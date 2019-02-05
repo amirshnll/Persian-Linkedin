@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <head>
 	<meta charset="utf-8">
   	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>لینکدین فارسی - ویرایش موقعیت های شغلی </title>
+	<title>لینکیدن فارسی - قوانین</title>
 	<link rel="stylesheet" type="text/css" href="{base}assets/layout/layout.css">
 	<link rel="stylesheet" type="text/css" href="{base}assets/library/bootstrap/css/bootstrap.min.css">
 	<link rel="stylesheet" type="text/css" href="{base}assets/library/bootstrap/css/bootstrap-grid.min.css">
@@ -42,7 +42,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 								<a href="{base}panel/setting" title="تنظیمات"><li><span class="fas fa-lg fa-cog"></span></li></a>
 								<a href="{base}panel/profile" title="پروفایل من"><li><span class="fas fa-lg fa-user"></span></li></a>
 								<a href="{base}panel/notification" title="اعلانات"><li><span class="fas fa-lg fa-bell"></span></li></a>
-								<a href="{base}panel/message" title="پیام ها"><li><span class="fas fa-lg fa-envelope"></span></li></a>
+								<a href="{base}panel/message" title="اعلانات"><li><span class="fas fa-lg fa-envelope"></span></li></a>
 								<a href="{base}panel/profile/connections" title="ارتباطات"><li><span class="fas fa-lg fa-handshake"></span></li></a>
 							</ul>
 						</nav>
@@ -58,73 +58,20 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				<div class="row right-to-left text-right">
 					<div class="col-md-9">
 						<div class="content-box">
-							<h5><span class="fas fa-1x fa-toolbox"></span>&nbsp;<span>ویرایش موقعیت های شغلی </span></h5>
-							<div class="real-content">
-								{form_addexperience_open}
-									<p><span class="fas fa-1x fa-edit"></span>&nbsp;<strong>موقعیت های شغلی </strong></p>
-									<p><span class="fas fa-1x fa-plus-square"></span>&nbsp;<span>افزودن موقعیت های شغلی  جدید</span></p>
-									<p>{title_input}</p>
-									<p>{content_input}</p>
-									<p>{start_date_input}</p>
-									<p>{end_date_input}</p>
-									<div class="float-left">
-										<a href="{base}panel/profile" title="بازگشت به پروفایل من"><span class="btn btn-danger text-light">بازگشت</span></a>
-										{submit_input}
-									</div>
-									<div class="clearfix"></div>
-									<p>&nbsp;</p>
-								{form_close}
-								<?php if(!empty($validation_errors)) { ?>
-									<div class="alert alert-danger right-to-left text-right">{validation_errors}</div>
-								<?php } ?>
-								<?php if(!empty($form_success)) { ?>
-									<div class="alert alert-success right-to-left text-right">{form_success}</div>
-								<?php } ?>
-
-								<p>&nbsp;</p><p>&nbsp;</p>
-								<p><span class="fas fa-1x fa-database"></span>&nbsp;<span>فهرست موقعیت های شغلی</span></p>
-
-								<table border="1" class="database-table">
-									<thead>
-										<th width="5%">#</th>
-										<th width="25%">عنوان</th>
-										<th width="40%">توضیحات</th>
-										<th width="12%">شروع</th>
-										<th width="12%">پایان</th>
-									<th width="6%"></th>
-									</thead>
-									<tbody>
-										<?php
-											if($user_experience !== false)
-											{
-												$counter = 1;
-												foreach ($user_experience as $ux) {
-													echo '<tr>';
-													echo '<td>' . $counter . '</td>';
-													echo '<td>' . $ux['title'] . '</td>';
-													echo '<td>' . $ux['content'] . '</td>';
-													echo '<td>' . $ux['start_date'] . '</td>';
-													echo '<td>' . $ux['end_date'] . '</td>';
-													echo '<td class="text-center"><a href="{base}panel/profile/edit/experience/edit/' . $ux['id'] . '" title="ویرایش" class="text-warning"><span class="fas fa-1x fa-edit"></span></a> <a href="{base}panel/profile/edit/experience/delete/' . $ux['id'] . '" title="حذف" class="text-danger"><span class="fas fa-1x fa-trash"></span></a></td>';
-													echo '</tr>';
-													$counter+=1;
-												}
-											}
-											else
-											{
-												echo "<tr><td colspan='6'>رکوردی موجود نیست.</td></tr>";
-											}
-										?>
-									</tbody>
-								</table>
-								<p>&nbsp;</p>
-								<?php if(!empty($database_action)) { ?>
-									<div class="alert alert-success right-to-left text-right">{database_action}</div>
-								<?php } ?>
-								<div class="hr"></div>
-								<p><span class="fas fa-1x fa-question-circle"></span>&nbsp;<span>راهنمایی :</span></p>
-								<p>لطفا قبل از ثبت تغییرات حتما آنها را با دقت بررسی کنید.</p>
-								<p>یکی از بخش های مهم رزومه ی کاری خوب ثبت موقعیت های شغلی با کیفیت می باشد.</p>
+							<h5><span class="fas fa-1x fa-ruler"></span>&nbsp;<span>قوانین</span></h5>
+							<div class="real-content" style="min-height: 700px;">
+								<ul class="rules-list">
+									<li class="nav-item">کاربر گرامی لطفا قبل از استفاده و یا ثبت نام در سرویس " لینکدین فارسی " موارد ذیل را کاملا مطالعه نمایید.</li>
+									<li class="nav-item">در صورتیکه مایل به استفاده از خدمات این وب سایت می باشید حتما باید توافقنامه زیر را قبول نمایید در غیر اینصورت مجاز به استفاده از این سامانه نیستید.</li>
+									<li class="nav-item">از توزیع محتوای نژادی یا قومی ، دینی و ... خودداری کنید.</li>
+									<li class="nav-item">برای کمک به مبارزه و جلوگیری از هرزنامه از نام حقیقی خود استفاده نمایید.</li>
+									<li class="nav-item">عكس کاربری پروفایل شخصی شما نباید دارای محتوای غیرمجاز یا توهین آمیز باشد.</li>
+									<li class="nav-item">در صورت رعایت نکردن هرکدام از موارد فوق حساب کاربری شما در سیستم مسدود می شود.</li>
+									<li class="nav-item">در صورت مشاهده تخلف شما به عنوان یک کاربر در این سامانه حق گزارش تخلف را خواهید داشت.</li>
+									<li class="nav-item">از توزیع اطلاعات شخصی و محرمانه شخصی سایر افراد و یا استفاده از حساب شخص دیگری یا باز کردن حساب به نام فرد دیگر خودداری فرمایید.</li>
+									<li class="nav-item">تمام هدف ما ارائه خدمات به کاربران عزیز ایرانی می باشد ، لذا از شما تقاضا داریم تا اطلاعات خود را بدون اغراق و با در نظر گرفتن واقعیت وارد نمایید تا این وبسایت برای شما کاربردی باشد.</li>
+									<li class="nav-item">( تاریخ بروز رسانی قوانین : پاییز و زمستان 1397 خورشیدی )</li>
+								</ul>
 							</div>
 						</div>
 					</div>

@@ -1,12 +1,13 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
+$ci =&get_instance();
 ?>
 <!DOCTYPE html>
 <html>
 <head>
 	<meta charset="utf-8">
   	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>لینکدین فارسی - ویرایش موقعیت های شغلی </title>
+	<title>لینکیدن فارسی - گفتگوی جدید</title>
 	<link rel="stylesheet" type="text/css" href="{base}assets/layout/layout.css">
 	<link rel="stylesheet" type="text/css" href="{base}assets/library/bootstrap/css/bootstrap.min.css">
 	<link rel="stylesheet" type="text/css" href="{base}assets/library/bootstrap/css/bootstrap-grid.min.css">
@@ -58,73 +59,22 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				<div class="row right-to-left text-right">
 					<div class="col-md-9">
 						<div class="content-box">
-							<h5><span class="fas fa-1x fa-toolbox"></span>&nbsp;<span>ویرایش موقعیت های شغلی </span></h5>
-							<div class="real-content">
-								{form_addexperience_open}
-									<p><span class="fas fa-1x fa-edit"></span>&nbsp;<strong>موقعیت های شغلی </strong></p>
-									<p><span class="fas fa-1x fa-plus-square"></span>&nbsp;<span>افزودن موقعیت های شغلی  جدید</span></p>
-									<p>{title_input}</p>
-									<p>{content_input}</p>
-									<p>{start_date_input}</p>
-									<p>{end_date_input}</p>
-									<div class="float-left">
-										<a href="{base}panel/profile" title="بازگشت به پروفایل من"><span class="btn btn-danger text-light">بازگشت</span></a>
-										{submit_input}
-									</div>
+							<h5><span class="fas fa-1x fa-envelope"></span>&nbsp;<span> گفتگوی جدید</span></h5>
+							<div class="real-content" style="min-height: 620px;">
+								<p><span class="fas fa-1x fa-comments"></span>&nbsp;<span><strong>شروع مکالمه ی جدید</strong></p>
+								<div class="message">
+									{form_newmessage_open}
+									<p>{dropdown_1}</p>
+									<p>{submit_input}</p>
+									{form_close}
 									<div class="clearfix"></div>
-									<p>&nbsp;</p>
-								{form_close}
-								<?php if(!empty($validation_errors)) { ?>
-									<div class="alert alert-danger right-to-left text-right">{validation_errors}</div>
-								<?php } ?>
-								<?php if(!empty($form_success)) { ?>
-									<div class="alert alert-success right-to-left text-right">{form_success}</div>
-								<?php } ?>
+									<br />
+									<?php
+										if($new_message_error==1)
+											echo '<p class="alert alert-danger">این عملیات امکان پذیر نیست.</p>';
+									?>
+								</div>
 
-								<p>&nbsp;</p><p>&nbsp;</p>
-								<p><span class="fas fa-1x fa-database"></span>&nbsp;<span>فهرست موقعیت های شغلی</span></p>
-
-								<table border="1" class="database-table">
-									<thead>
-										<th width="5%">#</th>
-										<th width="25%">عنوان</th>
-										<th width="40%">توضیحات</th>
-										<th width="12%">شروع</th>
-										<th width="12%">پایان</th>
-									<th width="6%"></th>
-									</thead>
-									<tbody>
-										<?php
-											if($user_experience !== false)
-											{
-												$counter = 1;
-												foreach ($user_experience as $ux) {
-													echo '<tr>';
-													echo '<td>' . $counter . '</td>';
-													echo '<td>' . $ux['title'] . '</td>';
-													echo '<td>' . $ux['content'] . '</td>';
-													echo '<td>' . $ux['start_date'] . '</td>';
-													echo '<td>' . $ux['end_date'] . '</td>';
-													echo '<td class="text-center"><a href="{base}panel/profile/edit/experience/edit/' . $ux['id'] . '" title="ویرایش" class="text-warning"><span class="fas fa-1x fa-edit"></span></a> <a href="{base}panel/profile/edit/experience/delete/' . $ux['id'] . '" title="حذف" class="text-danger"><span class="fas fa-1x fa-trash"></span></a></td>';
-													echo '</tr>';
-													$counter+=1;
-												}
-											}
-											else
-											{
-												echo "<tr><td colspan='6'>رکوردی موجود نیست.</td></tr>";
-											}
-										?>
-									</tbody>
-								</table>
-								<p>&nbsp;</p>
-								<?php if(!empty($database_action)) { ?>
-									<div class="alert alert-success right-to-left text-right">{database_action}</div>
-								<?php } ?>
-								<div class="hr"></div>
-								<p><span class="fas fa-1x fa-question-circle"></span>&nbsp;<span>راهنمایی :</span></p>
-								<p>لطفا قبل از ثبت تغییرات حتما آنها را با دقت بررسی کنید.</p>
-								<p>یکی از بخش های مهم رزومه ی کاری خوب ثبت موقعیت های شغلی با کیفیت می باشد.</p>
 							</div>
 						</div>
 					</div>

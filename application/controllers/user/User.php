@@ -134,6 +134,45 @@ class User extends CI_Controller
 		return rtrim($matches[0]).$end_char;
 	}
 
+	private function array_sort($array, $on, $order = SORT_ASC)
+	{
+	    $new_array = array();
+	    $sortable_array = array();
+	    if (count($array) > 0)
+	    {
+	        foreach ($array as $k => $v)
+	        {
+	            if (is_array($v))
+	            {
+	                foreach ($v as $k2 => $v2)
+	                {
+	                    if ($k2 == $on)
+	                    {
+	                        $sortable_array[$k] = $v2;
+	                    }
+	                }
+	            } else
+	            {
+	                $sortable_array[$k] = $v;
+	            }
+	        }
+	        switch ($order)
+	        {
+	            case SORT_ASC:
+	                asort($sortable_array);
+	                break;
+	            case SORT_DESC:
+	                arsort($sortable_array);
+	                break;
+	        }
+	        foreach ($sortable_array as $k => $v)
+	        {
+	            $new_array[$k] = $array[$k];
+	        }
+	    }
+	    return $new_array;
+	}
+
 	/* Public */
 	public function index()
 	{
@@ -2583,6 +2622,35 @@ class User extends CI_Controller
 
 		$profile_open_key = $this->base_url() . 'user/' . md5($this->session->userdata('user_id'));
 
+		$this->load->model('like_model');
+		$likes = $this->like_model->user_likes($this->session->userdata('user_id'), 20);
+		if($likes!==false)
+		foreach ($likes as &$my_likes) {
+			$my_likes['type']=1;
+		}
+
+		$this->load->model('profile_view_model');
+		$views = $this->profile_view_model->user_views($this->session->userdata('user_id'), 20);
+		if($views!==false)
+		foreach ($views as &$my_views) {
+			$my_views['type']=2;
+		}
+
+		if($likes!==false && $views!==false)
+			$notification = array_merge($likes, $views);
+		elseif ($likes!==false && $views===false) {
+			$notification = $likes;
+		}
+		elseif ($likes===false && $views!==false) {
+			$notification = $views;
+		}
+		else
+			$notification = false;
+
+		if($notification!==false)
+			$notification = $this->array_sort($notification, 'time', SORT_DESC);
+
+
 		$data = array(
 			'form_search_open'		=>	$form_search_open,
 			'search_input'			=>	$search_input,
@@ -2600,7 +2668,8 @@ class User extends CI_Controller
 			'telegram'				=>	$telegram,
 			'skype'					=>	$skype,
 			'register_date'			=>	$register_date,
-			'profile_open_key'		=>	$profile_open_key
+			'profile_open_key'		=>	$profile_open_key,
+			'notification'			=>	$notification
 		);
 
 		$this->parser('user/notification', $data);
@@ -2664,6 +2733,16 @@ class User extends CI_Controller
 
 		$profile_open_key = $this->base_url() . 'user/' . md5($this->session->userdata('user_id'));
 
+		$message = false;
+
+		if($this->session->has_userdata('noconnection_message')) {
+			$noconnection_message = $this->session->userdata('noconnection_message');
+			$this->session->unset_userdata('noconnection_message');
+		}
+		else {
+			$noconnection_message=0;
+		}
+
 		$data = array(
 			'form_search_open'		=>	$form_search_open,
 			'search_input'			=>	$search_input,
@@ -2681,10 +2760,130 @@ class User extends CI_Controller
 			'telegram'				=>	$telegram,
 			'skype'					=>	$skype,
 			'register_date'			=>	$register_date,
-			'profile_open_key'		=>	$profile_open_key
+			'profile_open_key'		=>	$profile_open_key,
+			'message'				=>	$message,
+			'noconnection_message'	=>	$noconnection_message
 		);
 
 		$this->parser('user/message', $data);
+	}
+
+	public function new_message()
+	{
+		$this->self_set_url($this->current_url());
+		$this->is_login();
+
+		$this->load->helper('form');
+		$form_search_open = form_open($this->base_url() . "user/form/search");
+		$search_input = form_input(
+			array(
+				'type'			=>	'text',
+				'name'			=>	'search',
+				'maxlength'		=>	255,
+				'placeholder'	=>	'تایپ + اینتر',
+				'class'			=>	'form-control text-right right-to-left'
+			)
+		);
+		$form_close 	= form_close();
+
+		$this->load->model('connections_model');
+		$user_connection_count = $this->connections_model->user_connection_count($this->session->userdata('user_id'));
+		if($user_connection_count===false)
+			$user_connection_count = 0;
+
+		if($user_connection_count===false || $user_connection_count===0)
+		{
+			$this->session->set_userdata('noconnection_message', 1);
+			redirect($this->base_url() . "panel/message");
+		}
+
+		$this->load->model('profile_view_model');
+		$user_view_profile = $this->profile_view_model->viewed_profile_count($this->session->userdata('user_id'));
+		if($user_view_profile===false)
+			$user_view_profile = 0;
+
+		$this->load->model('avatar_model');
+		$user_current_avatar = $this->avatar_model->user_current_avatar($this->session->userdata('user_id'));
+
+		$this->load->model('person_model');
+		$user_person = $this->person_model->read_user_person($this->session->userdata('user_id'));
+		$user_full_name = $user_person['firstname'] . " " . $user_person['lastname'];
+
+		$this->load->model('contact_model');
+		$user_contact = $this->contact_model->user_all_contact($this->session->userdata('user_id'));
+		$twitter  = "";
+		$linkedin = "";
+		$telegram = "";
+		$skype    = "";
+		foreach ($user_contact as $ucs) {
+			if($ucs['type']==1)
+				$linkedin = $ucs['content'];
+			if($ucs['type']==2)
+				$twitter = $ucs['content'];
+			if($ucs['type']==3)
+				$telegram = $ucs['content'];
+			if($ucs['type']==4)
+				$skype = $ucs['content'];
+		}
+
+		$this->load->model('user_model');
+		$this->load->library('jdf');
+		$register_date = $this->jdf->jdate('d / m / Y', $this->user_model->get_register_time_id($this->session->userdata('user_id')));
+
+		$profile_open_key = $this->base_url() . 'user/' . md5($this->session->userdata('user_id'));
+
+		$this->load->model('person_model');
+		$this->load->model('connections_model');
+		$connections = $this->connections_model->user_connection($this->session->userdata('user_id'));
+
+		$form_newmessage_open = form_open($this->base_url() . "user/form/newmessage");
+		$dropdown_1_options[0] = 'کاربری را برای شروع مکالمه انتخاب کنید.';
+		foreach ($connections as $my_connections) {
+			$dropdown_1_options[$my_connections['connected_id']] = $my_connections['firstname'] . " " . $my_connections['lastname'];
+		}
+		$dropdown_1 = form_dropdown('newmessage', $dropdown_1_options, 1, 'class="form-control"');
+		$submit_input = form_input(
+			array(
+				'type'			=>	'submit',
+				'name'			=>	'submit',
+				'value'			=>	'شروع مکالمه',
+				'class'			=>	'btn bg-primary text-light float-left'
+			)
+		);
+
+		if($this->session->has_userdata('new_message_error')) {
+			$new_message_error = $this->session->userdata('new_message_error');
+			$this->session->unset_userdata('new_message_error');
+		}
+		else {
+			$new_message_error=0;
+		}
+
+		$data = array(
+			'form_search_open'		=>	$form_search_open,
+			'search_input'			=>	$search_input,
+			'form_close'			=>	$form_close,
+			'user_connection_count'	=>	$user_connection_count,
+			'user_view_profile'		=>	$user_view_profile,
+			'user_current_avatar'	=>	$user_current_avatar,
+			'user_full_name'		=>	$user_full_name,
+			'twitter_limit'			=>	$this->character_limiter($twitter, 30),
+			'linkedin_limit'		=>	$this->character_limiter($linkedin, 30),
+			'telegram_limit'		=>	$this->character_limiter($telegram, 30),
+			'skype_limit'			=>	$this->character_limiter($skype, 30),
+			'twitter'				=>	$twitter,
+			'linkedin'				=>	$linkedin,
+			'telegram'				=>	$telegram,
+			'skype'					=>	$skype,
+			'register_date'			=>	$register_date,
+			'profile_open_key'		=>	$profile_open_key,
+			'form_newmessage_open'	=>	$form_newmessage_open,
+			'dropdown_1'			=>	$dropdown_1,
+			'submit_input'			=>	$submit_input,
+			'new_message_error'		=>	$new_message_error
+		);
+
+		$this->parser('user/newmessage', $data);
 	}
 
 	public function change_password()
@@ -3068,6 +3267,195 @@ class User extends CI_Controller
 		);
 
 		$this->parser('user/connections', $data);
+	}
+
+	public function rules()
+	{
+		$this->self_set_url($this->current_url());
+		$this->is_login();
+
+		$this->load->helper('form');
+		$form_search_open = form_open($this->base_url() . "user/form/search");
+		$search_input = form_input(
+			array(
+				'type'			=>	'text',
+				'name'			=>	'search',
+				'maxlength'		=>	255,
+				'placeholder'	=>	'تایپ + اینتر',
+				'class'			=>	'form-control text-right right-to-left'
+			)
+		);
+		$form_close 	= form_close();
+
+		$this->load->model('connections_model');
+		$user_connection_count = $this->connections_model->user_connection_count($this->session->userdata('user_id'));
+		if($user_connection_count===false)
+			$user_connection_count = 0;
+
+		$this->load->model('profile_view_model');
+		$user_view_profile = $this->profile_view_model->viewed_profile_count($this->session->userdata('user_id'));
+		if($user_view_profile===false)
+			$user_view_profile = 0;
+
+		$this->load->model('avatar_model');
+		$user_current_avatar = $this->avatar_model->user_current_avatar($this->session->userdata('user_id'));
+
+		$this->load->model('person_model');
+		$user_person = $this->person_model->read_user_person($this->session->userdata('user_id'));
+		$user_full_name = $user_person['firstname'] . " " . $user_person['lastname'];
+
+		$this->load->model('contact_model');
+		$user_contact = $this->contact_model->user_all_contact($this->session->userdata('user_id'));
+		$twitter  = "";
+		$linkedin = "";
+		$telegram = "";
+		$skype    = "";
+		foreach ($user_contact as $ucs) {
+			if($ucs['type']==1)
+				$linkedin = $ucs['content'];
+			if($ucs['type']==2)
+				$twitter = $ucs['content'];
+			if($ucs['type']==3)
+				$telegram = $ucs['content'];
+			if($ucs['type']==4)
+				$skype = $ucs['content'];
+		}
+
+		$this->load->model('user_model');
+		$this->load->library('jdf');
+		$register_date = $this->jdf->jdate('d / m / Y', $this->user_model->get_register_time_id($this->session->userdata('user_id')));
+
+		$profile_open_key = $this->base_url() . 'user/' . md5($this->session->userdata('user_id'));
+
+		$data = array(
+			'form_search_open'		=>	$form_search_open,
+			'search_input'			=>	$search_input,
+			'form_close'			=>	$form_close,
+			'user_connection_count'	=>	$user_connection_count,
+			'user_view_profile'		=>	$user_view_profile,
+			'user_current_avatar'	=>	$user_current_avatar,
+			'user_full_name'		=>	$user_full_name,
+			'twitter_limit'			=>	$this->character_limiter($twitter, 30),
+			'linkedin_limit'		=>	$this->character_limiter($linkedin, 30),
+			'telegram_limit'		=>	$this->character_limiter($telegram, 30),
+			'skype_limit'			=>	$this->character_limiter($skype, 30),
+			'twitter'				=>	$twitter,
+			'linkedin'				=>	$linkedin,
+			'telegram'				=>	$telegram,
+			'skype'					=>	$skype,
+			'register_date'			=>	$register_date,
+			'profile_open_key'		=>	$profile_open_key
+		);
+
+		$this->parser('user/rules', $data);
+	}
+
+	public function chat()
+	{
+		$this->self_set_url($this->current_url());
+		$this->is_login();
+
+		$this->load->helper('form');
+		$form_search_open = form_open($this->base_url() . "user/form/search");
+		$search_input = form_input(
+			array(
+				'type'			=>	'text',
+				'name'			=>	'search',
+				'maxlength'		=>	255,
+				'placeholder'	=>	'تایپ + اینتر',
+				'class'			=>	'form-control text-right right-to-left'
+			)
+		);
+		$form_close 	= form_close();
+
+		$this->load->model('connections_model');
+		$user_connection_count = $this->connections_model->user_connection_count($this->session->userdata('user_id'));
+		if($user_connection_count===false)
+			$user_connection_count = 0;
+
+		$this->load->model('profile_view_model');
+		$user_view_profile = $this->profile_view_model->viewed_profile_count($this->session->userdata('user_id'));
+		if($user_view_profile===false)
+			$user_view_profile = 0;
+
+		$this->load->model('avatar_model');
+		$user_current_avatar = $this->avatar_model->user_current_avatar($this->session->userdata('user_id'));
+
+		$this->load->model('person_model');
+		$user_person = $this->person_model->read_user_person($this->session->userdata('user_id'));
+		$user_full_name = $user_person['firstname'] . " " . $user_person['lastname'];
+
+		$this->load->model('contact_model');
+		$user_contact = $this->contact_model->user_all_contact($this->session->userdata('user_id'));
+		$twitter  = "";
+		$linkedin = "";
+		$telegram = "";
+		$skype    = "";
+		foreach ($user_contact as $ucs) {
+			if($ucs['type']==1)
+				$linkedin = $ucs['content'];
+			if($ucs['type']==2)
+				$twitter = $ucs['content'];
+			if($ucs['type']==3)
+				$telegram = $ucs['content'];
+			if($ucs['type']==4)
+				$skype = $ucs['content'];
+		}
+
+		$this->load->model('user_model');
+		$this->load->library('jdf');
+		$register_date = $this->jdf->jdate('d / m / Y', $this->user_model->get_register_time_id($this->session->userdata('user_id')));
+
+		$profile_open_key = $this->base_url() . 'user/' . md5($this->session->userdata('user_id'));
+
+		$form_chat_open = form_open($this->base_url() . "user/form/send_message");
+		$submit_input = form_input(
+			array(
+				'type'			=>	'submit',
+				'name'			=>	'submit',
+				'value'			=>	'☑',
+				'class'			=>	'btn bg-success text-light'
+			)
+		);
+		$textbox = form_input(
+			array(
+				'type'			=>	'text',
+				'name'			=>	'textbox',
+				'maxlength'		=>	255,
+				'placeholder'	=>	'تایپ + اینتر',
+				'class'			=>	'form-control text-right right-to-left'
+			)
+		);
+
+		$this->load->model('message_model');
+		$chat = $this->message_model->load_chat();
+
+		$data = array(
+			'form_search_open'		=>	$form_search_open,
+			'search_input'			=>	$search_input,
+			'form_close'			=>	$form_close,
+			'user_connection_count'	=>	$user_connection_count,
+			'user_view_profile'		=>	$user_view_profile,
+			'user_current_avatar'	=>	$user_current_avatar,
+			'user_full_name'		=>	$user_full_name,
+			'twitter_limit'			=>	$this->character_limiter($twitter, 30),
+			'linkedin_limit'		=>	$this->character_limiter($linkedin, 30),
+			'telegram_limit'		=>	$this->character_limiter($telegram, 30),
+			'skype_limit'			=>	$this->character_limiter($skype, 30),
+			'twitter'				=>	$twitter,
+			'linkedin'				=>	$linkedin,
+			'telegram'				=>	$telegram,
+			'skype'					=>	$skype,
+			'register_date'			=>	$register_date,
+			'profile_open_key'		=>	$profile_open_key,
+			'form_chat_open'		=>	$form_chat_open,
+			'submit_input'			=>	$submit_input,
+			'textbox'				=>	$textbox,
+			'chat'					=>	$chat
+
+		);
+
+		$this->parser('user/chat', $data);
 	}
 
 }

@@ -457,6 +457,7 @@
 	font-size: 11px;
 	font-family: arial;
 	margin-top: 50px;
+	margin-bottom: 20px;
 }
 .user-panel footer .footer p
 {
@@ -477,4 +478,60 @@
 }
 .loadmore hr {
 	height: 15px;
+}
+.pages {
+	margin: 100px 0;
+	font-family: 'samim';
+	line-height: 45px;
+}
+.pages li {
+	list-style-type: square;
+}
+.rules-list {
+	line-height: 45px;
+}
+.likes .like-item {
+	width: 100%;
+    padding: 20px;
+    box-shadow: 0px 0px 20px #e9ebea;
+    border: 1px solid #e9ebea;
+    margin-bottom: 20px;
+}
+.likes .like-item .float-right {
+	margin-left: 10px;
+}
+.newmessage-button {
+	border-radius: 100%;
+	background: #0771A9;
+	padding: 20px;
+	width: 70px;
+	height: 70px;
+	position:absolute;
+	bottom:50px;
+	left:50px;
+}
+.newmessage-button span {
+	margin-top: 8px !important;
+}
+
+.chat-box
+{
+	display: block;
+    width: 100%;
+    height: calc(2.25rem + 2px);
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+    height: 500px;
+    margin-bottom:20px;
+    overflow-y: scroll;
+}
+.chat-controll
+{
+	
 }

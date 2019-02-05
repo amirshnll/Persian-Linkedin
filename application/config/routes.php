@@ -60,6 +60,7 @@ $route['translate_uri_dashes'] = FALSE;
 $route['login'] 									= 'web/index';
 $route['forget'] 									= 'web/forget';
 $route['register'] 									= 'web/register';
+$route['page/rules'] 								= 'web/rules';
 
 $route['panel'] 									= 'user/user/index';
 $route['panel/(:num)'] 								= 'user/user/index_more/$1';
@@ -69,6 +70,7 @@ $route['panel/profile']								= 'user/user/profile';
 $route['panel/notification']						= 'user/user/notification';
 $route['panel/message']								= 'user/user/message';
 $route['panel/change_password']						= 'user/user/change_password';
+$route['panel/rules']								= 'user/user/rules';
 
 $route['panel/profile/edit/person'] 				= 'user/user/edit_person';
 
@@ -107,3 +109,6 @@ $route['panel/post/like/(:any)'] 					= 'user/form/like_post/$1';
 $route['panel/post/dislike/(:any)'] 				= 'user/form/dislike_post/$1';
 $route['panel/post/edit/(:any)'] 					= 'user/user/edit_post/$1';
 $route['panel/post/delete/(:any)'] 					= 'user/form/delete_post/$1';
+
+$route['panel/new_message']							= 'user/user/new_message';
+$route['panel/message/(:any)']						= 'user/user/chat/$1';

@@ -89,6 +89,35 @@ class Like_model extends CI_Model {
         else
             return false;
     }
+
+    public function user_likes($user_id, $limit)
+    {
+        if(empty($user_id))
+            return false;
+
+        if(empty($limit) || !is_numeric($limit))
+            $limit = 50;
+
+        if($limit!=0)
+            $this->db->limit($limit);
+        $this->db->where('like.status', 1);
+        $this->db->where('post.status', 1);
+        $this->db->where('post.user_id', $user_id);
+        $this->db->where('like.user_id!=', $user_id);
+        $this->db->order_by('like.id', 'DESC');
+        $this->db->join('post', 'post.id = like.post_id');
+        $this->db->select('like.user_id, like.time');
+        $this->db->from('like');
+        $query = $this->db->get('');
+
+        if($query->num_rows())
+        {
+            $query = $query->result_array();
+            return $query;
+        }
+        else
+            return false;
+    }
     
 }
 

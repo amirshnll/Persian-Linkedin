@@ -77,6 +77,45 @@ class Form extends CI_Controller
         return rtrim($matches[0]).$end_char;
     }
 
+    private function array_sort($array, $on, $order = SORT_ASC)
+    {
+        $new_array = array();
+        $sortable_array = array();
+        if (count($array) > 0)
+        {
+            foreach ($array as $k => $v)
+            {
+                if (is_array($v))
+                {
+                    foreach ($v as $k2 => $v2)
+                    {
+                        if ($k2 == $on)
+                        {
+                            $sortable_array[$k] = $v2;
+                        }
+                    }
+                } else
+                {
+                    $sortable_array[$k] = $v;
+                }
+            }
+            switch ($order)
+            {
+                case SORT_ASC:
+                    asort($sortable_array);
+                    break;
+                case SORT_DESC:
+                    arsort($sortable_array);
+                    break;
+            }
+            foreach ($sortable_array as $k => $v)
+            {
+                $new_array[$k] = $array[$k];
+            }
+        }
+        return $new_array;
+    }
+
 	/* Public */
 	public function index()
 	{
@@ -2601,6 +2640,77 @@ class Form extends CI_Controller
         
         redirect($this->base_url() . "panel");
         exit(0);
+    }
+
+    public function newmessage()
+    {
+        $this->self_set_url($this->current_url());
+
+        $this->load->helper('url');
+        if(!$this->check_login())
+        {
+            redirect($this->base_url() . "login");
+            exit(0);
+        }
+
+        $this->load->helper('form');
+        $this->load->library('form_validation');
+        $this->load->database();
+
+        $rules = array(
+            array(
+                'field' =>  'newmessage',
+                'label' =>  'کاربر برای مکالمه',
+                'rules' =>  'required|numeric',
+                'errors'=>  array(
+                    'required'  =>  'فیلد %s اجباری می باشد.',
+                    'numeric'   =>  'فیلد %s معتبر نیست'
+                )
+            )
+        );
+        
+        $this->form_validation->set_rules($rules);
+        if ($this->form_validation->run() == FALSE)
+        {
+            $this->session->set_userdata('new_message_error', 1);
+            redirect($this->base_url() . "panel/new_message");
+            exit(0);
+        }
+        else
+        {
+            $newmessage = $this->input->post('newmessage', true);
+
+            if(!is_numeric($newmessage) || $newmessage==0)
+            {
+                $this->session->set_userdata('new_message_error', 1);
+                redirect($this->base_url() . "panel/new_message");
+                exit(0);
+            }
+
+            $this->load->model('block_model');
+            if($this->block_model->is_block($this->session->userdata('user_id'), $newmessage))
+            { 
+                $this->session->set_userdata('new_message_error', 1);
+                redirect($this->base_url() . "panel/new_message");
+                exit(0);
+            }
+            $this->load->model('connections_model');
+            if(!$this->connections_model->is_connection($this->session->userdata('user_id'), $newmessage) || !$this->connections_model->is_connection($this->session->userdata('user_id'), $newmessage))
+            {
+                $this->session->set_userdata('new_message_error', 1);
+                redirect($this->base_url() . "panel/new_message");
+                exit(0);
+            }
+
+            redirect($this->base_url() . "panel/message/" . md5($newmessage));
+            exit(0);
+
+        }
+    }
+
+    public function send_message()
+    {
+        
     }
 
 }

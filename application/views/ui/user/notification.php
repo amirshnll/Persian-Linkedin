@@ -1,5 +1,6 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
+$ci =&get_instance();
 ?>
 <!DOCTYPE html>
 <html>
@@ -59,10 +60,34 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					<div class="col-md-9">
 						<div class="content-box">
 							<h5><span class="fas fa-1x fa-bell"></span>&nbsp;<span>اعلانات</span></h5>
-							<div class="real-content">
-								<table class="message-table">
-									
-								</table>
+							<div class="real-content" style="min-height: 700px;">
+								<div class="likes">
+									<?php
+										$ci->load->model('person_model');
+										$ci->load->library('jdf');
+										if($notification===false)
+											echo '<p class="alert alert-dark">اعلانات خالی می باشد.</p>';
+										else
+										foreach ($notification as $my_notification) { 
+											$temp_person = $ci->person_model->read_user_person($my_notification['user_id']);
+											$temp_person = $temp_person['firstname'] . " " . $temp_person['lastname'];
+											$temp_date = $this->jdf->jdate('h:i - Y/m/d', $my_notification['time']);
+											?>
+											
+											<div class="like-item">
+												<?php if($my_notification['type']==1) { ?>
+														<div class="float-right"><span class="fas fa-1x fa-heart text-danger"></span></div>
+														<div class="float-right"><strong><a class="text-dark" target="_blank" href="{base}user/<?php echo md5($my_notification['user_id']); ?>" title="<?php echo $temp_person; ?>"><?php echo $temp_person; ?></a></strong> نوشته ی شما را پسندید.</div>
+													<?php } elseif ($my_notification['type']==2){ ?>
+														<div class="float-right"><span class="fas fa-1x fa-eye text-primary"></span></div>
+														<div class="float-right"><strong><a class="text-dark" target="_blank" href="{base}user/<?php echo md5($my_notification['user_id']); ?>" title="<?php echo $temp_person; ?>"><?php echo $temp_person; ?></a></strong> از صفحه ی شما بازدید کرد.</div>
+													<?php } ?>
+												<div class="float-left text-gray"><?php echo $temp_date; ?></div>
+												<div class="clearfix"></div>
+											</div>
+
+										<?php } ?>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -136,7 +161,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<footer>
 			<div class="footer">
 				<div class="row">
-					<p>&copy; <?php echo date('Y'); ?> Persian Linkedin. All Right Reserved...</p>
+					<p>&copy; <?php echo date('Y'); ?> Persian Linkedin. All Right Reserved (<a class="text-dark" href="{base}panel/rules" title="قوانین سایت">Rules</a>).</p>
 				</div>
 			</div>
 		</footer>

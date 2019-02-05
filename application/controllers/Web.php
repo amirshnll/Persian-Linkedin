@@ -99,6 +99,45 @@ class Web extends CI_Controller
 		return rtrim($matches[0]).$end_char;
 	}
 
+	private function array_sort($array, $on, $order = SORT_ASC)
+	{
+	    $new_array = array();
+	    $sortable_array = array();
+	    if (count($array) > 0)
+	    {
+	        foreach ($array as $k => $v)
+	        {
+	            if (is_array($v))
+	            {
+	                foreach ($v as $k2 => $v2)
+	                {
+	                    if ($k2 == $on)
+	                    {
+	                        $sortable_array[$k] = $v2;
+	                    }
+	                }
+	            } else
+	            {
+	                $sortable_array[$k] = $v;
+	            }
+	        }
+	        switch ($order)
+	        {
+	            case SORT_ASC:
+	                asort($sortable_array);
+	                break;
+	            case SORT_DESC:
+	                arsort($sortable_array);
+	                break;
+	        }
+	        foreach ($sortable_array as $k => $v)
+	        {
+	            $new_array[$k] = $array[$k];
+	        }
+	    }
+	    return $new_array;
+	}
+
 	/* Public */
 	public function index()
 	{
@@ -501,6 +540,23 @@ class Web extends CI_Controller
 		);
 
 		$this->parser('web/profile', $data);
+	}
+
+	public function rules()
+	{
+		$this->self_set_url($this->current_url());
+		if($this->check_login())
+		{
+			$this->load->helper('url');
+			redirect($this->base_url() . "panel");
+			exit(0);
+		}
+
+		$data = array(
+			
+		);
+
+		$this->parser('web/rules', $data);
 	}
 
 }

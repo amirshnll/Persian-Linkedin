@@ -60,7 +60,7 @@ $ci =&get_instance();
 					<div class="col-md-9">
 						<div class="content-box">
 							<h5><span class="fas fa-1x fa-handshake"></span>&nbsp;<span>ارتباطات</span></h5>
-							<div class="real-content">
+							<div class="real-content" style="min-height: 700px;">
 
 								<?php if(!empty($profile_success)) { ?>
 								<div class="alert alert-success">{profile_success}</div><br />
@@ -203,7 +203,7 @@ $ci =&get_instance();
 		<footer>
 			<div class="footer">
 				<div class="row">
-					<p>&copy; <?php echo date('Y'); ?> Persian Linkedin. All Right Reserved...</p>
+					<p>&copy; <?php echo date('Y'); ?> Persian Linkedin. All Right Reserved (<a class="text-dark" href="{base}panel/rules" title="قوانین سایت">Rules</a>).</p>
 				</div>
 			</div>
 		</footer>

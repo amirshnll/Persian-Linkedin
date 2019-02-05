@@ -198,7 +198,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<footer>
 			<div class="footer">
 				<div class="row">
-					<p>&copy; <?php echo date('Y'); ?> Persian Linkedin. All Right Reserved...</p>
+					<p>&copy; <?php echo date('Y'); ?> Persian Linkedin. All Right Reserved (<a class="text-dark" href="{base}panel/rules" title="قوانین سایت">Rules</a>).</p>
 				</div>
 			</div>
 		</footer>

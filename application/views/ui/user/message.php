@@ -1,5 +1,6 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
+$ci =&get_instance();
 ?>
 <!DOCTYPE html>
 <html>
@@ -59,10 +60,30 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					<div class="col-md-9">
 						<div class="content-box">
 							<h5><span class="fas fa-1x fa-envelope"></span>&nbsp;<span>پیام ها</span></h5>
-							<div class="real-content">
-								<table class="message-table">
-									
-								</table>
+							<div class="real-content" style="min-height: 620px;">
+								<p><span class="fas fa-1x fa-comment"></span>&nbsp;<span><strong>لیست پیام ها</strong></p>
+								<div class="message">
+									<?php
+										if($noconnection_message==1)
+											echo '<p class="alert alert-danger">درحال حاظر به علت نداشتن ارتباطات امکان ارسال پیام ندارید.</p>';
+										if($message===false)
+											echo '<p class="alert alert-dark">پیام ها خالی می باشد.</p>';
+										else
+										{
+
+										}
+									?>
+								</div>
+								
+								<div class="float-left">
+									<a href="{base}panel/new_message" title="شروع گفتگوی جدید" class="text-light">
+										<div class="newmessage-button text-center">
+											<span class="fas fa-1x fa-plus"></span>
+										</div>
+									</a>
+								</div>
+								<div class="clearfix"></div>
+
 							</div>
 						</div>
 					</div>
@@ -136,7 +157,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<footer>
 			<div class="footer">
 				<div class="row">
-					<p>&copy; <?php echo date('Y'); ?> Persian Linkedin. All Right Reserved...</p>
+					<p>&copy; <?php echo date('Y'); ?> Persian Linkedin. All Right Reserved (<a class="text-dark" href="{base}panel/rules" title="قوانین سایت">Rules</a>).</p>
 				</div>
 			</div>
 		</footer>
