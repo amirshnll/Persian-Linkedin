@@ -1,0 +1,10 @@
+Options -Indexes
+<files ".htaccess">
+order allow,deny
+deny from all
+</files>
+
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php/$1 [L]

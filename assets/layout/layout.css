@@ -1,0 +1,71 @@
+
+/* Style Header */
+@charset "utf-8";
+@font-face {
+	font-family: 'samim';
+	font-style: normal;
+	src: url('../fonts/samim.eot');
+	src: url('../fonts/samim.eot?#iefix') format('embedded-opentype'),
+		 url('../fonts/samim.woff2') format('woff2'),
+		 url('../fonts/samim.woff') format('woff'),
+		 url('../fonts/samim.ttf') format('truetype');
+}
+
+/* Global Style */
+.right-to-left {
+	direction: rtl;
+}
+.width-50 {
+	width: 50%;
+}
+
+/* Special Style */
+.user-out-form {
+	font-family: 'samim';
+	padding: 30px 0;
+	background-image: url(../images/user-out-form.jpg);
+}
+
+.user-out-form .content .col-md-4 {
+	margin:120px auto;
+}
+#register-page .content .col-md-4 {
+		margin:60px auto 50px !important;
+}
+.user-out-form .content .logo h1 {
+	display: inline;
+	font-size: 40px;
+}
+.user-out-form .content .logo h2 {
+	border-radius: 7px;
+	padding: 5px 20px;
+	display: inline;
+	color: #0771A9;
+	font-size: 40px;
+}
+.user-out-form footer .nav {
+	padding: 0;
+}
+.user-out-form footer .navbar {
+	margin: 10px 0;
+	padding: 0;
+}
+.user-out-form .form {
+	margin-top: 30px;
+}
+.user-out-form .form .form-control:focus{
+    -webkit-box-shadow: none;
+    box-shadow: none !important;
+}
+
+.user-out-form .form input[type="text"], .user-out-form .form input[type="password"] {
+	border-radius: 20px !important;
+	padding: 20px !important;
+	margin-bottom: 20px;
+}
+.user-out-form .form input[type="submit"] {
+	border-radius: 20px !important;
+	padding: 10px !important;
+	width: 50%;
+	margin-bottom: 20px;
+}
