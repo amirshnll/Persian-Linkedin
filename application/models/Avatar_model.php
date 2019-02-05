@@ -17,8 +17,11 @@ class Avatar_model extends CI_Model {
 
     public function insert($user_id, $filename, $time, $status, $user_agent)
     {
-    	if(empty($user_id) || empty($filename) || empty($time) || empty($status) || empty($user_agent))
+    	if(empty($user_id) || empty($filename) || empty($status) || empty($user_agent))
     		return false;
+
+        if(empty($time))
+            $time = time();
 
     	$data = array(
     		'user_id'	=>	$user_id,

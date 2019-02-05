@@ -41,6 +41,9 @@ class User_model extends CI_Model {
     	if(empty($email) || empty($password) || empty($register_time) || empty($type) || empty($status))
     		return false;
 
+        if(empty($register_time))
+            $register_time = time();
+
     	if(!$this->is_unique_email($email))
     		return false;
 
@@ -133,6 +136,25 @@ class User_model extends CI_Model {
         {
             $query = $query->result_array();
             $query = $query[0]['password'];
+            return $query;
+        }
+        else
+            return false;
+    }
+
+    public function get_register_time_id($id)
+    {
+        if(empty($id))
+            return false;
+
+        $this->db->limit(1);
+        $this->db->where('id', $id);
+        $query = $this->db->get('user');
+
+        if($query->num_rows())
+        {
+            $query = $query->result_array();
+            $query = $query[0]['register_time'];
             return $query;
         }
         else
@@ -241,6 +263,45 @@ class User_model extends CI_Model {
             else
                 return $result;
         }
+        else
+            return false;
+    }
+
+    public function people_suggest()
+    {
+        if(empty($email))
+            return false;
+
+        $this->db->limit(1);
+        $this->db->order_by('user.id', 'RANDOM');
+        $this->db->from('user');
+        $this->db->join('avatar', 'avatar.user_id = user.id');
+        $this->db->join('person', 'person.user_id = user.id');
+        $this->db->join('connections', 'connections.connected_id = user.id');
+        $this->db->where('avatar.status', '1');
+        $query = $this->db->get('');
+
+        if($query->num_rows())
+        {
+            $query = $query->result_array();
+            return $query;
+        }
+        else
+            return false;
+    }
+
+    public function disable_user($id)
+    {
+        if(empty($id))
+            return false;
+
+        $data = array(
+            'status'  =>  0
+        );
+
+        $this->db->where('id', $id);
+        if($this->db->update('user', $data))
+            return true;
         else
             return false;
     }

@@ -17,8 +17,11 @@ class Login_model extends CI_Model {
 
     public function insert($user_id, $time, $user_agent)
     {
-    	if(empty($user_id) || empty($time) || empty($user_agent))
+    	if(empty($user_id) || empty($user_agent))
     		return false;
+
+        if(empty($time))
+            $time = time();
 
     	$data = array(
     		'user_id'	=>	$user_id,

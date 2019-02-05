@@ -22,8 +22,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					<div class="col-md-12">
 						<nav class="navbar">
 							<ul class="nav">
-								<li class="nav-item"><a href="{base}find" title="همکاران خود را بیابید" class="nav-link text-light">جستجوی همکاران</a></li>
-								<li class="nav-item"><a href="{base}login" title="ورود به حساب کاربری" class="nav-link text-light">ورود</a></li>
+								<li class="nav-item"><a href="{base}find" title="همکاران خود را بیابید" class="nav-link text-light"><span>جستجوی همکاران</span>&nbsp;<span class="fas fa-1x fa-search"></span></a></li>
+								<li class="nav-item"><a href="{base}login" title="ورود به حساب کاربری" class="nav-link text-light"><span>ورود</span>&nbsp;<span class="fas fa-1x fa-door-open"></span></a></li>
 							</ul>
 						</nav>
 					</div>
@@ -64,7 +64,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<div class="footer">
 				<div class="row">
 					<div class="col-md-12 text-right right-to-left">
-						<h6 class="text-light d-inline"><small>دایرکتوری کاربران  لینکدین فارسی : </small></h6>
+						<h6 class="text-light d-inline"><span class="fas fa-1x fa-database"></span>&nbsp;<small>دایرکتوری کاربران  لینکدین فارسی : </small></h6>
 						<nav class="navbar">
 							<ul class="nav">
 								<?php
@@ -74,7 +74,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 										$counter++;
 									}
 								?>
-								<li class="nav-item"><strong><small><a href="{base}find" title="جستجوی بیشتر" class="nav-link text-light">بیشتر...</a></small></strong></li>
+								<li class="nav-item"><strong><small><a href="{base}find" title="جستجوی بیشتر" class="nav-link text-light"><span class="fas fa-1x fa-box-open">&nbsp; </span><span>بیشتر...</span></a></small></strong></li>
 							</ul>
 						</nav>
 					</div>

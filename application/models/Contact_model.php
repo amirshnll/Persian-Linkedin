@@ -19,6 +19,9 @@ class Contact_model extends CI_Model {
     {
     	if(empty($user_id) || empty($type))
     		return false;
+        
+        if(empty($time))
+            $time = time();
 
     	/* 
         	Type List : 

@@ -74,6 +74,31 @@ class Web extends CI_Controller
         return $this->input->ip_address();
     }
 
+    private function character_limiter($string, $limit)
+	{
+		$result = substr($string, 0, $limit);
+		if($result != $string)
+			return $result . " ...";
+		return $result;
+	}
+
+    private function word_limiter($str, $limit = 100, $end_char = '&#8230;')
+	{
+		if (trim($str) === '')
+		{
+			return $str;
+		}
+
+		preg_match('/^\s*+(?:\S++\s*+){1,'.(int) $limit.'}/', $str, $matches);
+
+		if (strlen($str) === strlen($matches[0]))
+		{
+			$end_char = '';
+		}
+
+		return rtrim($matches[0]).$end_char;
+	}
+
 	/* Public */
 	public function index()
 	{
@@ -108,7 +133,7 @@ class Web extends CI_Controller
 				'type'			=>	'text',
 				'name'			=>	'email',
 				'maxlength'		=>	100,
-				'placeholder'	=>	'ایمیل',
+				'placeholder'	=>	'⛶ ایمیل',
 				'class'			=>	'form-control text-right right-to-left'
 			)
 		);
@@ -117,7 +142,7 @@ class Web extends CI_Controller
 				'type'			=>	'password',
 				'name'			=>	'password',
 				'maxlength'		=>	40,
-				'placeholder'	=>	'رمز عبور',
+				'placeholder'	=>	'⛶ رمز عبور',
 				'class'			=>	'form-control text-right right-to-left'
 			)
 		);
@@ -125,7 +150,7 @@ class Web extends CI_Controller
 			array(
 				'type'			=>	'submit',
 				'name'			=>	'submit',
-				'value'			=>	'ورود',
+				'value'			=>	'ورود  ⚐',
 				'class'			=>	'btn bg-light'
 			)
 		);
@@ -178,7 +203,7 @@ class Web extends CI_Controller
 				'type'			=>	'text',
 				'name'			=>	'email',
 				'maxlength'		=>	100,
-				'placeholder'	=>	'ایمیل',
+				'placeholder'	=>	'⛶ ایمیل',
 				'class'			=>	'form-control text-right right-to-left'
 			)
 		);
@@ -186,7 +211,7 @@ class Web extends CI_Controller
 			array(
 				'type'			=>	'submit',
 				'name'			=>	'submit',
-				'value'			=>	'بازیابی',
+				'value'			=>	'بازیابی ⚐',
 				'class'			=>	'btn bg-light'
 			)
 		);
@@ -238,7 +263,7 @@ class Web extends CI_Controller
 				'type'			=>	'text',
 				'name'			=>	'firstname',
 				'maxlength'		=>	100,
-				'placeholder'	=>	'نام',
+				'placeholder'	=>	'⛶ نام',
 				'class'			=>	'form-control text-right right-to-left'
 			)
 		);
@@ -247,7 +272,7 @@ class Web extends CI_Controller
 				'type'			=>	'text',
 				'name'			=>	'lastname',
 				'maxlength'		=>	100,
-				'placeholder'	=>	'نام خانوادگی',
+				'placeholder'	=>	'⛶ نام خانوادگی',
 				'class'			=>	'form-control text-right right-to-left'
 			)
 		);
@@ -256,7 +281,7 @@ class Web extends CI_Controller
 				'type'			=>	'text',
 				'name'			=>	'email',
 				'maxlength'		=>	100,
-				'placeholder'	=>	'ایمیل',
+				'placeholder'	=>	'⛶ ایمیل',
 				'class'			=>	'form-control text-right right-to-left'
 			)
 		);
@@ -265,7 +290,7 @@ class Web extends CI_Controller
 				'type'			=>	'password',
 				'name'			=>	'password',
 				'maxlength'		=>	40,
-				'placeholder'	=>	'رمز عبور',
+				'placeholder'	=>	'⛶ رمز عبور',
 				'class'			=>	'form-control text-right right-to-left'
 			)
 		);
@@ -273,7 +298,7 @@ class Web extends CI_Controller
 			array(
 				'type'			=>	'submit',
 				'name'			=>	'submit',
-				'value'			=>	'ثبت نام',
+				'value'			=>	'ثبت نام ⚐',
 				'class'			=>	'btn bg-light'
 			)
 		);
@@ -398,9 +423,56 @@ class Web extends CI_Controller
 				$skype_value = $ucs['content'];
 		}
 
+		$is_login = $this->check_login();
+		$profile_open_key = "";
+		if($is_login == true)
+		{
+			$user_id = $this->user_model->get_user_by_id($this->session->userdata('user_id'));
+			$user_id = $user_id['id'];
+			$profile_open_key = $this->base_url() . 'user/' . md5($user_id);
+		}
+
+		$is_my_page = false;
+		if($is_login==true && $user['id'] == $user_id)
+			$is_my_page = true;
+
+		$this->load->model('connections_model');
+		$is_friend = false;
+		if($is_login==true && $this->connections_model->is_connection($user['id'], $user_id))
+			$is_friend = true;
+
+		$is_respond = false;
+		if($this->connections_model->is_respond_connection($user['id'], $user_id))
+			$is_respond = true;
+
+		$is_requester = false;
+		if($this->connections_model->is_requester_connection($user_id, $user['id']))
+			$is_requester = true;
+
+		$this->load->model('block_model');
+		$is_block = false;
+		if($is_login==true && $this->block_model->is_block($user_id, $user['id']))
+			$is_block = true;
+
 		/* ViewUp User Profile View */
 		$this->load->model('profile_view_model');
 		$this->profile_view_model->insert($user_id, $user['id'], $this->time());
+
+		/* Profile Alert */
+		if($this->session->has_userdata('profile_error')) {
+			$profile_error = $this->session->userdata('profile_error');
+			$this->session->unset_userdata('profile_error');
+		}
+		else {
+			$profile_error="";
+		}
+		if($this->session->has_userdata('profile_success')) {
+			$profile_success = $this->session->userdata('profile_success');
+			$this->session->unset_userdata('profile_success');
+		}
+		else {
+			$profile_success="";
+		}
 
 		$data = array(
 			'user_key'				=>	$user_key,
@@ -416,8 +488,16 @@ class Web extends CI_Controller
 			'linkedin'				=>	$linkedin_value,
 			'telegram'				=>	$telegram_value,
 			'skype'					=>	$skype_value,
-			'user_private_contact'	=>	$user_private_contact
-
+			'user_private_contact'	=>	$user_private_contact,
+			'is_login'				=>	$is_login,
+			'profile_open_key'		=>	$profile_open_key,
+			'is_my_page'			=>	$is_my_page,
+			'is_friend'				=>	$is_friend,
+			'is_block'				=>	$is_block,
+			'profile_success'		=>	$profile_success,
+			'profile_error'			=>	$profile_error,
+			'is_respond'			=>	$is_respond,
+			'is_requester'			=>	$is_requester
 		);
 
 		$this->parser('web/profile', $data);

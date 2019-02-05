@@ -57,16 +57,21 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				<div class="row right-to-left text-right">
 					<div class="col-md-3">
 						<div class="content-box">
-							<h5>شاید این افراد را بشناسید</h5>
+							<h5><span class="fas fa-1x fa-users"></span>&nbsp; <span>شاید این افراد را بشناسید</span></h5>
 							<div class="real-content">
-
+								<ul>
+									<?php 
+									echo $user_suggest ;
+										
+									?>
+								</ul>
 							</div>
 						</div>
 					</div>
 					<div class="col-md-6">
 						<div class="content-box">
 							<div class="real-content">
-								<h5>اطلاعات شخصی [ <a class="text-success edit-item-icon" href="{base}panel/profile/edit/person" title="ویرایش"><span class="fas fa-lg fa-pen"></span></a> ]</h5>
+								<h5><span class="fas fa-1x fa-id-card"></span>&nbsp;<span>اطلاعات شخصی </span>[ <a class="text-success edit-item-icon" href="{base}panel/profile/edit/person" title="ویرایش"><span class="fas fa-lg fa-pen"></span></a> ]</h5>
 								<table class="person-profile-table">
 									
 									<tr>
@@ -99,13 +104,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						</div>
 						<div class="content-box">
 							<div class="real-content">
-								<h5>بیوگرافی [ <a class="text-success edit-item-icon" href="{base}panel/profile/edit/bio" title="ویرایش"><span class="fas fa-lg fa-pen"></span></a> ]</h5>
+								<h5><span class="fas fa-1x fa-monument"></span>&nbsp;<span>بیوگرافی </span>[ <a class="text-success edit-item-icon" href="{base}panel/profile/edit/bio" title="ویرایش"><span class="fas fa-lg fa-pen"></span></a> ]</h5>
 								<p class="text-justify"><?php echo $user_person['biography'] ?></p>
 							</div>
 						</div>
 						<div class="content-box">
 							<div class="real-content">
-								<h5>موقعیت های شغلی [ <a class="text-success edit-item-icon" href="{base}panel/profile/edit/experience" title="ویرایش"><span class="fas fa-lg fa-pen"></span></a> ]</h5>
+								<h5><span class="fas fa-1x fa-toolbox"></span>&nbsp;<span>موقعیت های شغلی </span>[ <a class="text-success edit-item-icon" href="{base}panel/profile/edit/experience" title="ویرایش"><span class="fas fa-lg fa-pen"></span></a> ]</h5>
 								<ul class="user-profile-items">
 									<?php 
 										if($experience !== false)
@@ -124,7 +129,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						</div>
 						<div class="content-box">
 							<div class="real-content">
-								<h5>مدارک تحصیلی [ <a class="text-success edit-item-icon" href="{base}panel/profile/edit/education" title="ویرایش"><span class="fas fa-lg fa-pen"></span></a> ]</h5>
+								<h5><span class="fas fa-1x fa-university"></span>&nbsp;<span>مدارک تحصیلی </span>[ <a class="text-success edit-item-icon" href="{base}panel/profile/edit/education" title="ویرایش"><span class="fas fa-lg fa-pen"></span></a> ]</h5>
 								<ul class="user-profile-items">
 									<?php 
 										if($education !== false)
@@ -143,7 +148,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						</div>
 						<div class="content-box">
 							<div class="real-content">
-								<h5>مهارت ها [ <a class="text-success edit-item-icon" href="{base}panel/profile/edit/skills" title="ویرایش"><span class="fas fa-lg fa-pen"></span></a> ]</h5>
+								<h5><span class="fas fa-1x fa-screwdriver"></span>&nbsp;<span>مهارت ها </span>[ <a class="text-success edit-item-icon" href="{base}panel/profile/edit/skills" title="ویرایش"><span class="fas fa-lg fa-pen"></span></a> ]</h5>
 								<ul class="user-profile-items">
 									<?php 
 										if($skills !== false)
@@ -162,7 +167,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						</div>
 						<div class="content-box">
 							<div class="real-content">
-								<h5>پروژه ها [ <a class="text-success edit-item-icon" href="{base}panel/profile/edit/project" title="ویرایش"><span class="fas fa-lg fa-pen"></span></a> ]</h5>
+								<h5><span class="fas fa-1x fa-project-diagram"></span>&nbsp;<span>پروژه ها </span>[ <a class="text-success edit-item-icon" href="{base}panel/profile/edit/project" title="ویرایش"><span class="fas fa-lg fa-pen"></span></a> ]</h5>
 								<ul class="user-profile-items">
 									<?php
 										if($project !== false)
@@ -181,7 +186,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						</div>
 						<div class="content-box">
 							<div class="real-content">
-								<h5>ارتباطات [ <a class="text-primary edit-item-icon" href="{base}panel/profile/connections" title="مشاهده همه"><span class="fas fa-lg fa-eye"></span></a> ]</h5>
+								<h5><span class="fas fa-1x fa-handshake"></span>&nbsp;<span>ارتباطات </span>[ <a class="text-primary edit-item-icon" href="{base}panel/profile/connections" title="مشاهده همه"><span class="fas fa-lg fa-eye"></span></a> ]</h5>
 							</div>
 						</div>
 					</div>
@@ -190,7 +195,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 							<div class="avatar-timeline text-center">
 								<img src="{base}upload/avatar/{user_current_avatar}" title="تصویر کاربری" alt="تصویر کاربری" width="120" height="120" />
 							</div>
+							<div class="full-name-timeline text-center">
+								<h4 class="display-4">{user_full_name}</h4>
+								<p id="register_date" class="text-gray">تاریخ عضویت : {register_date}</p>
+							</div>
 							<div class="text-center">
+								&nbsp;
+								<p class="text-gray">تغییر تصویر کاربری </p>
 								{form_avatar_open}
 								<div>
 									<label for="file-upload" class="custom-file-upload btn btn-primary d-inline"> انتخاب فایل</label>
@@ -198,6 +209,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 									{avatar_submit}
 								</div>
 								<div class="real-content">
+									<a class="btn btn-warning text-light" href="{profile_open_key}" title="بازکردن صفحه ی من" target="_blank">بازکردن صفحه ی من</a>
 									<?php if(!empty($avatar_success)) { ?>
 										<p><div class="alert alert-success right-to-left text-right">{avatar_success}</div></p>
 									<?php } ?>

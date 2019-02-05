@@ -78,6 +78,19 @@ class User extends CI_Controller
 			redirect($this->base_url() . "login");
 			exit(0);
 		}
+
+		$current_method = $this->router->fetch_method();
+		if($current_method!=="change_password" && $this->session->has_userdata('need_change_password') && $this->session->userdata('need_change_password')==true)
+		{
+			$this->load->helper('url');
+			redirect($this->base_url() . "panel/change_password");
+			exit(0);
+		}
+		elseif ($current_method==="change_password" && $this->session->has_userdata('need_change_password') && $this->session->userdata('need_change_password')==false) {
+			$this->load->helper('url');
+			redirect($this->base_url() . "panel");
+			exit(0);
+		}
 	}
 
     private function time()
@@ -96,6 +109,30 @@ class User extends CI_Controller
         return $this->input->ip_address();
     }
 
+    private function character_limiter($string, $limit)
+	{
+		$result = substr($string, 0, $limit);
+		if($result != $string)
+			return $result . " ...";
+		return $result;
+	}
+
+	private function word_limiter($str, $limit = 100, $end_char = '&#8230;')
+	{
+		if (trim($str) === '')
+		{
+			return $str;
+		}
+
+		preg_match('/^\s*+(?:\S++\s*+){1,'.(int) $limit.'}/', $str, $matches);
+
+		if (strlen($str) === strlen($matches[0]))
+		{
+			$end_char = '';
+		}
+
+		return rtrim($matches[0]).$end_char;
+	}
 
 	/* Public */
 	public function index()
@@ -115,13 +152,6 @@ class User extends CI_Controller
 			)
 		);
 		$form_close 	= form_close();
-
-		$this->load->model('avatar_model');
-		$user_current_avatar = $this->avatar_model->user_current_avatar($this->session->userdata('user_id'));
-
-		$this->load->model('person_model');
-		$user_person = $this->person_model->read_user_person($this->session->userdata('user_id'));
-		$user_full_name = $user_person['firstname'] . " " . $user_person['lastname'];
 
 		$form_newpost_open = form_open_multipart($this->base_url() . "user/form/newpost");
 		$write_post_content = form_textarea(
@@ -170,8 +200,33 @@ class User extends CI_Controller
 		if($user_view_profile===false)
 			$user_view_profile = 0;
 
+		$this->load->model('avatar_model');
+		$user_current_avatar = $this->avatar_model->user_current_avatar($this->session->userdata('user_id'));
+
+		$this->load->model('person_model');
+		$user_person = $this->person_model->read_user_person($this->session->userdata('user_id'));
+		$user_full_name = $user_person['firstname'] . " " . $user_person['lastname'];
+
 		$this->load->model('contact_model');
 		$user_contact = $this->contact_model->user_all_contact($this->session->userdata('user_id'));
+		$twitter  = "";
+		$linkedin = "";
+		$telegram = "";
+		$skype    = "";
+		foreach ($user_contact as $ucs) {
+			if($ucs['type']==1)
+				$linkedin = $ucs['content'];
+			if($ucs['type']==2)
+				$twitter = $ucs['content'];
+			if($ucs['type']==3)
+				$telegram = $ucs['content'];
+			if($ucs['type']==4)
+				$skype = $ucs['content'];
+		}
+
+		$this->load->model('user_model');
+		$this->load->library('jdf');
+		$register_date = $this->jdf->jdate('d / m / Y', $this->user_model->get_register_time_id($this->session->userdata('user_id')));
 
 		$this->load->model('post_model');
 		$timeline_posts = $this->post_model->post_timeline($this->session->userdata('user_id'), 100);
@@ -180,18 +235,26 @@ class User extends CI_Controller
 			'form_search_open'		=>	$form_search_open,
 			'search_input'			=>	$search_input,
 			'form_close'			=>	$form_close,
-			'user_current_avatar'	=>	$user_current_avatar,
-			'user_full_name'		=>	$user_full_name,
 			'form_newpost_open'		=>	$form_newpost_open,
 			'write_post_content'	=>	$write_post_content,
 			'file_post_content'		=>	$file_post_content,
 			'post_submit_input'		=>	$post_submit_input,
 			'validation_errors'		=>	$validation_errors,
 			'form_success'			=>	$form_success,
+			'timeline_posts'		=>	$timeline_posts,
 			'user_connection_count'	=>	$user_connection_count,
 			'user_view_profile'		=>	$user_view_profile,
-			'user_contact'			=>	$user_contact,
-			'timeline_posts'		=>	$timeline_posts
+			'user_current_avatar'	=>	$user_current_avatar,
+			'user_full_name'		=>	$user_full_name,
+			'twitter_limit'			=>	$this->character_limiter($twitter, 30),
+			'linkedin_limit'		=>	$this->character_limiter($linkedin, 30),
+			'telegram_limit'		=>	$this->character_limiter($telegram, 30),
+			'skype_limit'			=>	$this->character_limiter($skype, 30),
+			'twitter'				=>	$twitter,
+			'linkedin'				=>	$linkedin,
+			'telegram'				=>	$telegram,
+			'skype'					=>	$skype,
+			'register_date'			=>	$register_date
 		);
 
 		$this->parser('user/panel', $data);
@@ -303,6 +366,44 @@ class User extends CI_Controller
 			)
 		);
 
+		$this->load->model('connections_model');
+		$user_connection_count = $this->connections_model->user_connection_count($this->session->userdata('user_id'));
+		if($user_connection_count===false)
+			$user_connection_count = 0;
+
+		$this->load->model('profile_view_model');
+		$user_view_profile = $this->profile_view_model->viewed_profile_count($this->session->userdata('user_id'));
+		if($user_view_profile===false)
+			$user_view_profile = 0;
+
+		$this->load->model('avatar_model');
+		$user_current_avatar = $this->avatar_model->user_current_avatar($this->session->userdata('user_id'));
+
+		$this->load->model('person_model');
+		$user_person = $this->person_model->read_user_person($this->session->userdata('user_id'));
+		$user_full_name = $user_person['firstname'] . " " . $user_person['lastname'];
+
+		$this->load->model('contact_model');
+		$user_contact = $this->contact_model->user_all_contact($this->session->userdata('user_id'));
+		$twitter  = "";
+		$linkedin = "";
+		$telegram = "";
+		$skype    = "";
+		foreach ($user_contact as $ucs) {
+			if($ucs['type']==1)
+				$linkedin = $ucs['content'];
+			if($ucs['type']==2)
+				$twitter = $ucs['content'];
+			if($ucs['type']==3)
+				$telegram = $ucs['content'];
+			if($ucs['type']==4)
+				$skype = $ucs['content'];
+		}
+
+		$this->load->model('user_model');
+		$this->load->library('jdf');
+		$register_date = $this->jdf->jdate('d / m / Y', $this->user_model->get_register_time_id($this->session->userdata('user_id')));
+
 		$data = array(
 			'form_search_open'		=>	$form_search_open,
 			'search_input'			=>	$search_input,
@@ -316,7 +417,20 @@ class User extends CI_Controller
 			'form_success'			=>	$form_success,
 			'password_input'		=>	$password_input,
 			'new_password_input'	=>	$new_password_input,
-			'new_repassword_input'	=>	$new_repassword_input
+			'new_repassword_input'	=>	$new_repassword_input,
+			'user_connection_count'	=>	$user_connection_count,
+			'user_view_profile'		=>	$user_view_profile,
+			'user_current_avatar'	=>	$user_current_avatar,
+			'user_full_name'		=>	$user_full_name,
+			'twitter_limit'			=>	$this->character_limiter($twitter, 30),
+			'linkedin_limit'		=>	$this->character_limiter($linkedin, 30),
+			'telegram_limit'		=>	$this->character_limiter($telegram, 30),
+			'skype_limit'			=>	$this->character_limiter($skype, 30),
+			'twitter'				=>	$twitter,
+			'linkedin'				=>	$linkedin,
+			'telegram'				=>	$telegram,
+			'skype'					=>	$skype,
+			'register_date'			=>	$register_date
 		);
 
 		$this->parser('user/setting', $data);
@@ -476,6 +590,15 @@ class User extends CI_Controller
 			$avatar_success="";
 		}
 
+		$user_id = $this->user_model->get_user_by_id($this->session->userdata('user_id'));
+		$user_id = $user_id['id'];
+		$profile_open_key = $this->base_url() . 'user/' . md5($user_id);
+		
+		$this->load->library('jdf');
+		$register_date = $this->jdf->jdate('d / m / Y', $this->user_model->get_register_time_id($this->session->userdata('user_id')));
+
+		$user_suggest = $this->user_model->people_suggest();
+
 		$data = array(
 			'form_search_open'		=>	$form_search_open,
 			'search_input'			=>	$search_input,
@@ -500,7 +623,11 @@ class User extends CI_Controller
 			'form_avatar_open'		=>	$form_avatar_open,
 			'file_avatar_content'	=>	$file_avatar_content,
 			'avatar_submit'			=>	$avatar_submit,
-			'avatar_success'		=>	$avatar_success
+			'avatar_success'		=>	$avatar_success,
+			'profile_open_key'		=>	$profile_open_key,
+			'user_suggest'			=>	$user_suggest,
+			'user_full_name'		=>	$user_person['firstname'] . " " . $user_person['lastname'],
+			'register_date'			=>	$register_date
 		);
 
 		$this->parser('user/profile', $data);
@@ -603,6 +730,44 @@ class User extends CI_Controller
 			)
 		);
 
+		$this->load->model('connections_model');
+		$user_connection_count = $this->connections_model->user_connection_count($this->session->userdata('user_id'));
+		if($user_connection_count===false)
+			$user_connection_count = 0;
+
+		$this->load->model('profile_view_model');
+		$user_view_profile = $this->profile_view_model->viewed_profile_count($this->session->userdata('user_id'));
+		if($user_view_profile===false)
+			$user_view_profile = 0;
+
+		$this->load->model('avatar_model');
+		$user_current_avatar = $this->avatar_model->user_current_avatar($this->session->userdata('user_id'));
+
+		$this->load->model('person_model');
+		$user_person = $this->person_model->read_user_person($this->session->userdata('user_id'));
+		$user_full_name = $user_person['firstname'] . " " . $user_person['lastname'];
+
+		$this->load->model('contact_model');
+		$user_contact = $this->contact_model->user_all_contact($this->session->userdata('user_id'));
+		$twitter  = "";
+		$linkedin = "";
+		$telegram = "";
+		$skype    = "";
+		foreach ($user_contact as $ucs) {
+			if($ucs['type']==1)
+				$linkedin = $ucs['content'];
+			if($ucs['type']==2)
+				$twitter = $ucs['content'];
+			if($ucs['type']==3)
+				$telegram = $ucs['content'];
+			if($ucs['type']==4)
+				$skype = $ucs['content'];
+		}
+
+		$this->load->model('user_model');
+		$this->load->library('jdf');
+		$register_date = $this->jdf->jdate('d / m / Y', $this->user_model->get_register_time_id($this->session->userdata('user_id')));
+
 		$data = array(
 			'form_search_open'		=>	$form_search_open,
 			'search_input'			=>	$search_input,
@@ -615,7 +780,20 @@ class User extends CI_Controller
 			'lastname_input'		=>	$lastname_input,
 			'dropdown_1'			=>	$dropdown_1,
 			'zip_code_input'		=>	$zip_code_input,
-			'birthday_input'		=>	$birthday_input
+			'birthday_input'		=>	$birthday_input,
+			'user_connection_count'	=>	$user_connection_count,
+			'user_view_profile'		=>	$user_view_profile,
+			'user_current_avatar'	=>	$user_current_avatar,
+			'user_full_name'		=>	$user_full_name,
+			'twitter_limit'			=>	$this->character_limiter($twitter, 30),
+			'linkedin_limit'		=>	$this->character_limiter($linkedin, 30),
+			'telegram_limit'		=>	$this->character_limiter($telegram, 30),
+			'skype_limit'			=>	$this->character_limiter($skype, 30),
+			'twitter'				=>	$twitter,
+			'linkedin'				=>	$linkedin,
+			'telegram'				=>	$telegram,
+			'skype'					=>	$skype,
+			'register_date'			=>	$register_date
 		);
 
 		$this->parser('user/editperson', $data);
@@ -681,6 +859,44 @@ class User extends CI_Controller
 			)
 		);
 
+		$this->load->model('connections_model');
+		$user_connection_count = $this->connections_model->user_connection_count($this->session->userdata('user_id'));
+		if($user_connection_count===false)
+			$user_connection_count = 0;
+
+		$this->load->model('profile_view_model');
+		$user_view_profile = $this->profile_view_model->viewed_profile_count($this->session->userdata('user_id'));
+		if($user_view_profile===false)
+			$user_view_profile = 0;
+
+		$this->load->model('avatar_model');
+		$user_current_avatar = $this->avatar_model->user_current_avatar($this->session->userdata('user_id'));
+
+		$this->load->model('person_model');
+		$user_person = $this->person_model->read_user_person($this->session->userdata('user_id'));
+		$user_full_name = $user_person['firstname'] . " " . $user_person['lastname'];
+
+		$this->load->model('contact_model');
+		$user_contact = $this->contact_model->user_all_contact($this->session->userdata('user_id'));
+		$twitter  = "";
+		$linkedin = "";
+		$telegram = "";
+		$skype    = "";
+		foreach ($user_contact as $ucs) {
+			if($ucs['type']==1)
+				$linkedin = $ucs['content'];
+			if($ucs['type']==2)
+				$twitter = $ucs['content'];
+			if($ucs['type']==3)
+				$telegram = $ucs['content'];
+			if($ucs['type']==4)
+				$skype = $ucs['content'];
+		}
+
+		$this->load->model('user_model');
+		$this->load->library('jdf');
+		$register_date = $this->jdf->jdate('d / m / Y', $this->user_model->get_register_time_id($this->session->userdata('user_id')));
+
 		$data = array(
 			'form_search_open'		=>	$form_search_open,
 			'search_input'			=>	$search_input,
@@ -689,7 +905,20 @@ class User extends CI_Controller
 			'submit_input'			=>	$submit_input,
 			'validation_errors'		=>	$validation_errors,
 			'form_success'			=>	$form_success,
-			'bio_input'				=>	$bio_input
+			'bio_input'				=>	$bio_input,
+			'user_connection_count'	=>	$user_connection_count,
+			'user_view_profile'		=>	$user_view_profile,
+			'user_current_avatar'	=>	$user_current_avatar,
+			'user_full_name'		=>	$user_full_name,
+			'twitter_limit'			=>	$this->character_limiter($twitter, 30),
+			'linkedin_limit'		=>	$this->character_limiter($linkedin, 30),
+			'telegram_limit'		=>	$this->character_limiter($telegram, 30),
+			'skype_limit'			=>	$this->character_limiter($skype, 30),
+			'twitter'				=>	$twitter,
+			'linkedin'				=>	$linkedin,
+			'telegram'				=>	$telegram,
+			'skype'					=>	$skype,
+			'register_date'			=>	$register_date
 		);
 
 		$this->parser('user/editbio', $data);
@@ -791,6 +1020,44 @@ class User extends CI_Controller
 			)
 		);
 
+		$this->load->model('connections_model');
+		$user_connection_count = $this->connections_model->user_connection_count($this->session->userdata('user_id'));
+		if($user_connection_count===false)
+			$user_connection_count = 0;
+
+		$this->load->model('profile_view_model');
+		$user_view_profile = $this->profile_view_model->viewed_profile_count($this->session->userdata('user_id'));
+		if($user_view_profile===false)
+			$user_view_profile = 0;
+
+		$this->load->model('avatar_model');
+		$user_current_avatar = $this->avatar_model->user_current_avatar($this->session->userdata('user_id'));
+
+		$this->load->model('person_model');
+		$user_person = $this->person_model->read_user_person($this->session->userdata('user_id'));
+		$user_full_name = $user_person['firstname'] . " " . $user_person['lastname'];
+
+		$this->load->model('contact_model');
+		$user_contact = $this->contact_model->user_all_contact($this->session->userdata('user_id'));
+		$twitter  = "";
+		$linkedin = "";
+		$telegram = "";
+		$skype    = "";
+		foreach ($user_contact as $ucs) {
+			if($ucs['type']==1)
+				$linkedin = $ucs['content'];
+			if($ucs['type']==2)
+				$twitter = $ucs['content'];
+			if($ucs['type']==3)
+				$telegram = $ucs['content'];
+			if($ucs['type']==4)
+				$skype = $ucs['content'];
+		}
+
+		$this->load->model('user_model');
+		$this->load->library('jdf');
+		$register_date = $this->jdf->jdate('d / m / Y', $this->user_model->get_register_time_id($this->session->userdata('user_id')));
+
 		$data = array(
 			'form_search_open'		=>	$form_search_open,
 			'search_input'			=>	$search_input,
@@ -804,7 +1071,20 @@ class User extends CI_Controller
 			'start_date_input'		=>	$start_date_input,
 			'end_date_input'		=>	$end_date_input,
 			'user_experience'		=>	$user_experience,
-			'database_action'		=>	$database_action
+			'database_action'		=>	$database_action,
+			'user_connection_count'	=>	$user_connection_count,
+			'user_view_profile'		=>	$user_view_profile,
+			'user_current_avatar'	=>	$user_current_avatar,
+			'user_full_name'		=>	$user_full_name,
+			'twitter_limit'			=>	$this->character_limiter($twitter, 30),
+			'linkedin_limit'		=>	$this->character_limiter($linkedin, 30),
+			'telegram_limit'		=>	$this->character_limiter($telegram, 30),
+			'skype_limit'			=>	$this->character_limiter($skype, 30),
+			'twitter'				=>	$twitter,
+			'linkedin'				=>	$linkedin,
+			'telegram'				=>	$telegram,
+			'skype'					=>	$skype,
+			'register_date'			=>	$register_date
 		);
 
 		$this->parser('user/editexperience', $data);
@@ -921,6 +1201,44 @@ class User extends CI_Controller
 			)
 		);
 
+		$this->load->model('connections_model');
+		$user_connection_count = $this->connections_model->user_connection_count($this->session->userdata('user_id'));
+		if($user_connection_count===false)
+			$user_connection_count = 0;
+
+		$this->load->model('profile_view_model');
+		$user_view_profile = $this->profile_view_model->viewed_profile_count($this->session->userdata('user_id'));
+		if($user_view_profile===false)
+			$user_view_profile = 0;
+
+		$this->load->model('avatar_model');
+		$user_current_avatar = $this->avatar_model->user_current_avatar($this->session->userdata('user_id'));
+
+		$this->load->model('person_model');
+		$user_person = $this->person_model->read_user_person($this->session->userdata('user_id'));
+		$user_full_name = $user_person['firstname'] . " " . $user_person['lastname'];
+
+		$this->load->model('contact_model');
+		$user_contact = $this->contact_model->user_all_contact($this->session->userdata('user_id'));
+		$twitter  = "";
+		$linkedin = "";
+		$telegram = "";
+		$skype    = "";
+		foreach ($user_contact as $ucs) {
+			if($ucs['type']==1)
+				$linkedin = $ucs['content'];
+			if($ucs['type']==2)
+				$twitter = $ucs['content'];
+			if($ucs['type']==3)
+				$telegram = $ucs['content'];
+			if($ucs['type']==4)
+				$skype = $ucs['content'];
+		}
+
+		$this->load->model('user_model');
+		$this->load->library('jdf');
+		$register_date = $this->jdf->jdate('d / m / Y', $this->user_model->get_register_time_id($this->session->userdata('user_id')));
+
 		$data = array(
 			'form_search_open'		=>	$form_search_open,
 			'search_input'			=>	$search_input,
@@ -934,7 +1252,20 @@ class User extends CI_Controller
 			'content_input'			=>	$content_input,
 			'start_date_input'		=>	$start_date_input,
 			'end_date_input'		=>	$end_date_input,
-			'user_single_experience'=>	$user_single_experience
+			'user_single_experience'=>	$user_single_experience,
+			'user_connection_count'	=>	$user_connection_count,
+			'user_view_profile'		=>	$user_view_profile,
+			'user_current_avatar'	=>	$user_current_avatar,
+			'user_full_name'		=>	$user_full_name,
+			'twitter_limit'			=>	$this->character_limiter($twitter, 30),
+			'linkedin_limit'		=>	$this->character_limiter($linkedin, 30),
+			'telegram_limit'		=>	$this->character_limiter($telegram, 30),
+			'skype_limit'			=>	$this->character_limiter($skype, 30),
+			'twitter'				=>	$twitter,
+			'linkedin'				=>	$linkedin,
+			'telegram'				=>	$telegram,
+			'skype'					=>	$skype,
+			'register_date'			=>	$register_date
 		);
 
 		$this->parser('user/singleexperience', $data);
@@ -1036,6 +1367,44 @@ class User extends CI_Controller
 			)
 		);
 
+		$this->load->model('connections_model');
+		$user_connection_count = $this->connections_model->user_connection_count($this->session->userdata('user_id'));
+		if($user_connection_count===false)
+			$user_connection_count = 0;
+
+		$this->load->model('profile_view_model');
+		$user_view_profile = $this->profile_view_model->viewed_profile_count($this->session->userdata('user_id'));
+		if($user_view_profile===false)
+			$user_view_profile = 0;
+
+		$this->load->model('avatar_model');
+		$user_current_avatar = $this->avatar_model->user_current_avatar($this->session->userdata('user_id'));
+
+		$this->load->model('person_model');
+		$user_person = $this->person_model->read_user_person($this->session->userdata('user_id'));
+		$user_full_name = $user_person['firstname'] . " " . $user_person['lastname'];
+
+		$this->load->model('contact_model');
+		$user_contact = $this->contact_model->user_all_contact($this->session->userdata('user_id'));
+		$twitter  = "";
+		$linkedin = "";
+		$telegram = "";
+		$skype    = "";
+		foreach ($user_contact as $ucs) {
+			if($ucs['type']==1)
+				$linkedin = $ucs['content'];
+			if($ucs['type']==2)
+				$twitter = $ucs['content'];
+			if($ucs['type']==3)
+				$telegram = $ucs['content'];
+			if($ucs['type']==4)
+				$skype = $ucs['content'];
+		}
+
+		$this->load->model('user_model');
+		$this->load->library('jdf');
+		$register_date = $this->jdf->jdate('d / m / Y', $this->user_model->get_register_time_id($this->session->userdata('user_id')));
+
 		$data = array(
 			'form_search_open'		=>	$form_search_open,
 			'search_input'			=>	$search_input,
@@ -1049,7 +1418,20 @@ class User extends CI_Controller
 			'start_date_input'		=>	$start_date_input,
 			'end_date_input'		=>	$end_date_input,
 			'user_education'		=>	$user_education,
-			'database_action'		=>	$database_action
+			'database_action'		=>	$database_action,
+			'user_connection_count'	=>	$user_connection_count,
+			'user_view_profile'		=>	$user_view_profile,
+			'user_current_avatar'	=>	$user_current_avatar,
+			'user_full_name'		=>	$user_full_name,
+			'twitter_limit'			=>	$this->character_limiter($twitter, 30),
+			'linkedin_limit'		=>	$this->character_limiter($linkedin, 30),
+			'telegram_limit'		=>	$this->character_limiter($telegram, 30),
+			'skype_limit'			=>	$this->character_limiter($skype, 30),
+			'twitter'				=>	$twitter,
+			'linkedin'				=>	$linkedin,
+			'telegram'				=>	$telegram,
+			'skype'					=>	$skype,
+			'register_date'			=>	$register_date
 		);
 
 		$this->parser('user/editeducation', $data);
@@ -1166,6 +1548,44 @@ class User extends CI_Controller
 			)
 		);
 
+		$this->load->model('connections_model');
+		$user_connection_count = $this->connections_model->user_connection_count($this->session->userdata('user_id'));
+		if($user_connection_count===false)
+			$user_connection_count = 0;
+
+		$this->load->model('profile_view_model');
+		$user_view_profile = $this->profile_view_model->viewed_profile_count($this->session->userdata('user_id'));
+		if($user_view_profile===false)
+			$user_view_profile = 0;
+
+		$this->load->model('avatar_model');
+		$user_current_avatar = $this->avatar_model->user_current_avatar($this->session->userdata('user_id'));
+
+		$this->load->model('person_model');
+		$user_person = $this->person_model->read_user_person($this->session->userdata('user_id'));
+		$user_full_name = $user_person['firstname'] . " " . $user_person['lastname'];
+
+		$this->load->model('contact_model');
+		$user_contact = $this->contact_model->user_all_contact($this->session->userdata('user_id'));
+		$twitter  = "";
+		$linkedin = "";
+		$telegram = "";
+		$skype    = "";
+		foreach ($user_contact as $ucs) {
+			if($ucs['type']==1)
+				$linkedin = $ucs['content'];
+			if($ucs['type']==2)
+				$twitter = $ucs['content'];
+			if($ucs['type']==3)
+				$telegram = $ucs['content'];
+			if($ucs['type']==4)
+				$skype = $ucs['content'];
+		}
+
+		$this->load->model('user_model');
+		$this->load->library('jdf');
+		$register_date = $this->jdf->jdate('d / m / Y', $this->user_model->get_register_time_id($this->session->userdata('user_id')));
+
 		$data = array(
 			'form_search_open'		=>	$form_search_open,
 			'search_input'			=>	$search_input,
@@ -1179,7 +1599,20 @@ class User extends CI_Controller
 			'content_input'			=>	$content_input,
 			'start_date_input'		=>	$start_date_input,
 			'end_date_input'		=>	$end_date_input,
-			'user_single_education'=>	$user_single_education
+			'user_single_education'=>	$user_single_education,
+			'user_connection_count'	=>	$user_connection_count,
+			'user_view_profile'		=>	$user_view_profile,
+			'user_current_avatar'	=>	$user_current_avatar,
+			'user_full_name'		=>	$user_full_name,
+			'twitter_limit'			=>	$this->character_limiter($twitter, 30),
+			'linkedin_limit'		=>	$this->character_limiter($linkedin, 30),
+			'telegram_limit'		=>	$this->character_limiter($telegram, 30),
+			'skype_limit'			=>	$this->character_limiter($skype, 30),
+			'twitter'				=>	$twitter,
+			'linkedin'				=>	$linkedin,
+			'telegram'				=>	$telegram,
+			'skype'					=>	$skype,
+			'register_date'			=>	$register_date
 		);
 
 		$this->parser('user/singleeducation', $data);
@@ -1281,11 +1714,49 @@ class User extends CI_Controller
 			)
 		);
 
+		$this->load->model('connections_model');
+		$user_connection_count = $this->connections_model->user_connection_count($this->session->userdata('user_id'));
+		if($user_connection_count===false)
+			$user_connection_count = 0;
+
+		$this->load->model('profile_view_model');
+		$user_view_profile = $this->profile_view_model->viewed_profile_count($this->session->userdata('user_id'));
+		if($user_view_profile===false)
+			$user_view_profile = 0;
+
+		$this->load->model('avatar_model');
+		$user_current_avatar = $this->avatar_model->user_current_avatar($this->session->userdata('user_id'));
+
+		$this->load->model('person_model');
+		$user_person = $this->person_model->read_user_person($this->session->userdata('user_id'));
+		$user_full_name = $user_person['firstname'] . " " . $user_person['lastname'];
+
+		$this->load->model('contact_model');
+		$user_contact = $this->contact_model->user_all_contact($this->session->userdata('user_id'));
+		$twitter  = "";
+		$linkedin = "";
+		$telegram = "";
+		$skype    = "";
+		foreach ($user_contact as $ucs) {
+			if($ucs['type']==1)
+				$linkedin = $ucs['content'];
+			if($ucs['type']==2)
+				$twitter = $ucs['content'];
+			if($ucs['type']==3)
+				$telegram = $ucs['content'];
+			if($ucs['type']==4)
+				$skype = $ucs['content'];
+		}
+
+		$this->load->model('user_model');
+		$this->load->library('jdf');
+		$register_date = $this->jdf->jdate('d / m / Y', $this->user_model->get_register_time_id($this->session->userdata('user_id')));
+
 		$data = array(
 			'form_search_open'		=>	$form_search_open,
 			'search_input'			=>	$search_input,
 			'form_close'			=>	$form_close,
-			'form_addskills_open'=>	$form_addskills_open,
+			'form_addskills_open'	=>	$form_addskills_open,
 			'submit_input'			=>	$submit_input,
 			'validation_errors'		=>	$validation_errors,
 			'form_success'			=>	$form_success,
@@ -1293,8 +1764,21 @@ class User extends CI_Controller
 			'content_input'			=>	$content_input,
 			'start_date_input'		=>	$start_date_input,
 			'end_date_input'		=>	$end_date_input,
-			'user_skills'		=>	$user_skills,
-			'database_action'		=>	$database_action
+			'user_skills'			=>	$user_skills,
+			'database_action'		=>	$database_action,
+			'user_connection_count'	=>	$user_connection_count,
+			'user_view_profile'		=>	$user_view_profile,
+			'user_current_avatar'	=>	$user_current_avatar,
+			'user_full_name'		=>	$user_full_name,
+			'twitter_limit'			=>	$this->character_limiter($twitter, 30),
+			'linkedin_limit'		=>	$this->character_limiter($linkedin, 30),
+			'telegram_limit'		=>	$this->character_limiter($telegram, 30),
+			'skype_limit'			=>	$this->character_limiter($skype, 30),
+			'twitter'				=>	$twitter,
+			'linkedin'				=>	$linkedin,
+			'telegram'				=>	$telegram,
+			'skype'					=>	$skype,
+			'register_date'			=>	$register_date
 		);
 
 		$this->parser('user/editskills', $data);
@@ -1411,11 +1895,49 @@ class User extends CI_Controller
 			)
 		);
 
+		$this->load->model('connections_model');
+		$user_connection_count = $this->connections_model->user_connection_count($this->session->userdata('user_id'));
+		if($user_connection_count===false)
+			$user_connection_count = 0;
+
+		$this->load->model('profile_view_model');
+		$user_view_profile = $this->profile_view_model->viewed_profile_count($this->session->userdata('user_id'));
+		if($user_view_profile===false)
+			$user_view_profile = 0;
+
+		$this->load->model('avatar_model');
+		$user_current_avatar = $this->avatar_model->user_current_avatar($this->session->userdata('user_id'));
+
+		$this->load->model('person_model');
+		$user_person = $this->person_model->read_user_person($this->session->userdata('user_id'));
+		$user_full_name = $user_person['firstname'] . " " . $user_person['lastname'];
+
+		$this->load->model('contact_model');
+		$user_contact = $this->contact_model->user_all_contact($this->session->userdata('user_id'));
+		$twitter  = "";
+		$linkedin = "";
+		$telegram = "";
+		$skype    = "";
+		foreach ($user_contact as $ucs) {
+			if($ucs['type']==1)
+				$linkedin = $ucs['content'];
+			if($ucs['type']==2)
+				$twitter = $ucs['content'];
+			if($ucs['type']==3)
+				$telegram = $ucs['content'];
+			if($ucs['type']==4)
+				$skype = $ucs['content'];
+		}
+
+		$this->load->model('user_model');
+		$this->load->library('jdf');
+		$register_date = $this->jdf->jdate('d / m / Y', $this->user_model->get_register_time_id($this->session->userdata('user_id')));
+
 		$data = array(
 			'form_search_open'		=>	$form_search_open,
 			'search_input'			=>	$search_input,
 			'form_close'			=>	$form_close,
-			'form_editskills_open'=>$form_editskills_open,
+			'form_editskills_open'	=>$form_editskills_open,
 			'submit_input'			=>	$submit_input,
 			'validation_errors'		=>	$validation_errors,
 			'form_success'			=>	$form_success,
@@ -1424,7 +1946,20 @@ class User extends CI_Controller
 			'content_input'			=>	$content_input,
 			'start_date_input'		=>	$start_date_input,
 			'end_date_input'		=>	$end_date_input,
-			'user_single_skills'=>	$user_single_skills
+			'user_single_skills'	=>	$user_single_skills,
+			'user_connection_count'	=>	$user_connection_count,
+			'user_view_profile'		=>	$user_view_profile,
+			'user_current_avatar'	=>	$user_current_avatar,
+			'user_full_name'		=>	$user_full_name,
+			'twitter_limit'			=>	$this->character_limiter($twitter, 30),
+			'linkedin_limit'		=>	$this->character_limiter($linkedin, 30),
+			'telegram_limit'		=>	$this->character_limiter($telegram, 30),
+			'skype_limit'			=>	$this->character_limiter($skype, 30),
+			'twitter'				=>	$twitter,
+			'linkedin'				=>	$linkedin,
+			'telegram'				=>	$telegram,
+			'skype'					=>	$skype,
+			'register_date'			=>	$register_date
 		);
 
 		$this->parser('user/singleskills', $data);
@@ -1526,11 +2061,49 @@ class User extends CI_Controller
 			)
 		);
 
+		$this->load->model('connections_model');
+		$user_connection_count = $this->connections_model->user_connection_count($this->session->userdata('user_id'));
+		if($user_connection_count===false)
+			$user_connection_count = 0;
+
+		$this->load->model('profile_view_model');
+		$user_view_profile = $this->profile_view_model->viewed_profile_count($this->session->userdata('user_id'));
+		if($user_view_profile===false)
+			$user_view_profile = 0;
+
+		$this->load->model('avatar_model');
+		$user_current_avatar = $this->avatar_model->user_current_avatar($this->session->userdata('user_id'));
+
+		$this->load->model('person_model');
+		$user_person = $this->person_model->read_user_person($this->session->userdata('user_id'));
+		$user_full_name = $user_person['firstname'] . " " . $user_person['lastname'];
+
+		$this->load->model('contact_model');
+		$user_contact = $this->contact_model->user_all_contact($this->session->userdata('user_id'));
+		$twitter  = "";
+		$linkedin = "";
+		$telegram = "";
+		$skype    = "";
+		foreach ($user_contact as $ucs) {
+			if($ucs['type']==1)
+				$linkedin = $ucs['content'];
+			if($ucs['type']==2)
+				$twitter = $ucs['content'];
+			if($ucs['type']==3)
+				$telegram = $ucs['content'];
+			if($ucs['type']==4)
+				$skype = $ucs['content'];
+		}
+
+		$this->load->model('user_model');
+		$this->load->library('jdf');
+		$register_date = $this->jdf->jdate('d / m / Y', $this->user_model->get_register_time_id($this->session->userdata('user_id')));
+
 		$data = array(
 			'form_search_open'		=>	$form_search_open,
 			'search_input'			=>	$search_input,
 			'form_close'			=>	$form_close,
-			'form_addproject_open'=>	$form_addproject_open,
+			'form_addproject_open'	=>	$form_addproject_open,
 			'submit_input'			=>	$submit_input,
 			'validation_errors'		=>	$validation_errors,
 			'form_success'			=>	$form_success,
@@ -1538,8 +2111,21 @@ class User extends CI_Controller
 			'content_input'			=>	$content_input,
 			'start_date_input'		=>	$start_date_input,
 			'end_date_input'		=>	$end_date_input,
-			'user_project'		=>	$user_project,
-			'database_action'		=>	$database_action
+			'user_project'			=>	$user_project,
+			'database_action'		=>	$database_action,
+			'user_connection_count'	=>	$user_connection_count,
+			'user_view_profile'		=>	$user_view_profile,
+			'user_current_avatar'	=>	$user_current_avatar,
+			'user_full_name'		=>	$user_full_name,
+			'twitter_limit'			=>	$this->character_limiter($twitter, 30),
+			'linkedin_limit'		=>	$this->character_limiter($linkedin, 30),
+			'telegram_limit'		=>	$this->character_limiter($telegram, 30),
+			'skype_limit'			=>	$this->character_limiter($skype, 30),
+			'twitter'				=>	$twitter,
+			'linkedin'				=>	$linkedin,
+			'telegram'				=>	$telegram,
+			'skype'					=>	$skype,
+			'register_date'			=>	$register_date
 		);
 
 		$this->parser('user/editproject', $data);
@@ -1656,11 +2242,49 @@ class User extends CI_Controller
 			)
 		);
 
+		$this->load->model('connections_model');
+		$user_connection_count = $this->connections_model->user_connection_count($this->session->userdata('user_id'));
+		if($user_connection_count===false)
+			$user_connection_count = 0;
+
+		$this->load->model('profile_view_model');
+		$user_view_profile = $this->profile_view_model->viewed_profile_count($this->session->userdata('user_id'));
+		if($user_view_profile===false)
+			$user_view_profile = 0;
+
+		$this->load->model('avatar_model');
+		$user_current_avatar = $this->avatar_model->user_current_avatar($this->session->userdata('user_id'));
+
+		$this->load->model('person_model');
+		$user_person = $this->person_model->read_user_person($this->session->userdata('user_id'));
+		$user_full_name = $user_person['firstname'] . " " . $user_person['lastname'];
+
+		$this->load->model('contact_model');
+		$user_contact = $this->contact_model->user_all_contact($this->session->userdata('user_id'));
+		$twitter  = "";
+		$linkedin = "";
+		$telegram = "";
+		$skype    = "";
+		foreach ($user_contact as $ucs) {
+			if($ucs['type']==1)
+				$linkedin = $ucs['content'];
+			if($ucs['type']==2)
+				$twitter = $ucs['content'];
+			if($ucs['type']==3)
+				$telegram = $ucs['content'];
+			if($ucs['type']==4)
+				$skype = $ucs['content'];
+		}
+
+		$this->load->model('user_model');
+		$this->load->library('jdf');
+		$register_date = $this->jdf->jdate('d / m / Y', $this->user_model->get_register_time_id($this->session->userdata('user_id')));
+
 		$data = array(
 			'form_search_open'		=>	$form_search_open,
 			'search_input'			=>	$search_input,
 			'form_close'			=>	$form_close,
-			'form_editproject_open'=>$form_editproject_open,
+			'form_editproject_open'	=>	$form_editproject_open,
 			'submit_input'			=>	$submit_input,
 			'validation_errors'		=>	$validation_errors,
 			'form_success'			=>	$form_success,
@@ -1669,7 +2293,20 @@ class User extends CI_Controller
 			'content_input'			=>	$content_input,
 			'start_date_input'		=>	$start_date_input,
 			'end_date_input'		=>	$end_date_input,
-			'user_single_project'=>	$user_single_project
+			'user_single_project'	=>	$user_single_project,
+			'user_connection_count'	=>	$user_connection_count,
+			'user_view_profile'		=>	$user_view_profile,
+			'user_current_avatar'	=>	$user_current_avatar,
+			'user_full_name'		=>	$user_full_name,
+			'twitter_limit'			=>	$this->character_limiter($twitter, 30),
+			'linkedin_limit'		=>	$this->character_limiter($linkedin, 30),
+			'telegram_limit'		=>	$this->character_limiter($telegram, 30),
+			'skype_limit'			=>	$this->character_limiter($skype, 30),
+			'twitter'				=>	$twitter,
+			'linkedin'				=>	$linkedin,
+			'telegram'				=>	$telegram,
+			'skype'					=>	$skype,
+			'register_date'			=>	$register_date
 		);
 
 		$this->parser('user/singleproject', $data);
@@ -1693,10 +2330,61 @@ class User extends CI_Controller
 		);
 		$form_close 	= form_close();
 
+		$this->load->model('connections_model');
+		$user_connection_count = $this->connections_model->user_connection_count($this->session->userdata('user_id'));
+		if($user_connection_count===false)
+			$user_connection_count = 0;
+
+		$this->load->model('profile_view_model');
+		$user_view_profile = $this->profile_view_model->viewed_profile_count($this->session->userdata('user_id'));
+		if($user_view_profile===false)
+			$user_view_profile = 0;
+
+		$this->load->model('avatar_model');
+		$user_current_avatar = $this->avatar_model->user_current_avatar($this->session->userdata('user_id'));
+
+		$this->load->model('person_model');
+		$user_person = $this->person_model->read_user_person($this->session->userdata('user_id'));
+		$user_full_name = $user_person['firstname'] . " " . $user_person['lastname'];
+
+		$this->load->model('contact_model');
+		$user_contact = $this->contact_model->user_all_contact($this->session->userdata('user_id'));
+		$twitter  = "";
+		$linkedin = "";
+		$telegram = "";
+		$skype    = "";
+		foreach ($user_contact as $ucs) {
+			if($ucs['type']==1)
+				$linkedin = $ucs['content'];
+			if($ucs['type']==2)
+				$twitter = $ucs['content'];
+			if($ucs['type']==3)
+				$telegram = $ucs['content'];
+			if($ucs['type']==4)
+				$skype = $ucs['content'];
+		}
+
+		$this->load->model('user_model');
+		$this->load->library('jdf');
+		$register_date = $this->jdf->jdate('d / m / Y', $this->user_model->get_register_time_id($this->session->userdata('user_id')));
+
 		$data = array(
 			'form_search_open'		=>	$form_search_open,
 			'search_input'			=>	$search_input,
-			'form_close'			=>	$form_close
+			'form_close'			=>	$form_close,
+			'user_connection_count'	=>	$user_connection_count,
+			'user_view_profile'		=>	$user_view_profile,
+			'user_current_avatar'	=>	$user_current_avatar,
+			'user_full_name'		=>	$user_full_name,
+			'twitter_limit'			=>	$this->character_limiter($twitter, 30),
+			'linkedin_limit'		=>	$this->character_limiter($linkedin, 30),
+			'telegram_limit'		=>	$this->character_limiter($telegram, 30),
+			'skype_limit'			=>	$this->character_limiter($skype, 30),
+			'twitter'				=>	$twitter,
+			'linkedin'				=>	$linkedin,
+			'telegram'				=>	$telegram,
+			'skype'					=>	$skype,
+			'register_date'			=>	$register_date
 		);
 
 		$this->parser('user/notification', $data);
@@ -1720,13 +2408,196 @@ class User extends CI_Controller
 		);
 		$form_close 	= form_close();
 
+		$this->load->model('connections_model');
+		$user_connection_count = $this->connections_model->user_connection_count($this->session->userdata('user_id'));
+		if($user_connection_count===false)
+			$user_connection_count = 0;
+
+		$this->load->model('profile_view_model');
+		$user_view_profile = $this->profile_view_model->viewed_profile_count($this->session->userdata('user_id'));
+		if($user_view_profile===false)
+			$user_view_profile = 0;
+
+		$this->load->model('avatar_model');
+		$user_current_avatar = $this->avatar_model->user_current_avatar($this->session->userdata('user_id'));
+
+		$this->load->model('person_model');
+		$user_person = $this->person_model->read_user_person($this->session->userdata('user_id'));
+		$user_full_name = $user_person['firstname'] . " " . $user_person['lastname'];
+
+		$this->load->model('contact_model');
+		$user_contact = $this->contact_model->user_all_contact($this->session->userdata('user_id'));
+		$twitter  = "";
+		$linkedin = "";
+		$telegram = "";
+		$skype    = "";
+		foreach ($user_contact as $ucs) {
+			if($ucs['type']==1)
+				$linkedin = $ucs['content'];
+			if($ucs['type']==2)
+				$twitter = $ucs['content'];
+			if($ucs['type']==3)
+				$telegram = $ucs['content'];
+			if($ucs['type']==4)
+				$skype = $ucs['content'];
+		}
+
+		$this->load->model('user_model');
+		$this->load->library('jdf');
+		$register_date = $this->jdf->jdate('d / m / Y', $this->user_model->get_register_time_id($this->session->userdata('user_id')));
+
 		$data = array(
 			'form_search_open'		=>	$form_search_open,
 			'search_input'			=>	$search_input,
-			'form_close'			=>	$form_close
+			'form_close'			=>	$form_close,
+			'user_connection_count'	=>	$user_connection_count,
+			'user_view_profile'		=>	$user_view_profile,
+			'user_current_avatar'	=>	$user_current_avatar,
+			'user_full_name'		=>	$user_full_name,
+			'twitter_limit'			=>	$this->character_limiter($twitter, 30),
+			'linkedin_limit'		=>	$this->character_limiter($linkedin, 30),
+			'telegram_limit'		=>	$this->character_limiter($telegram, 30),
+			'skype_limit'			=>	$this->character_limiter($skype, 30),
+			'twitter'				=>	$twitter,
+			'linkedin'				=>	$linkedin,
+			'telegram'				=>	$telegram,
+			'skype'					=>	$skype,
+			'register_date'			=>	$register_date
 		);
 
 		$this->parser('user/message', $data);
+	}
+
+	public function change_password()
+	{
+		$this->self_set_url($this->current_url());
+		$this->is_login();
+
+		$this->load->helper('form');
+		$form_search_open = form_open($this->base_url() . "user/form/search");
+		$search_input = form_input(
+			array(
+				'type'			=>	'text',
+				'name'			=>	'search',
+				'maxlength'		=>	255,
+				'placeholder'	=>	'تایپ + اینتر',
+				'class'			=>	'form-control text-right right-to-left'
+			)
+		);
+		$form_close 	= form_close();
+
+		if($this->session->has_userdata('form_error')) {
+			$validation_errors = $this->session->userdata('form_error');
+			$this->session->unset_userdata('form_error');
+		}
+		else {
+			$validation_errors="";
+		}
+
+		$this->load->model('user_option_model');
+		$form_setting_open = form_open($this->base_url() . "user/form/change_password");
+
+		$password_input = form_input(
+			array(
+				'type'			=>	'password',
+				'name'			=>	'password',
+				'maxlength'		=>	40,
+				'placeholder'	=>	'رمز عبور فعلی',
+				'class'			=>	'form-control text-right right-to-left'
+			)
+		);
+		$new_password_input = form_input(
+			array(
+				'type'			=>	'password',
+				'name'			=>	'new_password',
+				'maxlength'		=>	40,
+				'placeholder'	=>	'رمز عبور تازه',
+				'class'			=>	'form-control text-right right-to-left'
+			)
+		);
+		$new_repassword_input = form_input(
+			array(
+				'type'			=>	'password',
+				'name'			=>	'new_repassword',
+				'maxlength'		=>	40,
+				'placeholder'	=>	'تکرار رمز عبور تازه',
+				'class'			=>	'form-control text-right right-to-left'
+			)
+		);
+
+		$submit_input = form_input(
+			array(
+				'type'			=>	'submit',
+				'name'			=>	'submit',
+				'value'			=>	'ثبت  تغییرات',
+				'class'			=>	'btn bg-success text-light float-left'
+			)
+		);
+
+		$this->load->model('connections_model');
+		$user_connection_count = $this->connections_model->user_connection_count($this->session->userdata('user_id'));
+		if($user_connection_count===false)
+			$user_connection_count = 0;
+
+		$this->load->model('profile_view_model');
+		$user_view_profile = $this->profile_view_model->viewed_profile_count($this->session->userdata('user_id'));
+		if($user_view_profile===false)
+			$user_view_profile = 0;
+
+		$this->load->model('avatar_model');
+		$user_current_avatar = $this->avatar_model->user_current_avatar($this->session->userdata('user_id'));
+
+		$this->load->model('person_model');
+		$user_person = $this->person_model->read_user_person($this->session->userdata('user_id'));
+		$user_full_name = $user_person['firstname'] . " " . $user_person['lastname'];
+
+		$this->load->model('contact_model');
+		$user_contact = $this->contact_model->user_all_contact($this->session->userdata('user_id'));
+		$twitter  = "";
+		$linkedin = "";
+		$telegram = "";
+		$skype    = "";
+		foreach ($user_contact as $ucs) {
+			if($ucs['type']==1)
+				$linkedin = $ucs['content'];
+			if($ucs['type']==2)
+				$twitter = $ucs['content'];
+			if($ucs['type']==3)
+				$telegram = $ucs['content'];
+			if($ucs['type']==4)
+				$skype = $ucs['content'];
+		}
+
+		$this->load->model('user_model');
+		$this->load->library('jdf');
+		$register_date = $this->jdf->jdate('d / m / Y', $this->user_model->get_register_time_id($this->session->userdata('user_id')));
+
+		$data = array(
+			'form_search_open'		=>	$form_search_open,
+			'search_input'			=>	$search_input,
+			'form_close'			=>	$form_close,
+			'form_setting_open'		=>	$form_setting_open,
+			'submit_input'			=>	$submit_input,
+			'validation_errors'		=>	$validation_errors,
+			'password_input'		=>	$password_input,
+			'new_password_input'	=>	$new_password_input,
+			'new_repassword_input'	=>	$new_repassword_input,
+			'user_connection_count'	=>	$user_connection_count,
+			'user_view_profile'		=>	$user_view_profile,
+			'user_current_avatar'	=>	$user_current_avatar,
+			'user_full_name'		=>	$user_full_name,
+			'twitter_limit'			=>	$this->character_limiter($twitter, 30),
+			'linkedin_limit'		=>	$this->character_limiter($linkedin, 30),
+			'telegram_limit'		=>	$this->character_limiter($telegram, 30),
+			'skype_limit'			=>	$this->character_limiter($skype, 30),
+			'twitter'				=>	$twitter,
+			'linkedin'				=>	$linkedin,
+			'telegram'				=>	$telegram,
+			'skype'					=>	$skype,
+			'register_date'			=>	$register_date
+		);
+
+		$this->parser('user/changepassword', $data);
 	}
 
 }

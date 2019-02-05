@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <head>
 	<meta charset="utf-8">
   	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>لینکدین فارسی - پنل کاربری</title>
+	<title>لینکدین فارسی - تغییر امنیتی</title>
 	<link rel="stylesheet" type="text/css" href="{base}assets/layout/layout.css">
 	<link rel="stylesheet" type="text/css" href="{base}assets/library/bootstrap/css/bootstrap.min.css">
 	<link rel="stylesheet" type="text/css" href="{base}assets/library/bootstrap/css/bootstrap-grid.min.css">
@@ -55,89 +55,28 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<section>
 			<div class="content">
 				<div class="row right-to-left text-right">
-					<div class="col-md-3">
+					<div class="col-md-9">
 						<div class="content-box">
-							<h5><span class="fas fa-1x fa-users"></span>&nbsp; <span>شاید این افراد را بشناسید</span></h5>
+							<h5><span class="fas fa-1x fa-fingerprint"></span>&nbsp;<span>تغییر امنیتی اجباری</span></h5>
 							<div class="real-content">
-
+								{form_setting_open}
+									<p><span class="fas fa-1x fa-edit"></span>&nbsp;<strong>تغییر امنیتی</strong></p>
+									<p>{password_input}</p>
+									<p>{new_password_input}</p>
+									<p>{new_repassword_input}</p>
+									<p>&nbsp;</p>
+									{submit_input}
+									<div class="clearfix"></div>
+									<p>&nbsp;</p>
+								{form_close}
+								<?php if(!empty($validation_errors)) { ?>
+									<div class="alert alert-danger right-to-left text-right">{validation_errors}</div>
+								<?php } ?>
+								<div class="hr"></div>
+								<p><span class="fas fa-1x fa-question-circle"></span>&nbsp;<span>راهنمایی :</span></p>
+								<p>شما به صورت اجباری باید رمزعبور خود را تعویض کنید و بعدا ادامه دهید برای اینکار از فرم بالا اقدام کنید.</p>
 							</div>
 						</div>
-					</div>
-					<div class="col-md-6">
-						<div class="content-box">
-							<div class="real-content">
-								<div class="write-post-box">
-									<div class="write-post-box-title">
-										<h6><span class="fas fa-1x fa-pen-nib"></span>&nbsp;<span> نوشته ای را به اشتراک بگذارید. ...</span></h6>
-									</div>
-									<div class="write-post-box-content">
-										{form_newpost_open}
-											{write_post_content}
-											<p></p>
-											<div class="float-left">
-												<label for="file-upload" class="custom-file-upload btn btn-primary"> انتخاب فایل</label>
-												{post_submit_input}
-											</div>
-											<div class="clearfix"></div>
-											{file_post_content}
-										{form_close}
-										<?php if(!empty($validation_errors)) { ?>
-											<div class="alert alert-danger right-to-left text-right">{validation_errors}</div>
-										<?php } ?>
-										<?php if(!empty($form_success)) { ?>
-											<div class="alert alert-success right-to-left text-right">{form_success}</div>
-										<?php } ?>
-									</div>
-								</div>
-							</div>
-						</div>
-
-						<div class="timeline-posts">
-							<?php 
-							if(!is_null($timeline_posts) && $timeline_posts!==false) {
-								foreach ($timeline_posts as $posts) { ?>
-									<div class="content-box">
-										<div class="real-content">
-											<div class="timeline-posts-user">
-												<div class="timeline-posts-user-avatar float-right text-center">
-													<img src="{base}upload/avatar/<?php echo $posts['avatar_file_name']; ?>" title="<?php echo $posts['firstname'] . " " . $posts['lastname']; ?>" alt="<?php echo $posts['firstname'] . " " . $posts['lastname']; ?>" />
-												</div>
-												<div class="timeline-posts-user-fullname float-right">
-													<a class="text-dark" href="{base}user/<?php echo md5($posts['user_post_id']); ?>" title="مشاهده ی پروفایل <?php echo $posts['firstname'] . " " . $posts['lastname']; ?>" target="_blank">
-														<p><?php echo $posts['firstname'] . " " . $posts['lastname']; ?></p>
-													</a>
-												</div>
-												<div class="clearfix"></div>
-											</div>
-											<div class="timeline_posts-content">
-												<?php echo $posts['content']; ?>
-											</div>
-											<div class="timeline_posts-footer">
-												<ul>
-													<li><span class="fas fa-1x fa-eye"></span>&nbsp; </li>
-													<li><span class="fas fa-1x fa-eye"></span>&nbsp; </li>
-													<li><span class="fas fa-1x fa-eye"></span>&nbsp; </li>
-													<li><span class="fas fa-1x fa-eye"></span>&nbsp; </li>
-												</ul>
-											</div>
-										</div>
-									</div>
-								<?php }
-							} else { ?>
-								<div class="content-box">
-									<div class="real-content">
-										<img class="img-fluid" src="{base}assets/images/nopost.png" title="نوشته ای یافت نشد" alt="نوشته ای یافت نشد" />
-									</div>
-								</div>
-							<?php }	?>
-							<div class="content-box">
-								<h5><span class="fas fa-1x fa-user-plus"></span>&nbsp; <span>ارتباطات خود را افزایش دهید.</span></h5>
-								<div class="real-content">
-											
-								</div>
-							</div>
-						</div>
-
 					</div>
 					<div class="col-md-3">
 						<div class="content-box">

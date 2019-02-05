@@ -67,6 +67,7 @@ $route['panel/setting']								= 'user/user/setting';
 $route['panel/profile']								= 'user/user/profile';
 $route['panel/notification']						= 'user/user/notification';
 $route['panel/message']								= 'user/user/message';
+$route['panel/change_password']						= 'user/user/change_password';
 
 $route['panel/profile/edit/person'] 				= 'user/user/edit_person';
 
@@ -77,7 +78,7 @@ $route['panel/profile/edit/experience/edit/(:num)'] = 'user/user/single_experien
 $route['panel/profile/edit/experience/delete/(:num)']= 'user/form/delete_experience/$1';
 
 $route['panel/profile/edit/education'] 				= 'user/user/edit_education';
-$route['panel/profile/edit/education/edit/(:num)'] = 'user/user/single_education/$1';
+$route['panel/profile/edit/education/edit/(:num)'] 	= 'user/user/single_education/$1';
 $route['panel/profile/edit/education/delete/(:num)']= 'user/form/delete_education/$1';
 
 $route['panel/profile/edit/skills'] 				= 'user/user/edit_skills';
@@ -88,5 +89,13 @@ $route['panel/profile/edit/project'] 				= 'user/user/edit_project';
 $route['panel/profile/edit/project/edit/(:num)'] 	= 'user/user/single_project/$1';
 $route['panel/profile/edit/project/delete/(:num)']	= 'user/form/delete_project/$1';
 
+$route['action/add_connect/(:any)']					= 'user/form/add_connect/$1';
+$route['action/delete_connect/(:any)']				= 'user/form/delete_connect/$1';
+$route['action/report/(:any)']						= 'user/form/report/$1';
+$route['action/block/(:any)']						= 'user/form/block/$1';
+$route['action/unblock/(:any)']						= 'user/form/unblock/$1';
+$route['action/confirm_connect/(:any)']				= 'user/form/confirm_connect/$1';
+$route['action/delete_request/(:any)']				= 'user/form/delete_request/$1';
+$route['action/unconfirm_connect/(:any)']			= 'user/form/unconfirm_connect/$1';
 
 $route['user/(:any)']								= 'web/profile/$1';

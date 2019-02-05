@@ -17,8 +17,11 @@ class Old_password_model extends CI_Model {
 
     public function insert($user_id, $password, $time, $user_agent)
     {
-    	if(empty($user_id) || empty($password) || empty($time) || empty($user_agent))
+    	if(empty($user_id) || empty($password) || empty($user_agent))
     		return false;
+
+        if(empty($time))
+            $time = time();
 
     	$data = array(
     		'user_id'	=>	$user_id,

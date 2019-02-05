@@ -340,8 +340,6 @@
 	line-height: 30px;
 }
 .profile-section h3 {
-	border-right: 5px solid #cfcfcf;
-	text-indent: 20px;
 	margin-bottom: 30px;
 }
 .profile-button-handler {
@@ -349,4 +347,53 @@
 }
 .profile-button-handler * {
 	font-size: 12px;
+}
+.big-line-height {
+	line-height: 40px;
+}
+.copyright-profile {
+	font-family: 'samim';
+	margin-top: 50px;
+	padding: 40px 0 20px 0;
+	background: #000;
+	font-size: 12px;
+}
+#register_date {
+	font-size: 11px;
+}
+.timeline-posts {
+	margin: 30px 0;
+}
+.timeline-posts .content-content {
+	margin-bottom: 20px;
+}
+.timeline-posts-user {
+	border-bottom: 1px solid #e9ebea;
+	padding-bottom: 10px;
+}
+.timeline-posts-user-avatar {
+	width: 40px;
+    height: 40px;
+    border-radius: 100%;
+    padding: 5px;
+    border: 1px solid #e9ebea;
+    box-shadow: 0px 0px 50px #e9ebea;
+}
+.timeline-posts-user-avatar img {
+	width: 30px;
+	height: 30px;
+	border-radius: 100%;
+}
+.timeline-posts-user-fullname {
+	margin-right: 20px;
+	margin-top: 10px;
+}
+.timeline_posts-content {
+	margin: 20px 0;
+	line-height: 30px;
+	text-align: justify;
+}
+.timeline_posts-footer {
+	border-top: 1px solid #e9ebea;
+	padding-top: 10px;
 }

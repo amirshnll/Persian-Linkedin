@@ -1,16 +1,27 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
-?>
-
-<div style="border:1px solid #990000;padding-left:20px;margin:0 0 10px 0;">
-
-<h4>An uncaught Exception was encountered</h4>
-
-<p>Type: <?php echo get_class($exception); ?></p>
-<p>Message: <?php echo $message; ?></p>
-<p>Filename: <?php echo $exception->getFile(); ?></p>
-<p>Line Number: <?php echo $exception->getLine(); ?></p>
-
+?><!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>exception - چیزی یافت نشد</title>
+<link rel="shortcut icon" href="<?php echo config_item('base_url'); ?>/assets/images/favicon.png"/>
+<style type="text/css">
+body {
+	
+}
+#container {
+	margin: auto;
+	width: 80%;
+}
+</style>
+</head>
+<body>
+	<div id="container">
+		<img src="<?php echo config_item('base_url'); ?>/assets/images/error.png" width="100%" title="چیزی یافت نشد." alt="چیزی یافت نشد." />
+	</div>
+</body>
+</html>
 <?php if (defined('SHOW_DEBUG_BACKTRACE') && SHOW_DEBUG_BACKTRACE === TRUE): ?>
 
 	<p>Backtrace:</p>
@@ -28,5 +39,4 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<?php endforeach ?>
 
 <?php endif ?>
-
-</div>
+<?php die(); ?>

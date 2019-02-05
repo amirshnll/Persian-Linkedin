@@ -17,8 +17,11 @@ class Like_model extends CI_Model {
 
     public function insert($user_id, $post_id, $time)
     {
-    	if(empty($user_id) || empty($post_id) || empty($time))
+    	if(empty($user_id) || empty($post_id))
     		return false;
+
+        if(empty($time))
+            $time = time();
 
     	$data = array(
     		'user_id'		=>	$user_id,

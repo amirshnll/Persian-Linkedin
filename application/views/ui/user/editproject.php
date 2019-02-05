@@ -57,11 +57,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				<div class="row right-to-left text-right">
 					<div class="col-md-9">
 						<div class="content-box">
-							<h5>ویرایش پروژه ها </h5>
+							<h5><span class="fas fa-1x fa-project-diagram"></span>&nbsp;<span>ویرایش پروژه ها </span></h5>
 							<div class="real-content">
 								{form_addproject_open}
-									<p><strong>پروژه ها </strong></p>
-									<p>افزودن پروژه ها  جدید</p>
+									<p><span class="fas fa-1x fa-edit"></span>&nbsp;<strong>پروژه ها </strong></p>
+									<p><span class="fas fa-1x fa-plus-square"></span>&nbsp;<span>افزودن پروژه ها  جدید</span></p>
 									<p>{title_input}</p>
 									<p>{content_input}</p>
 									<p>{start_date_input}</p>
@@ -81,7 +81,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 								<?php } ?>
 
 								<p>&nbsp;</p><p>&nbsp;</p>
-								<p>فهرست پروژه ها</p>
+								<p><span class="fas fa-1x fa-database"></span>&nbsp;<span>فهرست پروژه ها</span></p>
 
 								<table border="1" class="database-table">
 									<thead>
@@ -121,7 +121,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 									<div class="alert alert-success right-to-left text-right">{database_action}</div>
 								<?php } ?>
 								<div class="hr"></div>
-								<p>راهنمایی :</p>
+								<p><span class="fas fa-1x fa-question-circle"></span>&nbsp;<span>راهنمایی :</span></p>
 								<p>لطفا قبل از ثبت تغییرات حتما آنها را با دقت بررسی کنید.</p>
 								<p>یکی از بخش های مهم رزومه ی کاری خوب ثبت پروژه ها با کیفیت می باشد.</p>
 							</div>
@@ -129,19 +129,64 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					</div>
 					<div class="col-md-3">
 						<div class="content-box">
-							<div class="avatar-timeline">
-								<img src="" title="" alt="" />
-								<h2 class="display-4"></h2>
+							<div class="avatar-timeline text-center">
+								<img src="{base}upload/avatar/{user_current_avatar}" title="تصویر کاربری" alt="تصویر کاربری" width="120" height="120" />
 							</div>
-							<div class="connection-state-timeline">
-								<div class="">
-
-								</div>
-								<div class="">
-
+							<div class="full-name-timeline text-center">
+								<h4 class="display-4">{user_full_name}</h4>
+								<p id="register_date" class="text-gray">تاریخ عضویت : {register_date}</p>
+							</div>
+							<div class="connection-state-timeline text-center">
+								<div class="real-content">
+									<div class="float-right text-center width-50">
+										<p><strong>{user_view_profile}</strong></p>
+										<p class="text-gray">بازدیدها</p>
+									</div>
+									<div class="float-left text-center width-50">
+										<p><strong>{user_connection_count}</strong></p>
+										<p class="text-gray">ارتباطات</p>
+									</div>
+									<div class="clearfix"></div>
 								</div>
 							</div>
-							<div class="social-link-timeline">
+							<?php if(!empty($linkedin) && !empty($twitter) && !empty($telegram) && !empty($skype)) { ?>
+								<div class="social-link-timeline left-to-right text-left">
+									<div class="real-content">
+										<?php if(!empty($linkedin)) { ?>
+											<a href="{linkedin}" title="لینکدین" target="_blank">
+												<p>
+													<span class="fab fa-lg fa-linkedin text-gray"></span>
+													<span class="text-gray">{linkedin_limit}</span>
+												</p>
+											</a>
+										<?php } ?>
+										<?php if(!empty($twitter)) { ?>
+										<a href="{twitter}" title="توییتر" target="_blank">
+											<p>
+												<span class="fab fa-lg fa-twitter text-gray"></span>
+												<span class="text-gray">{twitter_limit}</span>
+											</p>
+										</a>
+										<?php } ?>
+										<?php if(!empty($telegram)) { ?>
+										<a href="{telegram}" title="تلگرام" target="_blank">
+											<p>
+												<span class="fab fa-lg fa-telegram text-gray"></span>
+												<span class="text-gray">{telegram_limit}</span>
+											</p>
+										</a>
+										<?php } ?>
+										<?php if(!empty($skype)) { ?>
+										<a href="{skype}" title="اسکایپ" target="_blank">
+											<p>
+												<span class="fab fa-lg fa-skype text-gray"></span>
+												<span class="text-gray">{skype_limit}</span>
+											</p>
+										</a>
+										<?php } ?>
+									</div>
+								</div>
+							<?php } ?>
 						</div>
 					</div>
 				</div>

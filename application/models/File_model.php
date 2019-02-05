@@ -17,8 +17,11 @@ class File_model extends CI_Model {
 
     public function insert($user_id, $filename, $time, $status, $type, $user_agent)
     {
-    	if(empty($user_id) || empty($filename) || empty($time) || empty($status) || empty($type) || empty($user_agent))
+    	if(empty($user_id) || empty($filename) || empty($status) || empty($type) || empty($user_agent))
     		return false;
+
+        if(empty($time))
+            $time = time();
 
     	/* Type 1:images 2:videos */
     	$data = array(

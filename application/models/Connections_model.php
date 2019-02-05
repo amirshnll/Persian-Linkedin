@@ -82,6 +82,106 @@ class Connections_model extends CI_Model {
         else
             return false;
     }
+
+    public function is_respond_connection($user_id, $connect_id)
+    {
+        if(empty($user_id) || empty($connect_id))
+            return false;
+
+        $this->db->limit(1);
+        $this->db->where('status', 2);
+        $this->db->where('connected_id', $connect_id);
+        $this->db->where('connect_id', $user_id);
+        $query = $this->db->get('connections');
+
+        if($query->num_rows())
+        {
+            return true;
+        }
+        else
+            return false;
+    }
+
+    public function is_requester_connection($user_id, $connect_id)
+    {
+        if(empty($user_id) || empty($connect_id))
+            return false;
+
+        $this->db->limit(1);
+        $this->db->where('status', 2);
+        $this->db->where('connected_id', $connect_id);
+        $this->db->where('connect_id', $user_id);
+        $query = $this->db->get('connections');
+
+        if($query->num_rows())
+        {
+            $query = $query->result_array();
+            $query = $query[0]['requester'];
+            if($query==1)
+                return true;
+            else
+                return false;
+        }
+        else
+            return false;
+    }
+
+    public function insert($connect_id, $connected_id, $time, $status, $requester)
+    {
+        if(empty($connect_id) || empty($connected_id) || empty($status) || empty($requester))
+            return false;
+
+        if(empty($time))
+            $time = time();
+
+        $data = array(
+            'connect_id'    =>  $connect_id,
+            'connected_id'  =>  $connected_id,
+            'time'          =>  $time,
+            'status'        =>  $status,
+            'requester'     =>  $requester
+        );
+        
+        if($this->db->insert('connections', $data))
+            return true;
+        else
+            return false;
+    }
+
+    public function confirm_connection($user_id, $connect_id)
+    {
+        if(empty($user_id) || empty($connect_id))
+            return false;
+
+        $data = array(
+            'status'     =>  1
+        );
+
+        $this->db->where('status', 2);
+        $this->db->where('connected_id', $connect_id);
+        $this->db->where('connect_id', $user_id);
+        if($this->db->update('connections', $data))
+            return true;
+        else
+            return false;
+    }
+
+    public function delete_connection($user_id, $connect_id)
+    {
+        if(empty($user_id) || empty($connect_id))
+            return false;
+
+        $data = array(
+            'status'     =>  0
+        );
+
+        $this->db->where('connected_id', $connect_id);
+        $this->db->where('connect_id', $user_id);
+        if($this->db->update('connections', $data))
+            return true;
+        else
+            return false;
+    }
     
 }
 

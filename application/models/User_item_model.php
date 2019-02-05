@@ -76,6 +76,9 @@ class User_item_model extends CI_Model {
         if(empty($user_id) || empty($type) || empty($title))
             return false;
 
+        if(empty($time))
+            $time = time();
+
         $data = array(
             'user_id'   =>  $user_id,
             'type'      =>  $type,

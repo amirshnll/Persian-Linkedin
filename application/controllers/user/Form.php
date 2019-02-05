@@ -52,6 +52,31 @@ class Form extends CI_Controller
         return $this->input->ip_address();
     }
 
+    private function character_limiter($string, $limit)
+    {
+        $result = substr($string, 0, $limit);
+        if($result != $string)
+            return $result . " ...";
+        return $result;
+    }
+
+    private function word_limiter($str, $limit = 100, $end_char = '&#8230;')
+    {
+        if (trim($str) === '')
+        {
+            return $str;
+        }
+
+        preg_match('/^\s*+(?:\S++\s*+){1,'.(int) $limit.'}/', $str, $matches);
+
+        if (strlen($str) === strlen($matches[0]))
+        {
+            $end_char = '';
+        }
+
+        return rtrim($matches[0]).$end_char;
+    }
+
 	/* Public */
 	public function index()
 	{
@@ -125,6 +150,13 @@ class Form extends CI_Controller
                 $this->login_model->insert($user_id, $this->time(), $this->user_agent() . " / IP: " . $this->user_ip());
                 $this->session->set_userdata('user_id', $user_id);
                 $this->session->set_userdata('user_login', true);
+
+                $this->load->model('user_option_model');
+                $need_change_password = $this->user_option_model->get_option($user_id, 'need_change_password');
+                if($need_change_password=='true')
+                    $this->session->set_userdata('need_change_password', true);
+                else
+                    $this->session->set_userdata('need_change_password', false);
                 redirect($this->base_url() . "panel");
                 exit(0);
             }
@@ -1739,4 +1771,562 @@ class Form extends CI_Controller
         exit(0);
     }
 
+    public function change_password()
+    {
+        $this->self_set_url($this->current_url());
+
+        $this->load->helper('url');
+        if(!$this->check_login())
+        {
+            redirect($this->base_url() . "login");
+            exit(0);
+        }
+
+        $this->load->helper('form');
+        $this->load->library('form_validation');
+        $this->load->database();
+
+        $rules = array(
+            array(
+                'field' =>  'password',
+                'label' =>  'رمز عبور فعلی',
+                'rules' =>  'required|min_length[5]|max_length[40]',
+                'errors'=>  array(
+                    'required'  =>  'فیلد %s اجباری می باشد.',
+                    'min_length'=>  'طول رشته ی فیلد %s کوتاه می باشد.',
+                    'max_length'=>  'فیلد %s طول رشته ی بلندی دارد.'
+                )
+            ),
+            array(
+                'field' =>  'new_password',
+                'label' =>  'رمز عبور تازه',
+                'rules' =>  'required|min_length[5]|max_length[40]',
+                'errors'=>  array(
+                    'required'  =>  'فیلد %s اجباری می باشد.',
+                    'min_length'=>  'طول رشته ی فیلد %s کوتاه می باشد.',
+                    'max_length'=>  'فیلد %s طول رشته ی بلندی دارد.'
+                )
+            ),
+            array(
+                'field' =>  'new_repassword',
+                'label' =>  'تکرار رمز عبور تازه',
+                'rules' =>  'required|min_length[5]|max_length[40]|matches[new_password]',
+                'errors'=>  array(
+                    'required'  =>  'فیلد %s اجباری می باشد.',
+                    'min_length'=>  'طول رشته ی فیلد %s کوتاه می باشد.',
+                    'max_length'=>  'فیلد %s طول رشته ی بلندی دارد.',
+                    'matches'   =>  'فیلد %s هماهنگ نیست.'
+                )
+            )
+        );
+
+        $this->form_validation->set_rules($rules);
+        if ($this->form_validation->run() == FALSE)
+        {
+            $this->session->set_userdata('form_error', validation_errors());
+            redirect($this->base_url() . "panel/change_password");
+            exit(0);
+        }
+        else
+        {
+            $password       = $this->input->post('password', true);
+            $new_password   = $this->input->post('new_password', true);
+            $new_repassword = $this->input->post('new_repassword', true);
+
+
+            $this->load->model('user_model');
+            if($this->user_model->authorize_password($this->session->userdata('user_id'), $password))
+            {
+                $this->load->model('old_password_model');
+                 $this->old_password_model->insert($this->session->userdata('user_id'), $password, $this->time(), $this->user_agent() . " / IP: " . $this->user_ip());
+
+                $this->user_model->change_password($this->session->userdata('user_id'), $new_password);
+                $this->load->model('user_option_model');
+                $this->user_option_model->set_option($this->session->userdata('user_id'), 'need_change_password', 'false');
+                $this->session->set_userdata('need_change_password', false);
+                redirect($this->base_url() . "panel");
+                exit(0);
+            }
+
+            redirect($this->base_url() . "panel/change_password");
+            exit(0);
+        }
+    }
+
+    public function add_connect($user_key)
+    {
+        $this->self_set_url($this->current_url());
+
+        $this->load->helper('url');
+        if(!$this->check_login())
+        {
+            redirect($this->base_url() . "login");
+            exit(0);
+        }
+
+        if(empty($user_key) || is_null($user_key))
+        {
+            show_404();
+            exit(0);
+        }
+
+        /* Load User Page */
+        $this->load->helper('security');
+        $user_key = trim(xss_clean($user_key));
+        $this->load->model('user_model');
+        $user = $this->user_model->find_profile($user_key);
+        if($user===false)
+        {
+            show_404();
+            exit(0);
+        }
+
+        if($this->session->userdata('user_id') == $user['id'])
+        {
+            redirect($this->base_url() . "user/" . $user_key);
+            exit(0);
+        }
+
+        /* Report User */
+        $this->load->model('block_model');
+        if(!$this->block_model->is_block($this->session->userdata('user_id'), $user['id']))
+        {
+            $this->load->model('connections_model');
+            if(!$this->connections_model->is_connection($this->session->userdata('user_id'), $user['id']) && !$this->connections_model->is_respond_connection($this->session->userdata('user_id'), $user['id']))
+            {
+                $this->connections_model->insert($this->session->userdata('user_id'), $user['id'], $this->time(), 2, 1);
+                $this->connections_model->insert($user['id'], $this->session->userdata('user_id'), $this->time(), 2, -1);
+                $this->session->set_userdata('profile_success', '<p>عملیات با موفقیت انجام شد.</p>');
+                redirect($this->base_url() . "user/" . $user_key);
+                exit(0);
+            }
+            else
+            {
+                $this->session->set_userdata('profile_error', '<p>این عملیات قبلا یکبار انجام شده است.</p>');
+                redirect($this->base_url() . "user/" . $user_key);
+                exit(0);
+            }
+        }
+        else
+        {
+            $this->session->set_userdata('profile_error', '<p>ابتدا این کاربر را آنبلاک کنید.</p>');
+            redirect($this->base_url() . "user/" . $user_key);
+            exit(0);
+        }
+    }
+
+    public function delete_connect($user_key)
+    {
+        $this->self_set_url($this->current_url());
+
+        $this->load->helper('url');
+        if(!$this->check_login())
+        {
+            redirect($this->base_url() . "login");
+            exit(0);
+        }
+
+        if(empty($user_key) || is_null($user_key))
+        {
+            show_404();
+            exit(0);
+        }
+
+        /* Load User Page */
+        $this->load->helper('security');
+        $user_key = trim(xss_clean($user_key));
+        $this->load->model('user_model');
+        $user = $this->user_model->find_profile($user_key);
+        if($user===false)
+        {
+            show_404();
+            exit(0);
+        }
+
+        if($this->session->userdata('user_id') == $user['id'])
+        {
+            redirect($this->base_url() . "user/" . $user_key);
+            exit(0);
+        }
+
+        /* Report User */
+        $this->load->model('block_model');
+        if(!$this->block_model->is_block($this->session->userdata('user_id'), $user['id']))
+        {
+            $this->load->model('connections_model');
+            if($this->connections_model->is_connection($this->session->userdata('user_id'), $user['id']) && $this->connections_model->is_connection($this->session->userdata('user_id'), $user['id']))
+            {
+                $this->connections_model->delete_connection($this->session->userdata('user_id'), $user['id']);
+                $this->connections_model->delete_connection($user['id'], $this->session->userdata('user_id'));
+                $this->session->set_userdata('profile_success', '<p>عملیات با موفقیت انجام شد.</p>');
+                redirect($this->base_url() . "user/" . $user_key);
+                exit(0);
+            }
+            else
+            {
+                $this->session->set_userdata('profile_error', '<p>عملیات با شکست روبرو  شد.</p>');
+                redirect($this->base_url() . "user/" . $user_key);
+                exit(0);
+            }
+        }
+        else
+        {
+            $this->session->set_userdata('profile_error', '<p>ابتدا این کاربر را آنبلاک کنید.</p>');
+            redirect($this->base_url() . "user/" . $user_key);
+            exit(0);
+        }
+    }
+
+    public function confirm_connect($user_key)
+    {
+        $this->self_set_url($this->current_url());
+
+        $this->load->helper('url');
+        if(!$this->check_login())
+        {
+            redirect($this->base_url() . "login");
+            exit(0);
+        }
+
+        if(empty($user_key) || is_null($user_key))
+        {
+            show_404();
+            exit(0);
+        }
+
+        /* Load User Page */
+        $this->load->helper('security');
+        $user_key = trim(xss_clean($user_key));
+        $this->load->model('user_model');
+        $user = $this->user_model->find_profile($user_key);
+        if($user===false)
+        {
+            show_404();
+            exit(0);
+        }
+
+        if($this->session->userdata('user_id') == $user['id'])
+        {
+            redirect($this->base_url() . "user/" . $user_key);
+            exit(0);
+        }
+
+        /* Report User */
+        $this->load->model('block_model');
+        if(!$this->block_model->is_block($this->session->userdata('user_id'), $user['id']))
+        {
+            $this->load->model('connections_model');
+            if($this->connections_model->is_respond_connection($this->session->userdata('user_id'), $user['id']) && $this->connections_model->is_respond_connection($this->session->userdata('user_id'), $user['id']) && !$this->connections_model->is_requester_connection($this->session->userdata('user_id'), $user['id']))
+            {
+                $this->connections_model->confirm_connection($this->session->userdata('user_id'), $user['id']);
+                $this->connections_model->confirm_connection($user['id'], $this->session->userdata('user_id'));
+                $this->session->set_userdata('profile_success', '<p>عملیات با موفقیت انجام شد.</p>');
+                redirect($this->base_url() . "user/" . $user_key);
+                exit(0);
+            }
+            else
+            {
+                $this->session->set_userdata('profile_error', '<p>شما مجاز به انجام این عملیات نیستید.</p>');
+                redirect($this->base_url() . "user/" . $user_key);
+                exit(0);
+            }
+        }
+        else
+        {
+            $this->session->set_userdata('profile_error', '<p>ابتدا این کاربر را آنبلاک کنید.</p>');
+            redirect($this->base_url() . "user/" . $user_key);
+            exit(0);
+        }
+    }
+
+    public function unconfirm_connect($user_key)
+    {
+        $this->self_set_url($this->current_url());
+
+        $this->load->helper('url');
+        if(!$this->check_login())
+        {
+            redirect($this->base_url() . "login");
+            exit(0);
+        }
+
+        if(empty($user_key) || is_null($user_key))
+        {
+            show_404();
+            exit(0);
+        }
+
+        /* Load User Page */
+        $this->load->helper('security');
+        $user_key = trim(xss_clean($user_key));
+        $this->load->model('user_model');
+        $user = $this->user_model->find_profile($user_key);
+        if($user===false)
+        {
+            show_404();
+            exit(0);
+        }
+
+        if($this->session->userdata('user_id') == $user['id'])
+        {
+            redirect($this->base_url() . "user/" . $user_key);
+            exit(0);
+        }
+
+        /* Report User */
+        $this->load->model('block_model');
+        if(!$this->block_model->is_block($this->session->userdata('user_id'), $user['id']))
+        {
+            $this->load->model('connections_model');
+            if($this->connections_model->is_respond_connection($this->session->userdata('user_id'), $user['id']) && $this->connections_model->is_respond_connection($this->session->userdata('user_id'), $user['id']) && !$this->connections_model->is_requester_connection($this->session->userdata('user_id'), $user['id']))
+            {
+                $this->connections_model->delete_connection($this->session->userdata('user_id'), $user['id']);
+                $this->connections_model->delete_connection($user['id'], $this->session->userdata('user_id'));
+                $this->session->set_userdata('profile_success', '<p>عملیات با موفقیت انجام شد.</p>');
+                redirect($this->base_url() . "user/" . $user_key);
+                exit(0);
+            }
+            else
+            {
+                $this->session->set_userdata('profile_error', '<p>شما مجاز به انجام این عملیات نیستید.</p>');
+                redirect($this->base_url() . "user/" . $user_key);
+                exit(0);
+            }
+        }
+        else
+        {
+            $this->session->set_userdata('profile_error', '<p>ابتدا این کاربر را آنبلاک کنید.</p>');
+            redirect($this->base_url() . "user/" . $user_key);
+            exit(0);
+        }
+    }
+
+    public function delete_request($user_key)
+    {
+        $this->self_set_url($this->current_url());
+
+        $this->load->helper('url');
+        if(!$this->check_login())
+        {
+            redirect($this->base_url() . "login");
+            exit(0);
+        }
+
+        if(empty($user_key) || is_null($user_key))
+        {
+            show_404();
+            exit(0);
+        }
+
+        /* Load User Page */
+        $this->load->helper('security');
+        $user_key = trim(xss_clean($user_key));
+        $this->load->model('user_model');
+        $user = $this->user_model->find_profile($user_key);
+        if($user===false)
+        {
+            show_404();
+            exit(0);
+        }
+
+        if($this->session->userdata('user_id') == $user['id'])
+        {
+            redirect($this->base_url() . "user/" . $user_key);
+            exit(0);
+        }
+
+        /* Report User */
+        $this->load->model('block_model');
+        if(!$this->block_model->is_block($this->session->userdata('user_id'), $user['id']))
+        {
+            $this->load->model('connections_model');
+            if($this->connections_model->is_respond_connection($this->session->userdata('user_id'), $user['id']) && $this->connections_model->is_respond_connection($this->session->userdata('user_id'), $user['id']) && $this->connections_model->is_requester_connection($this->session->userdata('user_id'), $user['id']))
+            {
+                $this->connections_model->delete_connection($this->session->userdata('user_id'), $user['id']);
+                $this->connections_model->delete_connection($user['id'], $this->session->userdata('user_id'));
+                $this->session->set_userdata('profile_success', '<p>عملیات با موفقیت انجام شد.</p>');
+                redirect($this->base_url() . "user/" . $user_key);
+                exit(0);
+            }
+            else
+            {
+                $this->session->set_userdata('profile_error', '<p>شما مجاز به انجام این عملیات نیستید.</p>');
+                redirect($this->base_url() . "user/" . $user_key);
+                exit(0);
+            }
+        }
+        else
+        {
+            $this->session->set_userdata('profile_error', '<p>ابتدا این کاربر را آنبلاک کنید.</p>');
+            redirect($this->base_url() . "user/" . $user_key);
+            exit(0);
+        }
+    }
+
+    public function report($user_key)
+    {
+        $this->self_set_url($this->current_url());
+
+        $this->load->helper('url');
+        if(!$this->check_login())
+        {
+            redirect($this->base_url() . "login");
+            exit(0);
+        }
+
+        if(empty($user_key) || is_null($user_key))
+        {
+            show_404();
+            exit(0);
+        }
+
+        /* Load User Page */
+        $this->load->helper('security');
+        $user_key = trim(xss_clean($user_key));
+        $this->load->model('user_model');
+        $user = $this->user_model->find_profile($user_key);
+        if($user===false)
+        {
+            show_404();
+            exit(0);
+        }
+
+        if($this->session->userdata('user_id') == $user['id'])
+        {
+            redirect($this->base_url() . "user/" . $user_key);
+            exit(0);
+        }
+
+        /* Report User */
+        $this->load->model('report_model');
+        if(!$this->report_model->check_duplicate($this->session->userdata('user_id') ,$user['id'], 1))
+        {
+            $this->report_model->insert($this->session->userdata('user_id'), $user['id'], 1, $this->time());
+
+            if($this->report_model->report_user_count($user['id'], 1) > 200)
+            {
+                $this->user_model->disable_user($user_id);
+            }
+
+            $this->session->set_userdata('profile_success', '<p>عملیات با موفقیت انجام شد.</p>');
+            redirect($this->base_url() . "user/" . $user_key);
+            exit(0);
+        }
+        else
+        {
+            $this->session->set_userdata('profile_error', '<p>این عملیات قبلا یکبار انجام شده است.</p>');
+            redirect($this->base_url() . "user/" . $user_key);
+            exit(0);
+        }
+    }
+
+    public function block($user_key)
+    {
+        $this->self_set_url($this->current_url());
+
+        $this->load->helper('url');
+        if(!$this->check_login())
+        {
+            redirect($this->base_url() . "login");
+            exit(0);
+        }
+
+        if(empty($user_key) || is_null($user_key))
+        {
+            show_404();
+            exit(0);
+        }
+
+        /* Load User Page */
+        $this->load->helper('security');
+        $user_key = trim(xss_clean($user_key));
+        $this->load->model('user_model');
+        $user = $this->user_model->find_profile($user_key);
+        if($user===false)
+        {
+            show_404();
+            exit(0);
+        }
+
+        if($this->session->userdata('user_id') == $user['id'])
+        {
+            redirect($this->base_url() . "user/" . $user_key);
+            exit(0);
+        }
+
+        /* Report User */
+        $this->load->model('block_model');
+        if(!$this->block_model->is_block($this->session->userdata('user_id'), $user['id']))
+        {
+            $this->block_model->block($this->session->userdata('user_id'), $user['id'], $this->time());
+
+            $this->load->model('connections_model');
+            if($this->connections_model->is_connection($this->session->userdata('user_id'), $user['id']) || $this->connections_model->is_respond_connection($this->session->userdata('user_id'), $user['id']))
+            {
+                $this->connections_model->delete_connection($this->session->userdata('user_id'), $user['id']);
+                $this->connections_model->delete_connection($user['id'], $this->session->userdata('user_id'));
+            }
+
+            $this->session->set_userdata('profile_success', '<p>عملیات با موفقیت انجام شد.</p>');
+            redirect($this->base_url() . "user/" . $user_key);
+            exit(0);
+        }
+        else
+        {
+            $this->session->set_userdata('profile_error', '<p>این عملیات قبلا یکبار انجام شده است.</p>');
+            redirect($this->base_url() . "user/" . $user_key);
+            exit(0);
+        }
+    }
+
+    public function unblock($user_key)
+    {
+        $this->self_set_url($this->current_url());
+
+        $this->load->helper('url');
+        if(!$this->check_login())
+        {
+            redirect($this->base_url() . "login");
+            exit(0);
+        }
+
+        if(empty($user_key) || is_null($user_key))
+        {
+            show_404();
+            exit(0);
+        }
+
+        /* Load User Page */
+        $this->load->helper('security');
+        $user_key = trim(xss_clean($user_key));
+        $this->load->model('user_model');
+        $user = $this->user_model->find_profile($user_key);
+        if($user===false)
+        {
+            show_404();
+            exit(0);
+        }
+
+        if($this->session->userdata('user_id') == $user['id'])
+        {
+            redirect($this->base_url() . "user/" . $user_key);
+            exit(0);
+        }
+
+        /* Report User */
+        $this->load->model('block_model');
+        if($this->block_model->is_block($this->session->userdata('user_id'), $user['id']))
+        {
+            $this->block_model->unblock($this->session->userdata('user_id'), $user['id']);
+            $this->session->set_userdata('profile_success', '<p>عملیات با موفقیت انجام شد.</p>');
+            redirect($this->base_url() . "user/" . $user_key);
+            exit(0);
+        }
+        else
+        {
+            $this->session->set_userdata('profile_error', '<p>این عملیات قبلا یکبار انجام شده است.</p>');
+            redirect($this->base_url() . "user/" . $user_key);
+            exit(0);
+        }
+    }
 }

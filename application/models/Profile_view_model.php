@@ -37,6 +37,9 @@ class Profile_view_model extends CI_Model {
         if(empty($user_viewed_id))
             return false;
 
+        if(empty($time))
+            $time = time();
+
         $data = array(
             'user_id'           =>  $user_id,
             'user_viewed_id'    =>  $user_viewed_id,

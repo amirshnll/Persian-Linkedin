@@ -39,6 +39,9 @@ class Block_model extends CI_Model {
     	if(empty($source_user_id) || empty($destination_user_id))
     		return false;
 
+        if(empty($time))
+            $time = time();
+
     	$data = array(
     		'user_id'			=>	$source_user_id,
     		'user_blocked_id'	=>	$destination_user_id,
