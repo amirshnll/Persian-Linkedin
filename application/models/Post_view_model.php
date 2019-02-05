@@ -14,7 +14,7 @@ class Post_view_model extends CI_Model {
     	parent::__construct();
     	$this->load->database();
     }
-    
+
 }
 
 ?>

@@ -33,6 +33,27 @@ class Avatar_model extends CI_Model {
     	else
     		return false;
     }
+
+    public function user_current_avatar($user_id)
+    {
+        if(empty($user_id))
+            return false;
+
+        $this->db->limit(1);
+        $this->db->where('status', '1');
+        $this->db->where('user_id', $user_id);
+        $this->db->select('filename');
+        $query = $this->db->get('avatar');
+
+        if($query->num_rows())
+        {
+            $query = $query->result_array();
+            $query = $query[0]['filename'];
+            return $query;
+        }
+        else
+            return false;
+    }
     
 }
 

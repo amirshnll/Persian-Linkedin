@@ -36,6 +36,25 @@ class Person_model extends CI_Model {
     	else
     		return false;
     }
+
+    public function read_user_person($user_id)
+    {
+        if(empty($user_id))
+            return false;
+
+        $this->db->limit(1);
+        $this->db->where('user_id', $user_id);
+        $query = $this->db->get('person');
+
+        if($query->num_rows())
+        {
+            $query = $query->result_array();
+            $query = $query[0];
+            return $query;
+        }
+        else
+            return false;
+    }
     
 }
 

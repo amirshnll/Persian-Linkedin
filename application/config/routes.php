@@ -57,9 +57,13 @@ $route['translate_uri_dashes'] = FALSE;
 
 
 /* My Router */
-$route['login'] 		= 'web/index';
-$route['forget'] 		= 'web/forget';
-$route['register'] 		= 'web/register';
+$route['login'] 			= 'web/index';
+$route['forget'] 			= 'web/forget';
+$route['register'] 			= 'web/register';
 
-$route['panel'] 		= 'user/user/index';
-$route['panel/out']		= 'user/user/logout';
+$route['panel'] 			= 'user/user/index';
+$route['panel/out']			= 'user/user/logout';
+$route['panel/setting']		= 'user/user/setting';
+$route['panel/profile']		= 'user/user/profile';
+$route['panel/notification']= 'user/user/notification';
+$route['panel/message']		= 'user/user/message';

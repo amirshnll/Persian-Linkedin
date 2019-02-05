@@ -344,4 +344,77 @@ class Form extends CI_Controller
 		echo 'ok';
 	}
 
+    public function setting()
+    {
+        $this->self_set_url($this->current_url());
+
+        $this->load->helper('url');
+        if(!$this->check_login())
+        {
+            redirect($this->base_url() . "login");
+            exit(0);
+        }
+
+        $this->load->helper('form');
+        $this->load->library('form_validation');
+        $this->load->database();
+
+        $rules = array(
+            array(
+                'field' =>  'private_page',
+                'label' =>  'نمایش پروفایل',
+                'rules' =>  'required',
+                'errors'=>  array(
+                    'required'  =>  'فیلد %s اجباری می باشد.'
+                )
+            ),
+            array(
+                'field' =>  'private_contact',
+                'label' =>  'نمایش اطلاعات تماس',
+                'rules' =>  'required',
+                'errors'=>  array(
+                    'required'  =>  'فیلد %s اجباری می باشد.'
+                )
+            ),
+            array(
+                'field' =>  'private_avatar',
+                'label' =>  'نمایش تصویر کاربری',
+                'rules' =>  'required',
+                'errors'=>  array(
+                    'required'  =>  'فیلد %s اجباری می باشد.'
+                )
+            )
+        );
+
+        $this->form_validation->set_rules($rules);
+        if ($this->form_validation->run() == FALSE)
+        {
+            $this->session->set_userdata('form_error', validation_errors());
+            redirect($this->base_url() . "panel/setting");
+            exit(0);
+        }
+        else
+        {
+            $private_page   = $this->input->post('private_page', true);
+            $private_contact= $this->input->post('private_contact', true);
+            $private_avatar = $this->input->post('private_avatar', true);
+
+            $this->load->model('user_option_model');
+            $this->user_option_model->set_option($this->session->userdata('user_id'), "private_page", $private_page);
+            $this->user_option_model->set_option($this->session->userdata('user_id'), "private_contact", $private_contact);
+            $this->user_option_model->set_option($this->session->userdata('user_id'), "private_avatar", $private_avatar);
+
+            $this->session->set_userdata('form_success', '<p>تغییرات با موفقیت انجام شد.</p>');
+            redirect($this->base_url() . "panel/setting");
+            exit(0);
+        }
+
+    }
+
+    public function newpost()
+    {
+        $this->self_set_url($this->current_url());
+        echo 'ok';
+    }
+
 }
