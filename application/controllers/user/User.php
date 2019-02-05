@@ -231,6 +231,11 @@ class User extends CI_Controller
 		$this->load->model('post_model');
 		$timeline_posts = $this->post_model->post_timeline($this->session->userdata('user_id'), 100);
 
+		$user_suggest_3 = $this->user_model->people_suggest(3, $this->session->userdata('user_id'));
+		$user_suggest_5 = $this->user_model->people_suggest(5, $this->session->userdata('user_id'));
+
+		$profile_open_key = $this->base_url() . 'user/' . md5($this->session->userdata('user_id'));
+
 		$data = array(
 			'form_search_open'		=>	$form_search_open,
 			'search_input'			=>	$search_input,
@@ -254,7 +259,11 @@ class User extends CI_Controller
 			'linkedin'				=>	$linkedin,
 			'telegram'				=>	$telegram,
 			'skype'					=>	$skype,
-			'register_date'			=>	$register_date
+			'register_date'			=>	$register_date,
+			'user_suggest_3'		=>	$user_suggest_3,
+			'user_suggest_5'		=>	$user_suggest_5,
+			'my_user_id'			=>	$this->session->userdata('user_id'),
+			'profile_open_key'		=>	$profile_open_key
 		);
 
 		$this->parser('user/panel', $data);
@@ -404,6 +413,8 @@ class User extends CI_Controller
 		$this->load->library('jdf');
 		$register_date = $this->jdf->jdate('d / m / Y', $this->user_model->get_register_time_id($this->session->userdata('user_id')));
 
+		$profile_open_key = $this->base_url() . 'user/' . md5($this->session->userdata('user_id'));
+
 		$data = array(
 			'form_search_open'		=>	$form_search_open,
 			'search_input'			=>	$search_input,
@@ -430,7 +441,8 @@ class User extends CI_Controller
 			'linkedin'				=>	$linkedin,
 			'telegram'				=>	$telegram,
 			'skype'					=>	$skype,
-			'register_date'			=>	$register_date
+			'register_date'			=>	$register_date,
+			'profile_open_key'		=>	$profile_open_key
 		);
 
 		$this->parser('user/setting', $data);
@@ -597,7 +609,7 @@ class User extends CI_Controller
 		$this->load->library('jdf');
 		$register_date = $this->jdf->jdate('d / m / Y', $this->user_model->get_register_time_id($this->session->userdata('user_id')));
 
-		$user_suggest = $this->user_model->people_suggest();
+		$user_suggest_3 = $this->user_model->people_suggest(3, $this->session->userdata('user_id'));
 
 		$data = array(
 			'form_search_open'		=>	$form_search_open,
@@ -625,7 +637,8 @@ class User extends CI_Controller
 			'avatar_submit'			=>	$avatar_submit,
 			'avatar_success'		=>	$avatar_success,
 			'profile_open_key'		=>	$profile_open_key,
-			'user_suggest'			=>	$user_suggest,
+			'user_suggest_3'		=>	$user_suggest_3,
+			'my_user_id'			=>	$this->session->userdata('user_id'),
 			'user_full_name'		=>	$user_person['firstname'] . " " . $user_person['lastname'],
 			'register_date'			=>	$register_date
 		);
@@ -768,6 +781,8 @@ class User extends CI_Controller
 		$this->load->library('jdf');
 		$register_date = $this->jdf->jdate('d / m / Y', $this->user_model->get_register_time_id($this->session->userdata('user_id')));
 
+		$profile_open_key = $this->base_url() . 'user/' . md5($this->session->userdata('user_id'));
+
 		$data = array(
 			'form_search_open'		=>	$form_search_open,
 			'search_input'			=>	$search_input,
@@ -793,7 +808,8 @@ class User extends CI_Controller
 			'linkedin'				=>	$linkedin,
 			'telegram'				=>	$telegram,
 			'skype'					=>	$skype,
-			'register_date'			=>	$register_date
+			'register_date'			=>	$register_date,
+			'profile_open_key'		=>	$profile_open_key
 		);
 
 		$this->parser('user/editperson', $data);
@@ -897,6 +913,8 @@ class User extends CI_Controller
 		$this->load->library('jdf');
 		$register_date = $this->jdf->jdate('d / m / Y', $this->user_model->get_register_time_id($this->session->userdata('user_id')));
 
+		$profile_open_key = $this->base_url() . 'user/' . md5($this->session->userdata('user_id'));
+
 		$data = array(
 			'form_search_open'		=>	$form_search_open,
 			'search_input'			=>	$search_input,
@@ -918,7 +936,8 @@ class User extends CI_Controller
 			'linkedin'				=>	$linkedin,
 			'telegram'				=>	$telegram,
 			'skype'					=>	$skype,
-			'register_date'			=>	$register_date
+			'register_date'			=>	$register_date,
+			'profile_open_key'		=>	$profile_open_key
 		);
 
 		$this->parser('user/editbio', $data);
@@ -1058,6 +1077,8 @@ class User extends CI_Controller
 		$this->load->library('jdf');
 		$register_date = $this->jdf->jdate('d / m / Y', $this->user_model->get_register_time_id($this->session->userdata('user_id')));
 
+		$profile_open_key = $this->base_url() . 'user/' . md5($this->session->userdata('user_id'));
+
 		$data = array(
 			'form_search_open'		=>	$form_search_open,
 			'search_input'			=>	$search_input,
@@ -1084,7 +1105,8 @@ class User extends CI_Controller
 			'linkedin'				=>	$linkedin,
 			'telegram'				=>	$telegram,
 			'skype'					=>	$skype,
-			'register_date'			=>	$register_date
+			'register_date'			=>	$register_date,
+			'profile_open_key'		=>	$profile_open_key
 		);
 
 		$this->parser('user/editexperience', $data);
@@ -1239,6 +1261,8 @@ class User extends CI_Controller
 		$this->load->library('jdf');
 		$register_date = $this->jdf->jdate('d / m / Y', $this->user_model->get_register_time_id($this->session->userdata('user_id')));
 
+		$profile_open_key = $this->base_url() . 'user/' . md5($this->session->userdata('user_id'));
+
 		$data = array(
 			'form_search_open'		=>	$form_search_open,
 			'search_input'			=>	$search_input,
@@ -1265,7 +1289,8 @@ class User extends CI_Controller
 			'linkedin'				=>	$linkedin,
 			'telegram'				=>	$telegram,
 			'skype'					=>	$skype,
-			'register_date'			=>	$register_date
+			'register_date'			=>	$register_date,
+			'profile_open_key'		=>	$profile_open_key
 		);
 
 		$this->parser('user/singleexperience', $data);
@@ -1405,6 +1430,8 @@ class User extends CI_Controller
 		$this->load->library('jdf');
 		$register_date = $this->jdf->jdate('d / m / Y', $this->user_model->get_register_time_id($this->session->userdata('user_id')));
 
+		$profile_open_key = $this->base_url() . 'user/' . md5($this->session->userdata('user_id'));
+
 		$data = array(
 			'form_search_open'		=>	$form_search_open,
 			'search_input'			=>	$search_input,
@@ -1431,7 +1458,8 @@ class User extends CI_Controller
 			'linkedin'				=>	$linkedin,
 			'telegram'				=>	$telegram,
 			'skype'					=>	$skype,
-			'register_date'			=>	$register_date
+			'register_date'			=>	$register_date,
+			'profile_open_key'		=>	$profile_open_key
 		);
 
 		$this->parser('user/editeducation', $data);
@@ -1586,6 +1614,8 @@ class User extends CI_Controller
 		$this->load->library('jdf');
 		$register_date = $this->jdf->jdate('d / m / Y', $this->user_model->get_register_time_id($this->session->userdata('user_id')));
 
+		$profile_open_key = $this->base_url() . 'user/' . md5($this->session->userdata('user_id'));
+
 		$data = array(
 			'form_search_open'		=>	$form_search_open,
 			'search_input'			=>	$search_input,
@@ -1612,7 +1642,8 @@ class User extends CI_Controller
 			'linkedin'				=>	$linkedin,
 			'telegram'				=>	$telegram,
 			'skype'					=>	$skype,
-			'register_date'			=>	$register_date
+			'register_date'			=>	$register_date,
+			'profile_open_key'		=>	$profile_open_key
 		);
 
 		$this->parser('user/singleeducation', $data);
@@ -1752,6 +1783,8 @@ class User extends CI_Controller
 		$this->load->library('jdf');
 		$register_date = $this->jdf->jdate('d / m / Y', $this->user_model->get_register_time_id($this->session->userdata('user_id')));
 
+		$profile_open_key = $this->base_url() . 'user/' . md5($this->session->userdata('user_id'));
+
 		$data = array(
 			'form_search_open'		=>	$form_search_open,
 			'search_input'			=>	$search_input,
@@ -1778,7 +1811,8 @@ class User extends CI_Controller
 			'linkedin'				=>	$linkedin,
 			'telegram'				=>	$telegram,
 			'skype'					=>	$skype,
-			'register_date'			=>	$register_date
+			'register_date'			=>	$register_date,
+			'profile_open_key'		=>	$profile_open_key
 		);
 
 		$this->parser('user/editskills', $data);
@@ -1933,6 +1967,8 @@ class User extends CI_Controller
 		$this->load->library('jdf');
 		$register_date = $this->jdf->jdate('d / m / Y', $this->user_model->get_register_time_id($this->session->userdata('user_id')));
 
+		$profile_open_key = $this->base_url() . 'user/' . md5($this->session->userdata('user_id'));
+
 		$data = array(
 			'form_search_open'		=>	$form_search_open,
 			'search_input'			=>	$search_input,
@@ -1959,7 +1995,8 @@ class User extends CI_Controller
 			'linkedin'				=>	$linkedin,
 			'telegram'				=>	$telegram,
 			'skype'					=>	$skype,
-			'register_date'			=>	$register_date
+			'register_date'			=>	$register_date,
+			'profile_open_key'		=>	$profile_open_key
 		);
 
 		$this->parser('user/singleskills', $data);
@@ -2099,6 +2136,8 @@ class User extends CI_Controller
 		$this->load->library('jdf');
 		$register_date = $this->jdf->jdate('d / m / Y', $this->user_model->get_register_time_id($this->session->userdata('user_id')));
 
+		$profile_open_key = $this->base_url() . 'user/' . md5($this->session->userdata('user_id'));
+
 		$data = array(
 			'form_search_open'		=>	$form_search_open,
 			'search_input'			=>	$search_input,
@@ -2125,7 +2164,8 @@ class User extends CI_Controller
 			'linkedin'				=>	$linkedin,
 			'telegram'				=>	$telegram,
 			'skype'					=>	$skype,
-			'register_date'			=>	$register_date
+			'register_date'			=>	$register_date,
+			'profile_open_key'		=>	$profile_open_key
 		);
 
 		$this->parser('user/editproject', $data);
@@ -2280,6 +2320,8 @@ class User extends CI_Controller
 		$this->load->library('jdf');
 		$register_date = $this->jdf->jdate('d / m / Y', $this->user_model->get_register_time_id($this->session->userdata('user_id')));
 
+		$profile_open_key = $this->base_url() . 'user/' . md5($this->session->userdata('user_id'));
+
 		$data = array(
 			'form_search_open'		=>	$form_search_open,
 			'search_input'			=>	$search_input,
@@ -2306,7 +2348,8 @@ class User extends CI_Controller
 			'linkedin'				=>	$linkedin,
 			'telegram'				=>	$telegram,
 			'skype'					=>	$skype,
-			'register_date'			=>	$register_date
+			'register_date'			=>	$register_date,
+			'profile_open_key'		=>	$profile_open_key
 		);
 
 		$this->parser('user/singleproject', $data);
@@ -2368,6 +2411,8 @@ class User extends CI_Controller
 		$this->load->library('jdf');
 		$register_date = $this->jdf->jdate('d / m / Y', $this->user_model->get_register_time_id($this->session->userdata('user_id')));
 
+		$profile_open_key = $this->base_url() . 'user/' . md5($this->session->userdata('user_id'));
+
 		$data = array(
 			'form_search_open'		=>	$form_search_open,
 			'search_input'			=>	$search_input,
@@ -2384,7 +2429,8 @@ class User extends CI_Controller
 			'linkedin'				=>	$linkedin,
 			'telegram'				=>	$telegram,
 			'skype'					=>	$skype,
-			'register_date'			=>	$register_date
+			'register_date'			=>	$register_date,
+			'profile_open_key'		=>	$profile_open_key
 		);
 
 		$this->parser('user/notification', $data);
@@ -2446,6 +2492,8 @@ class User extends CI_Controller
 		$this->load->library('jdf');
 		$register_date = $this->jdf->jdate('d / m / Y', $this->user_model->get_register_time_id($this->session->userdata('user_id')));
 
+		$profile_open_key = $this->base_url() . 'user/' . md5($this->session->userdata('user_id'));
+
 		$data = array(
 			'form_search_open'		=>	$form_search_open,
 			'search_input'			=>	$search_input,
@@ -2462,7 +2510,8 @@ class User extends CI_Controller
 			'linkedin'				=>	$linkedin,
 			'telegram'				=>	$telegram,
 			'skype'					=>	$skype,
-			'register_date'			=>	$register_date
+			'register_date'			=>	$register_date,
+			'profile_open_key'		=>	$profile_open_key
 		);
 
 		$this->parser('user/message', $data);
@@ -2572,6 +2621,8 @@ class User extends CI_Controller
 		$this->load->library('jdf');
 		$register_date = $this->jdf->jdate('d / m / Y', $this->user_model->get_register_time_id($this->session->userdata('user_id')));
 
+		$profile_open_key = $this->base_url() . 'user/' . md5($this->session->userdata('user_id'));
+
 		$data = array(
 			'form_search_open'		=>	$form_search_open,
 			'search_input'			=>	$search_input,
@@ -2594,10 +2645,24 @@ class User extends CI_Controller
 			'linkedin'				=>	$linkedin,
 			'telegram'				=>	$telegram,
 			'skype'					=>	$skype,
-			'register_date'			=>	$register_date
+			'register_date'			=>	$register_date,
+			'profile_open_key'		=>	$profile_open_key
 		);
 
 		$this->parser('user/changepassword', $data);
+	}
+
+	public function like_post($post_key)
+	{
+
+	}
+	public function edit_post($post_key)
+	{
+
+	}
+	public function delete_post($post_key)
+	{
+
 	}
 
 }

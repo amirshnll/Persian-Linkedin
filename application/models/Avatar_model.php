@@ -73,6 +73,19 @@ class Avatar_model extends CI_Model {
         else
             return false;
     }
+
+    public function read_all_avatar()
+    {
+        $query = $this->db->get('avatar');
+
+        if($query->num_rows())
+        {
+            $query = $query->result_array();
+            return $query;
+        }
+        else
+            return false;
+    }
     
 }
 

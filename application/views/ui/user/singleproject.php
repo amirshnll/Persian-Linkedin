@@ -95,6 +95,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 							<div class="full-name-timeline text-center">
 								<h4 class="display-4">{user_full_name}</h4>
 								<p id="register_date" class="text-gray">تاریخ عضویت : {register_date}</p>
+								<a class="btn btn-warning text-light" href="{profile_open_key}" title="بازکردن صفحه ی من" target="_blank">بازکردن صفحه ی من</a>
 							</div>
 							<div class="connection-state-timeline text-center">
 								<div class="real-content">

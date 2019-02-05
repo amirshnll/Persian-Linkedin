@@ -35,6 +35,23 @@ class Post_view_model extends CI_Model {
     		return false;
     }
 
+    public function post_view_count($post_id)
+    {
+        if(empty($post_id))
+            return false;
+
+        $this->db->where('post_viewed_id', $post_id);
+        $this->db->select('id');
+        $query = $this->db->get('post_view');
+
+        if($query->num_rows())
+        {
+            return $query->num_rows();
+        }
+        else
+            return false;
+    }
+
 }
 
 ?>

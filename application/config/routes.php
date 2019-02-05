@@ -99,3 +99,7 @@ $route['action/delete_request/(:any)']				= 'user/form/delete_request/$1';
 $route['action/unconfirm_connect/(:any)']			= 'user/form/unconfirm_connect/$1';
 
 $route['user/(:any)']								= 'web/profile/$1';
+
+$route['panel/post/like/(:any)'] 					= 'user/user/like_post';
+$route['panel/post/edit/(:any)'] 					= 'user/user/edit_post';
+$route['panel/post/delete/(:any)'] 					= 'user/user/delete_post';

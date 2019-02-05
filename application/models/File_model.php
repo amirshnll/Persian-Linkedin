@@ -57,6 +57,26 @@ class File_model extends CI_Model {
 		else
 			return false;
     }
+
+    public function find_file($id)
+    {
+        if(empty($id))
+            return false;
+
+        $this->db->limit(1);
+        $this->db->where('status', 1);
+        $this->db->where('id', $id);
+        $query = $this->db->get('file');
+
+        if($query->num_rows())
+        {
+            $query = $query->result_array();
+            $query = $query[0]['filename'];
+            return $query;
+        }
+        else
+            return false;
+    }
     
 }
 

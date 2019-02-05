@@ -1,5 +1,6 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
+$ci =&get_instance();
 ?>
 <!DOCTYPE html>
 <html>
@@ -59,12 +60,45 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						<div class="content-box">
 							<h5><span class="fas fa-1x fa-users"></span>&nbsp; <span>شاید این افراد را بشناسید</span></h5>
 							<div class="real-content">
-								<ul>
+								<?php if($user_suggest_3!==false) { ?>
 									<?php 
-									echo $user_suggest ;
-										
+										$suggest_counter = 0;
+										$ci->load->model('connections_model');
+										$ci->load->model('avatar_model');
+										foreach ($user_suggest_3 as $us3){
+											if($us3['id'] == $my_user_id)
+												continue;
+											if(!$ci->connections_model->is_connection($my_user_id, $us3['id']))
+											{ 
+												$temp_full_name = $ci->person_model->read_user_person($us3['id']);
+												$temp_full_name = $temp_full_name['firstname'] . " " . $temp_full_name['lastname'];
+												$temp_avatar = $ci->avatar_model->user_current_avatar($us3['id']);
+												?>
+
+												<a href="{base}user/<?php echo md5($us3['id']); ?>" title="مشاهده ی پروفایل <?php echo $temp_full_name; ?>" target="_blank">
+													<div class="suggest-item">
+														<div class="suggest-item-image float-right text-center">
+															<img class="img-fluid" src="{base}upload/avatar/<?php echo $temp_avatar; ?>" title="<?php echo $temp_full_name; ?>" src="<?php echo $temp_full_name; ?>" />
+														</div>
+														<div class="suggest-item-content float-right">
+															<p class="text-dark"><?php echo $temp_full_name; ?></p>
+														</div>
+														<div class="clearfix"></div>
+													</div>
+												</a>
+
+												<?php $suggest_counter++;
+											}
+										}
+
+										if($suggest_counter==0)
+										{
+											echo '<p class="alert alert-dark">در حال حاظر پیشنهادی موجود نیست.</p>';
+										}
 									?>
-								</ul>
+								<?php } else { ?>
+									<p class="alert alert-dark">پیشنهادی موجود نیست.</p>
+								<?php } ?>
 							</div>
 						</div>
 					</div>

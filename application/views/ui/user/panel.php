@@ -1,5 +1,6 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
+$ci =&get_instance();
 ?>
 <!DOCTYPE html>
 <html>
@@ -59,7 +60,45 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						<div class="content-box">
 							<h5><span class="fas fa-1x fa-users"></span>&nbsp; <span>شاید این افراد را بشناسید</span></h5>
 							<div class="real-content">
+								<?php if($user_suggest_3!==false) { ?>
+									<?php 
+										$suggest_counter = 0;
+										$ci->load->model('connections_model');
+										$ci->load->model('avatar_model');
+										foreach ($user_suggest_3 as $us3){
+											if($us3['id'] == $my_user_id)
+												continue;
+											if(!$ci->connections_model->is_connection($my_user_id, $us3['id']))
+											{ 
+												$temp_full_name = $ci->person_model->read_user_person($us3['id']);
+												$temp_full_name = $temp_full_name['firstname'] . " " . $temp_full_name['lastname'];
+												$temp_avatar = $ci->avatar_model->user_current_avatar($us3['id']);
+												?>
 
+												<a href="{base}user/<?php echo md5($us3['id']); ?>" title="مشاهده ی پروفایل <?php echo $temp_full_name; ?>" target="_blank">
+													<div class="suggest-item">
+														<div class="suggest-item-image float-right text-center">
+															<img class="img-fluid" src="{base}upload/avatar/<?php echo $temp_avatar; ?>" title="<?php echo $temp_full_name; ?>" src="<?php echo $temp_full_name; ?>" />
+														</div>
+														<div class="suggest-item-content float-right">
+															<p class="text-dark"><?php echo $temp_full_name; ?></p>
+														</div>
+														<div class="clearfix"></div>
+													</div>
+												</a>
+
+												<?php $suggest_counter++;
+											}
+										}
+
+										if($suggest_counter==0)
+										{
+											echo '<p class="alert alert-dark">در حال حاظر پیشنهادی موجود نیست.</p>';
+										}
+									?>
+								<?php } else { ?>
+									<p class="alert alert-dark">پیشنهادی موجود نیست.</p>
+								<?php } ?>
 							</div>
 						</div>
 					</div>
@@ -94,46 +133,126 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 						<div class="timeline-posts">
 							<?php 
+							$ci->load->model('connections_model');
+							$ci->load->model('avatar_model');
+							$ci->load->model('post_view_model');
+							$ci->load->model('like_model');
+							$ci->load->model('file_model');
+							$ci->load->library('jdf');
 							if(!is_null($timeline_posts) && $timeline_posts!==false) {
-								foreach ($timeline_posts as $posts) { ?>
+								$post_counter = 0;
+								foreach ($timeline_posts as $posts) {
+									if(!$ci->connections_model->is_connection($my_user_id, $posts['user_id']) && $my_user_id !== $posts['user_id'])
+										continue;
+									$post_counter++;
+									$temp_full_name = $ci->person_model->read_user_person($posts['user_id']);
+									$temp_full_name = $temp_full_name['firstname'] . " " . $temp_full_name['lastname'];
+									$temp_avatar = $ci->avatar_model->user_current_avatar($posts['user_id']);
+								?>
+
 									<div class="content-box">
 										<div class="real-content">
 											<div class="timeline-posts-user">
 												<div class="timeline-posts-user-avatar float-right text-center">
-													<img src="{base}upload/avatar/<?php echo $posts['avatar_file_name']; ?>" title="<?php echo $posts['firstname'] . " " . $posts['lastname']; ?>" alt="<?php echo $posts['firstname'] . " " . $posts['lastname']; ?>" />
+													<img src="{base}upload/avatar/<?php echo $temp_avatar; ?>" title="<?php echo $temp_full_name; ?>" alt="<?php echo $temp_full_name; ?>" />
 												</div>
 												<div class="timeline-posts-user-fullname float-right">
-													<a class="text-dark" href="{base}user/<?php echo md5($posts['user_post_id']); ?>" title="مشاهده ی پروفایل <?php echo $posts['firstname'] . " " . $posts['lastname']; ?>" target="_blank">
-														<p><?php echo $posts['firstname'] . " " . $posts['lastname']; ?></p>
+													<a class="text-dark" href="{base}user/<?php echo md5($posts['user_id']); ?>" title="مشاهده ی پروفایل <?php echo $temp_full_name; ?>" target="_blank">
+														<p><?php echo $temp_full_name; ?></p>
 													</a>
 												</div>
 												<div class="clearfix"></div>
 											</div>
 											<div class="timeline_posts-content">
-												<?php echo $posts['content']; ?>
+												<?php
+													if(!is_null($posts['file_id']))
+													{
+														$temp_file_address = $ci->file_model->find_file($posts['file_id']);
+													?>
+													<img class="img-fluid timeline_posts-image" src="{base}upload/file/<?php echo $temp_file_address; ?>" title="تصویر نوشته" alt="تصویر نوشته" />
+												<?php } echo $posts['content']; ?>
 											</div>
-											<div class="timeline_posts-footer">
-												<ul>
-													<li><span class="fas fa-1x fa-eye"></span>&nbsp; </li>
-													<li><span class="fas fa-1x fa-eye"></span>&nbsp; </li>
-													<li><span class="fas fa-1x fa-eye"></span>&nbsp; </li>
-													<li><span class="fas fa-1x fa-eye"></span>&nbsp; </li>
+											<div class="timeline_posts-footer nav">
+												<?php
+													$ci->post_view_model->insert($my_user_id, $posts['id'], time());
+													$temp_post_view = $ci->post_view_model->post_view_count($posts['id']);
+													$temp_post_like = $ci->like_model->post_like_count($posts['id']);
+													if($temp_post_view===false)
+														$temp_post_view=0;
+													if($temp_post_like===false)
+														$temp_post_like=0;
+												?>
+												<ul class="navbar">
+													<li class="nav-item text-gray"><span class="fas fa-1x fa-eye"></span>&nbsp;بازدید : <?php echo $temp_post_view; ?></li>
+													<li class="nav-item text-gray"><span class="fas fa-1x fa-calendar"></span>&nbsp; آخرین ویرایش : <?php echo $ci->jdf->jdate('j F y', $posts['updated_time']); ?></li>
+													<li class="nav-item text-gray"><a class="text-gray like-anchor" href="{base}panel/post/like/<?php echo md5($posts['id']); ?>" title="لایک"><span class="fas fa-1x fa-heart"></span>&nbsp;<?php echo $temp_post_like; ?> لایک</a></li>
+													<?php
+														if($my_user_id == $posts['user_id']){ ?>
+															<li class="nav-item text-primary"><a class="text-primary" href="{base}panel/post/edit/<?php echo md5($posts['id']); ?>" title="ویرایش نوشته"><span class="fas fa-1x fa-pen"></span>&nbsp; ویرایش</a></li>
+															<li class="nav-item text-danger"><a class="text-danger" href="{base}panel/post/delete/<?php echo md5($posts['id']); ?>" title="حذف نوشته"><span class="fas fa-1x fa-trash"></span>&nbsp; حذف</a></li>
+														<?php }	?>
 												</ul>
 											</div>
 										</div>
 									</div>
 								<?php }
+								if($post_counter==0) { ?>
+								<div class="content-box">
+									<div class="real-content">
+										<img class="img-fluid" src="{base}assets/images/nopost.png" title="نوشته ای یافت نشد" alt="نوشته ای یافت نشد" />
+									</div>
+								</div>
+							<?php }
 							} else { ?>
 								<div class="content-box">
 									<div class="real-content">
 										<img class="img-fluid" src="{base}assets/images/nopost.png" title="نوشته ای یافت نشد" alt="نوشته ای یافت نشد" />
 									</div>
 								</div>
-							<?php }	?>
+							<?php } ?>
 							<div class="content-box">
 								<h5><span class="fas fa-1x fa-user-plus"></span>&nbsp; <span>ارتباطات خود را افزایش دهید.</span></h5>
 								<div class="real-content">
-											
+								<?php if($user_suggest_5!==false) { ?>
+									<?php 
+										$suggest_counter = 0;
+										$ci->load->model('connections_model');
+										$ci->load->model('avatar_model');
+
+										foreach ($user_suggest_5 as $us5){
+											if($us5['id'] == $my_user_id)
+												continue;
+											if(!$ci->connections_model->is_connection($my_user_id, $us5['id']))
+											{ 
+												$temp_full_name = $ci->person_model->read_user_person($us5['id']);
+												$temp_full_name = $temp_full_name['firstname'] . " " . $temp_full_name['lastname'];
+												$temp_avatar = $ci->avatar_model->user_current_avatar($us5['id']);
+												?>
+
+												<a href="{base}user/<?php echo md5($us5['id']); ?>" title="مشاهده ی پروفایل <?php echo $temp_full_name; ?>" target="_blank">
+													<div class="suggest-item">
+														<div class="suggest-item-image float-right text-center">
+															<img class="img-fluid" src="{base}upload/avatar/<?php echo $temp_avatar; ?>" title="<?php echo $temp_full_name; ?>" src="<?php echo $temp_full_name; ?>" />
+														</div>
+														<div class="suggest-item-content float-right">
+															<p class="text-dark"><?php echo $temp_full_name; ?></p>
+														</div>
+														<div class="clearfix"></div>
+													</div>
+												</a>
+
+												<?php $suggest_counter++;
+											}
+										}
+
+										if($suggest_counter==0)
+										{
+											echo '<p class="alert alert-dark">در حال حاظر پیشنهادی موجود نیست.</p>';
+										}
+									?>
+								<?php } else { ?>
+									<p class="alert alert-dark">پیشنهادی موجود نیست.</p>
+								<?php } ?>
 								</div>
 							</div>
 						</div>
@@ -147,6 +266,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 							<div class="full-name-timeline text-center">
 								<h4 class="display-4">{user_full_name}</h4>
 								<p id="register_date" class="text-gray">تاریخ عضویت : {register_date}</p>
+								<a class="btn btn-warning text-light" href="{profile_open_key}" title="بازکردن صفحه ی من" target="_blank">بازکردن صفحه ی من</a>
 							</div>
 							<div class="connection-state-timeline text-center">
 								<div class="real-content">

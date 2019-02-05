@@ -49,20 +49,13 @@ class Post_model extends CI_Model {
 
         if($limit!=0)
             $this->db->limit($limit);
-        $this->db->group_by('post.id', 'DESC');
-        $this->db->or_where('post.user_id', $user_id);
+        $this->db->order_by('post.id', 'DESC');
         $this->db->where('post.status', 1);
-        $this->db->where('avatar.status', 1);
         $this->db->where('user.status', 1);
-        $this->db->or_where('connections.status', 1);
-        $this->db->or_where('connections.connected_id', $user_id);
-        $this->db->select('file.filename, post.file_id, post.content, post.create_time, post.updated_time, post.status, post.user_agent, person.firstname, person.lastname, avatar.filename AS avatar_file_name, user.id AS user_post_id');
+        $this->db->select('post.id, post.user_id, post.file_id, post.content, post.create_time, post.updated_time, post.status, post.user_agent');
         $this->db->from('post');
-        $this->db->join('user', 'user.id = post.user_id');
-        $this->db->join('connections', 'connections.connected_id = post.user_id');
-        $this->db->join('avatar', 'avatar.user_id = post.user_id');
-        $this->db->join('file', 'file.id = post.file_id');
-        $this->db->join('person', 'person.user_id = post.user_id');
+        $this->db->join('user', 'user.id = post.user_id', 'left');
+        $this->db->group_by('post.id');
         $query = $this->db->get('');
 
         if($query->num_rows())

@@ -15,7 +15,7 @@ class Person_model extends CI_Model {
     	$this->load->database();
     }
 
-    public function insert($user_id, $firstname, $lastname, $country_id, $city_id, $zip_code, $birthday, $biography)
+    public function insert($user_id, $firstname, $lastname, $country_id, $zip_code, $birthday, $biography)
     {
     	if(empty($user_id) || empty($firstname) || empty($lastname))
     		return false;
@@ -25,7 +25,6 @@ class Person_model extends CI_Model {
     		'firstname'	=>	$firstname,
     		'lastname'	=>	$lastname,
     		'country_id'=>	$country_id,
-    		'city_id'	=>	$city_id,
     		'zip_code'	=>	$zip_code,
     		'birthday'	=>	$birthday,
     		'biography'	=>	$biography,
@@ -108,6 +107,19 @@ class Person_model extends CI_Model {
         $this->db->where('user_id', $user_id);
         if($this->db->update('person', $data))
             return true;
+        else
+            return false;
+    }
+
+    public function read_all_person()
+    {
+        $query = $this->db->get('person');
+
+        if($query->num_rows())
+        {
+            $query = $query->result_array();
+            return $query;
+        }
         else
             return false;
     }

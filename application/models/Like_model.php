@@ -36,7 +36,7 @@ class Like_model extends CI_Model {
     		return false;
     }
 
-    public function set_post_status_zero($user_id, $post_id)
+    public function delete($user_id, $post_id)
     {
     	if(empty($user_id) || empty($post_id))
             return false;
@@ -49,6 +49,24 @@ class Like_model extends CI_Model {
         $this->db->where('post_id', $post_id);
         if($this->db->update('like', $data))
             return true;
+        else
+            return false;
+    }
+
+    public function post_like_count($post_id)
+    {
+        if(empty($post_id))
+            return false;
+
+        $this->db->where('status', 1);
+        $this->db->where('post_id', $post_id);
+        $this->db->select('id');
+        $query = $this->db->get('like');
+
+        if($query->num_rows())
+        {
+            return $query->num_rows();
+        }
         else
             return false;
     }

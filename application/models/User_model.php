@@ -267,19 +267,15 @@ class User_model extends CI_Model {
             return false;
     }
 
-    public function people_suggest()
+    public function people_suggest($limit, $my_id)
     {
-        if(empty($email))
-            return false;
-
-        $this->db->limit(1);
-        $this->db->order_by('user.id', 'RANDOM');
-        $this->db->from('user');
-        $this->db->join('avatar', 'avatar.user_id = user.id');
-        $this->db->join('person', 'person.user_id = user.id');
-        $this->db->join('connections', 'connections.connected_id = user.id');
-        $this->db->where('avatar.status', '1');
-        $query = $this->db->get('');
+        if(!empty($limit) && $limit!=0)
+            $this->db->limit($limit);
+        $this->db->order_by('id', 'RANDOM');
+        $this->db->where('status', 1);
+        $this->db->where('type', 2);
+        $this->db->where('id!=', $my_id);
+        $query = $this->db->get('user');
 
         if($query->num_rows())
         {
