@@ -49,6 +49,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 									<div class="clearfix"></div>
 								</div>
 							{form_close}
+							<?php if(!empty($validation_errors)) { ?>
+								<div class="alert alert-danger right-to-left text-right">{validation_errors}</div>
+							<?php } ?>
+							<?php if(!empty($form_success)) { ?>
+								<div class="alert alert-success right-to-left text-right">{form_success}</div>
+							<?php } ?>
 						</div>
 					</div>
 				</div>

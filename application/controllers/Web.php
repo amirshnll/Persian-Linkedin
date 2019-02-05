@@ -37,8 +37,6 @@ class Web extends CI_Controller
 	{
 		if(is_numeric(strpos($url, "/index.php")))
 			show_404();
-		if(is_numeric(strpos($url, "panel")))
-			show_404();
 	}
 
 	private function current_url()
@@ -51,12 +49,57 @@ class Web extends CI_Controller
 		$this->load->helper('url');
         return base_url();
 	}
+	
+	private function check_login()
+	{
+		if(!$this->session->has_userdata('user_login') || $this->session->has_userdata('user_login')!==true || !$this->session->has_userdata('user_id'))
+    	   return false;
+        else
+            return true;
+	}
 
+    private function time()
+    {
+        return time();
+    }
+
+    private function user_agent()
+    {
+        $this->load->library('user_agent');
+        return $this->agent->agent_string();
+    }
+
+    private function user_ip()
+    {
+        return $this->input->ip_address();
+    }
 
 	/* Public */
 	public function index()
 	{
 		$this->self_set_url($this->current_url());
+		if($this->check_login())
+		{
+			$this->load->helper('url');
+			redirect($this->base_url() . "panel");
+			exit(0);
+		}
+
+		if($this->session->has_userdata('form_error')) {
+			$validation_errors = $this->session->userdata('form_error');
+			$this->session->unset_userdata('form_error');
+		}
+		else {
+			$validation_errors="";
+		}
+
+		if($this->session->has_userdata('form_success')) {
+			$form_success = $this->session->userdata('form_success');
+			$this->session->unset_userdata('form_success');
+		}
+		else {
+			$form_success="";
+		}
 
 		$this->load->helper('form');
 		$form_open = form_open($this->base_url() . "user/form/login");
@@ -94,7 +137,9 @@ class Web extends CI_Controller
 			'password_input'=>	$password_input,
 			'submit_input'	=>	$submit_input,
 			'form_close'	=>	$form_close,
-			'alphabet'		=>	array("ا", "ب", "پ", "ت", "ث", "ج", "چ", "ح", "خ", "د", "ذ", "ر", "ز", "ژ", "س", "ش", "ص", "ض", "ط", "ظ", "ع", "غ", "ف", "ق", "ک", "گ", "ل", "م", "ن", "و", "هـ", "ی")
+			'alphabet'		=>	array("ا", "ب", "پ", "ت", "ث", "ج", "چ", "ح", "خ", "د", "ذ", "ر", "ز", "ژ", "س", "ش", "ص", "ض", "ط", "ظ", "ع", "غ", "ف", "ق", "ک", "گ", "ل", "م", "ن", "و", "هـ", "ی"),
+			'validation_errors'	=>	$validation_errors,
+			'form_success'		=>	$form_success
 		);
 
 		$this->parser('user/login', $data);
@@ -103,6 +148,28 @@ class Web extends CI_Controller
 	public function forget()
 	{
 		$this->self_set_url($this->current_url());
+		if($this->check_login())
+		{
+			$this->load->helper('url');
+			redirect($this->base_url() . "panel");
+			exit(0);
+		}
+
+		if($this->session->has_userdata('form_error')) {
+			$validation_errors = $this->session->userdata('form_error');
+			$this->session->unset_userdata('form_error');
+		}
+		else {
+			$validation_errors="";
+		}
+
+		if($this->session->has_userdata('form_success')) {
+			$form_success = $this->session->userdata('form_success');
+			$this->session->unset_userdata('form_success');
+		}
+		else {
+			$form_success="";
+		}
 
 		$this->load->helper('form');
 		$form_open = form_open($this->base_url() . "user/form/forget");
@@ -130,7 +197,9 @@ class Web extends CI_Controller
 			'email_input'	=>	$email_input,
 			'submit_input'	=>	$submit_input,
 			'form_close'	=>	$form_close,
-			'alphabet'		=>	array("ا", "ب", "پ", "ت", "ث", "ج", "چ", "ح", "خ", "د", "ذ", "ر", "ز", "ژ", "س", "ش", "ص", "ض", "ط", "ظ", "ع", "غ", "ف", "ق", "ک", "گ", "ل", "م", "ن", "و", "هـ", "ی")
+			'alphabet'		=>	array("ا", "ب", "پ", "ت", "ث", "ج", "چ", "ح", "خ", "د", "ذ", "ر", "ز", "ژ", "س", "ش", "ص", "ض", "ط", "ظ", "ع", "غ", "ف", "ق", "ک", "گ", "ل", "م", "ن", "و", "هـ", "ی"),
+			'validation_errors'	=>	$validation_errors,
+			'form_success'		=>	$form_success
 		);
 
 		$this->parser('user/forget', $data);
@@ -139,6 +208,28 @@ class Web extends CI_Controller
 	public function register()
 	{
 		$this->self_set_url($this->current_url());
+		if($this->check_login())
+		{
+			$this->load->helper('url');
+			redirect($this->base_url() . "panel");
+			exit(0);
+		}
+
+		if($this->session->has_userdata('form_error')) {
+			$validation_errors = $this->session->userdata('form_error');
+			$this->session->unset_userdata('form_error');
+		}
+		else {
+			$validation_errors="";
+		}
+
+		if($this->session->has_userdata('form_success')) {
+			$form_success = $this->session->userdata('form_success');
+			$this->session->unset_userdata('form_success');
+		}
+		else {
+			$form_success="";
+		}
 
 		$this->load->helper('form');
 		$form_open = form_open($this->base_url() . "user/form/register");
@@ -196,7 +287,9 @@ class Web extends CI_Controller
 			'password_input'	=>	$password_input,
 			'submit_input'		=>	$submit_input,
 			'form_close'		=>	$form_close,
-			'alphabet'			=>	array("ا", "ب", "پ", "ت", "ث", "ج", "چ", "ح", "خ", "د", "ذ", "ر", "ز", "ژ", "س", "ش", "ص", "ض", "ط", "ظ", "ع", "غ", "ف", "ق", "ک", "گ", "ل", "م", "ن", "و", "هـ", "ی")
+			'alphabet'			=>	array("ا", "ب", "پ", "ت", "ث", "ج", "چ", "ح", "خ", "د", "ذ", "ر", "ز", "ژ", "س", "ش", "ص", "ض", "ط", "ظ", "ع", "غ", "ف", "ق", "ک", "گ", "ل", "م", "ن", "و", "هـ", "ی"),
+			'validation_errors'	=>	$validation_errors,
+			'form_success'		=>	$form_success
 		);
 
 		$this->parser('user/register', $data);

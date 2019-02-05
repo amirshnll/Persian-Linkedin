@@ -1,13 +1,13 @@
 <?php
 
 /**
- * Created : 01/11/2018
+ * Created : 09/11/2018
  * Author : A.shokri
  * Mail : amirsh.nll@gmail.com
  
  */
 
-class Avatar_model extends CI_Model {
+class Old_password_model extends CI_Model {
 
     public function __construct()
     {
@@ -15,25 +15,24 @@ class Avatar_model extends CI_Model {
     	$this->load->database();
     }
 
-    public function insert($user_id, $filename, $time, $status, $user_agent)
+    public function insert($user_id, $password, $time, $user_agent)
     {
-    	if(empty($user_id) || empty($filename) || empty($time) || empty($status) || empty($user_agent))
+    	if(empty($user_id) || empty($password) || empty($time) || empty($user_agent))
     		return false;
 
     	$data = array(
     		'user_id'	=>	$user_id,
-    		'filename'	=>	$filename,
+    		'password'	=>	$password,
     		'time'		=>	$time,
-    		'status'	=>	$status,
     		'user_agent'=>	$user_agent
     	);
     	
-    	if($this->db->insert('avatar', $data))
+    	if($this->db->insert('old_password', $data))
     		return true;
     	else
     		return false;
     }
-    
+
 }
 
 ?>

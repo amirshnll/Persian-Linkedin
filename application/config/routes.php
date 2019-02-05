@@ -60,3 +60,6 @@ $route['translate_uri_dashes'] = FALSE;
 $route['login'] 		= 'web/index';
 $route['forget'] 		= 'web/forget';
 $route['register'] 		= 'web/register';
+
+$route['panel'] 		= 'user/user/index';
+$route['panel/out']		= 'user/user/logout';
