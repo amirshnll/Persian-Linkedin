@@ -559,4 +559,46 @@ class Web extends CI_Controller
 		$this->parser('web/rules', $data);
 	}
 
+	public function find()
+	{
+		$this->self_set_url($this->current_url());
+		if($this->check_login())
+		{
+			$this->load->helper('url');
+			redirect($this->base_url() . "panel");
+			exit(0);
+		}
+
+		$this->load->helper('form');
+		$form_open = form_open($this->base_url() . "user/form/out_search");
+		$search_input = form_input(
+			array(
+				'type'			=>	'text',
+				'name'			=>	'search',
+				'maxlength'		=>	255,
+				'placeholder'	=>	'⛶ جستجو',
+				'class'			=>	'form-control text-right right-to-left'
+			)
+		);
+		$submit_input = form_input(
+			array(
+				'type'			=>	'submit',
+				'name'			=>	'submit',
+				'value'			=>	'جستجو  ⚐',
+				'class'			=>	'btn bg-light'
+			)
+		);
+		$form_close 	= form_close();
+
+		$data = array(
+			'form_open' 	=>	$form_open,
+			'search_input'	=>	$search_input,
+			'submit_input'	=>	$submit_input,
+			'form_close'	=>	$form_close,
+			'alphabet'		=>	array("ا", "ب", "پ", "ت", "ث", "ج", "چ", "ح", "خ", "د", "ذ", "ر", "ز", "ژ", "س", "ش", "ص", "ض", "ط", "ظ", "ع", "غ", "ف", "ق", "ک", "گ", "ل", "م", "ن", "و", "هـ", "ی")
+		);
+
+		$this->parser('web/find', $data);
+	}
+
 }

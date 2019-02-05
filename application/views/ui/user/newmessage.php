@@ -65,7 +65,7 @@ $ci =&get_instance();
 								<div class="message">
 									{form_newmessage_open}
 									<p>{dropdown_1}</p>
-									<p>{submit_input}</p>
+									<p class="float-left"><a href="{base}panel/message" title="بازگشت به پیام ها"><span class="btn btn-danger text-light">بازگشت</span></a> &nbsp; {submit_input}</p>
 									{form_close}
 									<div class="clearfix"></div>
 									<br />

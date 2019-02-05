@@ -7,7 +7,7 @@ $ci =&get_instance();
 <head>
 	<meta charset="utf-8">
   	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>لینکیدن فارسی - پیام ها</title>
+	<title>لینکیدن فارسی - جستجو</title>
 	<link rel="stylesheet" type="text/css" href="{base}assets/layout/layout.css">
 	<link rel="stylesheet" type="text/css" href="{base}assets/library/bootstrap/css/bootstrap.min.css">
 	<link rel="stylesheet" type="text/css" href="{base}assets/library/bootstrap/css/bootstrap-grid.min.css">
@@ -43,7 +43,7 @@ $ci =&get_instance();
 								<a href="{base}panel/setting" title="تنظیمات"><li><span class="fas fa-lg fa-cog"></span></li></a>
 								<a href="{base}panel/profile" title="پروفایل من"><li><span class="fas fa-lg fa-user"></span></li></a>
 								<a href="{base}panel/notification" title="اعلانات"><li><span class="fas fa-lg fa-bell"></span></li></a>
-								<a href="{base}panel/message" title="پیام ها"><li><span class="fas fa-lg fa-envelope"></span></li></a>
+								<a href="{base}panel/message" title="اعلانات"><li><span class="fas fa-lg fa-envelope"></span></li></a>
 								<a href="{base}panel/profile/connections" title="ارتباطات"><li><span class="fas fa-lg fa-handshake"></span></li></a>
 							</ul>
 						</nav>
@@ -59,43 +59,27 @@ $ci =&get_instance();
 				<div class="row right-to-left text-right">
 					<div class="col-md-9">
 						<div class="content-box">
-							<h5><span class="fas fa-1x fa-envelope"></span>&nbsp;<span>پیام ها</span></h5>
-							<div class="real-content" style="min-height: 620px;">
-								<p><span class="fas fa-1x fa-comment"></span>&nbsp;<span><strong>لیست پیام ها ( <a href="{base}panel/new_message" title="شروع مکالمه جدید" class="text-dark">مکالمه جدید</a> )</strong></p>
-								<div class="message-list">
-									<?php
-										if($noconnection_message==1)
-											echo '<p class="alert alert-danger">درحال حاظر به علت نداشتن ارتباطات امکان ارسال پیام ندارید.</p>';
-										if($message===false)
-											echo '<p class="alert alert-dark">پیام ها خالی می باشد.</p>';
-										else
-										{
-											$ci->load->model('avatar_model');
-											$ci->load->model('person_model');
-											$ci->load->model('message_model');
-											$temp_id=0;
-											foreach ($message as $my_message) {
+							<h5><span class="fas fa-1x fa-search"></span>&nbsp;<span>جستجو</span></h5>
+							<div class="real-content" style="min-height: 700px;">
+								
+								<p><strong><span class="fas fa-1x fa-list"></span>&nbsp;جستجو برای  " {search_text} " : </strong></p>
 
-												if($my_message['user_reciver_id'] != $my_id)
-												{
-													if($temp_id==$my_message['user_reciver_id'])
-														continue;
-													$temp_id = $my_message['user_reciver_id'];
-												}
-												elseif($my_message['user_sender_id'] != $my_id)
-												{
-													if($temp_id==$my_message['user_sender_id'])
-														continue;
-													$temp_id = $my_message['user_sender_id'];
-												}
-												else
-													continue;
+								<?php
+									if($country_search!==false)
+									{
+										$suggest_counter = 0;
+										$ci->load->model('connections_model');
+										$ci->load->model('avatar_model');
 
-											$temp_full_name = $ci->person_model->read_user_person($temp_id);
+										foreach ($country_search as $css){
+											if($css['user_id'] == $my_user_id)
+												continue;
+
+											$temp_full_name = $ci->person_model->read_user_person($css['user_id']);
 											$temp_full_name = $temp_full_name['firstname'] . " " . $temp_full_name['lastname'];
-											$temp_avatar = $ci->avatar_model->user_current_avatar($temp_id);
+											$temp_avatar = $ci->avatar_model->user_current_avatar($css['user_id']);
 											?>
-											<a href="{base}panel/message/<?php echo md5($temp_id); ?>" title="مشاهده ی پروفایل <?php echo $temp_full_name; ?>">
+											<a href="{base}user/<?php echo md5($css['user_id']); ?>" title="مشاهده ی پروفایل <?php echo $temp_full_name; ?>" target="_blank">
 												<div class="suggest-item">
 													<div class="suggest-item-image float-right text-center">
 														<img class="img-fluid" src="{base}upload/avatar/<?php echo $temp_avatar; ?>" title="<?php echo $temp_full_name; ?>" src="<?php echo $temp_full_name; ?>" />
@@ -103,23 +87,97 @@ $ci =&get_instance();
 													<div class="suggest-item-content float-right">
 														<p class="text-dark"><?php echo $temp_full_name; ?></p>
 													</div>
-													<div class="float-left" style="margin-top: 10px;">
-														<?php if($ci->message_model->is_unread($my_id, $temp_id)){ echo '<p class="text-success">پیام خوانده نشده دارید</p>';} ?>
+													<div class="clearfix"></div>
+												</div>
+											</a>
+											<?php $suggest_counter++;
+										}
+
+										if($suggest_counter==0)
+										{
+											$country_search = false;
+										}
+									}
+								?>
+
+								<?php
+									if($person_search!==false)
+									{
+										$suggest_counter = 0;
+										$ci->load->model('connections_model');
+										$ci->load->model('avatar_model');
+
+										foreach ($person_search as $pss){
+											if($pss['user_id'] == $my_user_id)
+												continue;
+
+											$temp_full_name = $ci->person_model->read_user_person($pss['user_id']);
+											$temp_full_name = $temp_full_name['firstname'] . " " . $temp_full_name['lastname'];
+											$temp_avatar = $ci->avatar_model->user_current_avatar($pss['user_id']);
+											?>
+											<a href="{base}user/<?php echo md5($pss['user_id']); ?>" title="مشاهده ی پروفایل <?php echo $temp_full_name; ?>" target="_blank">
+												<div class="suggest-item">
+													<div class="suggest-item-image float-right text-center">
+														<img class="img-fluid" src="{base}upload/avatar/<?php echo $temp_avatar; ?>" title="<?php echo $temp_full_name; ?>" src="<?php echo $temp_full_name; ?>" />
+													</div>
+													<div class="suggest-item-content float-right">
+														<p class="text-dark"><?php echo $temp_full_name; ?></p>
 													</div>
 													<div class="clearfix"></div>
 												</div>
 											</a>
-										<?php } } ?>
-								</div>
-								
-								<div class="float-left">
-									<a href="{base}panel/new_message" title="شروع گفتگوی جدید" class="text-light">
-										<div class="newmessage-button text-center">
-											<span class="fas fa-1x fa-plus"></span>
-										</div>
-									</a>
-								</div>
-								<div class="clearfix"></div>
+											<?php $suggest_counter++;
+										}
+
+										if($suggest_counter==0)
+										{
+											$person_search = false;
+										}
+									}
+								?>
+
+								<?php
+									if($item_search!==false)
+									{
+										$suggest_counter = 0;
+										$ci->load->model('connections_model');
+										$ci->load->model('avatar_model');
+
+										foreach ($item_search as $iss){
+											if($iss['user_id'] == $my_user_id)
+												continue;
+
+											$temp_full_name = $ci->person_model->read_user_person($iss['user_id']);
+											$temp_full_name = $temp_full_name['firstname'] . " " . $temp_full_name['lastname'];
+											$temp_avatar = $ci->avatar_model->user_current_avatar($iss['user_id']);
+											?>
+											<a href="{base}user/<?php echo md5($iss['user_id']); ?>" title="مشاهده ی پروفایل <?php echo $temp_full_name; ?>" target="_blank">
+												<div class="suggest-item">
+													<div class="suggest-item-image float-right text-center">
+														<img class="img-fluid" src="{base}upload/avatar/<?php echo $temp_avatar; ?>" title="<?php echo $temp_full_name; ?>" src="<?php echo $temp_full_name; ?>" />
+													</div>
+													<div class="suggest-item-content float-right">
+														<p class="text-dark"><?php echo $temp_full_name; ?></p>
+													</div>
+													<div class="clearfix"></div>
+												</div>
+											</a>
+											<?php $suggest_counter++;
+										}
+
+										if($suggest_counter==0)
+										{
+											$item_search = false;
+										}
+									}
+								?>
+
+								<?php 
+									if($country_search===false && $person_search===false && $item_search===false)
+									{
+										echo '<p class="alert alert-dark">چیزی یافت نشد.</p>';
+									}
+								?>
 
 							</div>
 						</div>

@@ -415,12 +415,6 @@ class Form extends CI_Controller
         }
 	}
 
-	public function search()
-	{
-		$this->self_set_url($this->current_url());
-		echo 'ok';
-	}
-
     public function setting()
     {
         $this->self_set_url($this->current_url());
@@ -847,7 +841,7 @@ class Form extends CI_Controller
             $this->load->model('user_item_model');
             $this->user_item_model->insert($this->session->userdata('user_id'),  1, $title, $content, $start_date, $end_date, $this->time());
 
-            $this->session->set_userdata('form_success', '<p>رکرود جدید با موفقیت ثبت شد.</p>');
+            $this->session->set_userdata('form_success', '<p>رکورد جدید با موفقیت ثبت شد.</p>');
             redirect($this->base_url() . "panel/profile/edit/experience");
             exit(0);
         }
@@ -957,7 +951,7 @@ class Form extends CI_Controller
             $this->load->model('user_item_model');
             $this->user_item_model->update($this->session->userdata('user_id'), $id, $title, $content, $start_date, $end_date);
 
-            $this->session->set_userdata('form_success', '<p>رکرود جدید با موفقیت ثبت شد.</p>');
+            $this->session->set_userdata('form_success', '<p>رکورد جدید با موفقیت ثبت شد.</p>');
             redirect($this->base_url() . "panel/profile/edit/experience/edit/" . $id);
             exit(0);
         }
@@ -1081,7 +1075,7 @@ class Form extends CI_Controller
             $this->load->model('user_item_model');
             $this->user_item_model->insert($this->session->userdata('user_id'),  2, $title, $content, $start_date, $end_date, $this->time());
 
-            $this->session->set_userdata('form_success', '<p>رکرود جدید با موفقیت ثبت شد.</p>');
+            $this->session->set_userdata('form_success', '<p>رکورد جدید با موفقیت ثبت شد.</p>');
             redirect($this->base_url() . "panel/profile/edit/education");
             exit(0);
         }
@@ -1191,7 +1185,7 @@ class Form extends CI_Controller
             $this->load->model('user_item_model');
             $this->user_item_model->update($this->session->userdata('user_id'), $id, $title, $content, $start_date, $end_date);
 
-            $this->session->set_userdata('form_success', '<p>رکرود جدید با موفقیت ثبت شد.</p>');
+            $this->session->set_userdata('form_success', '<p>رکورد جدید با موفقیت ثبت شد.</p>');
             redirect($this->base_url() . "panel/profile/edit/education/edit/" . $id);
             exit(0);
         }
@@ -1315,7 +1309,7 @@ class Form extends CI_Controller
             $this->load->model('user_item_model');
             $this->user_item_model->insert($this->session->userdata('user_id'),  3, $title, $content, $start_date, $end_date, $this->time());
 
-            $this->session->set_userdata('form_success', '<p>رکرود جدید با موفقیت ثبت شد.</p>');
+            $this->session->set_userdata('form_success', '<p>رکورد جدید با موفقیت ثبت شد.</p>');
             redirect($this->base_url() . "panel/profile/edit/skills");
             exit(0);
         }
@@ -1425,7 +1419,7 @@ class Form extends CI_Controller
             $this->load->model('user_item_model');
             $this->user_item_model->update($this->session->userdata('user_id'), $id, $title, $content, $start_date, $end_date);
 
-            $this->session->set_userdata('form_success', '<p>رکرود جدید با موفقیت ثبت شد.</p>');
+            $this->session->set_userdata('form_success', '<p>رکورد جدید با موفقیت ثبت شد.</p>');
             redirect($this->base_url() . "panel/profile/edit/skills/edit/" . $id);
             exit(0);
         }
@@ -1549,7 +1543,7 @@ class Form extends CI_Controller
             $this->load->model('user_item_model');
             $this->user_item_model->insert($this->session->userdata('user_id'),  4, $title, $content, $start_date, $end_date, $this->time());
 
-            $this->session->set_userdata('form_success', '<p>رکرود جدید با موفقیت ثبت شد.</p>');
+            $this->session->set_userdata('form_success', '<p>رکورد جدید با موفقیت ثبت شد.</p>');
             redirect($this->base_url() . "panel/profile/edit/project");
             exit(0);
         }
@@ -1659,7 +1653,7 @@ class Form extends CI_Controller
             $this->load->model('user_item_model');
             $this->user_item_model->update($this->session->userdata('user_id'), $id, $title, $content, $start_date, $end_date);
 
-            $this->session->set_userdata('form_success', '<p>رکرود جدید با موفقیت ثبت شد.</p>');
+            $this->session->set_userdata('form_success', '<p>رکورد جدید با موفقیت ثبت شد.</p>');
             redirect($this->base_url() . "panel/profile/edit/project/edit/" . $id);
             exit(0);
         }
@@ -2687,6 +2681,13 @@ class Form extends CI_Controller
                 exit(0);
             }
 
+            if($this->session->userdata('user_id') == $newmessage)
+            {
+                $this->session->set_userdata('new_message_error', 1);
+                redirect($this->base_url() . "panel/new_message");
+                exit(0);
+            }
+
             $this->load->model('block_model');
             if($this->block_model->is_block($this->session->userdata('user_id'), $newmessage))
             { 
@@ -2710,7 +2711,137 @@ class Form extends CI_Controller
 
     public function send_message()
     {
-        
+        $this->self_set_url($this->current_url());
+
+        $this->load->helper('url');
+        if(!$this->check_login())
+        {
+            redirect($this->base_url() . "login");
+            exit(0);
+        }
+
+        $this->load->helper('form');
+        $this->load->library('form_validation');
+        $this->load->database();
+
+        $rules = array(
+            array(
+                'field' =>  'textbox',
+                'label' =>  'پیام',
+                'rules' =>  'required|min_length[1]|max_length[255]',
+                'errors'=>  array(
+                    'required'  =>  'فیلد %s اجباری می باشد.',
+                    'min_length'=>  'حداقل طول %s 3 کاراکتر می باشد.',
+                    'max_length'=>  'حداکثر طول %s 100 کاراکتر می باشد.'
+                )
+            ),
+            array(
+                'field' =>  'reciver_message',
+                'label' =>  'پیام',
+                'rules' =>  'required',
+                'errors'=>  array(
+                    'required'  =>  'فیلد %s اجباری می باشد.'
+                )
+            )
+        );
+
+        $this->form_validation->set_rules($rules);
+        if ($this->form_validation->run() == FALSE)
+        {
+            $previous = "javascript:history.go(-1)";
+            if(isset($_SERVER['HTTP_REFERER'])) {
+                $previous = $_SERVER['HTTP_REFERER'];
+            }
+            redirect($previous);
+            exit(0);
+        }
+        else
+        {
+            $textbox         = $this->input->post('textbox', true);
+            $reciver_message = $this->input->post('reciver_message', true);
+
+            $this->load->helper('url');
+            if(empty($reciver_message) || is_null($reciver_message))
+            {
+                redirect($this->base_url() . "panel/message");
+                exit(0);
+            }
+
+            $this->load->helper('security');
+            $reciver_message = trim(xss_clean($reciver_message));
+            $this->load->model('user_model');
+
+            if($this->session->userdata('user_id') == $reciver_message)
+            {
+                redirect($this->base_url() . "panel/message");
+                exit(0);
+            }
+
+            $this->load->model('block_model');
+            if($this->block_model->is_block($this->session->userdata('user_id'), $reciver_message))
+            { 
+                redirect($this->base_url() . "panel/message");
+                exit(0);
+            }
+            $this->load->model('connections_model');
+            if(!$this->connections_model->is_connection($this->session->userdata('user_id'), $reciver_message) || !$this->connections_model->is_connection($this->session->userdata('user_id'), $reciver_message))
+            {
+                redirect($this->base_url() . "panel/message");
+                exit(0);
+            }
+
+            $this->load->model('message_model');
+            $this->message_model->insert($this->session->userdata('user_id'),  $reciver_message, $textbox, $this->time(), 1);
+
+            redirect($this->base_url() . "panel/message/" . md5($reciver_message) . "#chatbox");
+            exit(0);
+        }
+    }
+
+    public function search()
+    {
+        $this->self_set_url($this->current_url());
+
+        $this->load->helper('url');
+        if(!$this->check_login())
+        {
+            redirect($this->base_url() . "login");
+            exit(0);
+        }
+
+        $this->load->helper('form');
+        $this->load->library('form_validation');
+        $this->load->database();
+
+        $rules = array(
+            array(
+                'field' =>  'search',
+                'label' =>  'متن جستجو',
+                'rules' =>  'required|min_length[1]|max_length[255]',
+                'errors'=>  array(
+                    'required'  =>  'فیلد %s اجباری می باشد.',
+                    'min_length'=>  'حداقل طول %s 3 کاراکتر می باشد.',
+                    'max_length'=>  'حداکثر طول %s 100 کاراکتر می باشد.'
+                )
+            )
+        );
+
+        $this->form_validation->set_rules($rules);
+        if ($this->form_validation->run() == FALSE)
+        {
+            $previous = "javascript:history.go(-1)";
+            if(isset($_SERVER['HTTP_REFERER'])) {
+                $previous = $_SERVER['HTTP_REFERER'];
+            }
+            redirect($previous);
+            exit(0);
+        }
+        else
+        {
+            $search = $this->input->post('search', true);
+            redirect($this->base_url() . "panel/search/" . $search);
+            exit(0);
+        }
     }
 
 }

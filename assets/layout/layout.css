@@ -527,11 +527,38 @@
     background-clip: padding-box;
     border: 1px solid #ced4da;
     border-radius: .25rem;
-    height: 500px;
     margin-bottom:20px;
-    overflow-y: scroll;
+}
+#messages {
+	height: 500px;
+	overflow-y: scroll;
 }
 .chat-controll
 {
 	
+}
+.send-message-box, .recive-message-box
+{
+	margin-bottom: 20px;
+	border-radius: 5px;
+	padding: 10px;
+	font-size: 13px;
+	line-height: 20px;
+	max-width: 70%;
+}
+.start-chat
+{
+	margin: 20px auto;
+	border-radius: 5px;
+	padding: 10px;
+	font-size: 13px;
+	line-height: 20px;
+	width: 45%;
+	max-width: 70%;
+}
+.message-list {
+	margin-bottom: 150px;
+}
+.bg-unread {
+	border:1px solid #f00;
 }

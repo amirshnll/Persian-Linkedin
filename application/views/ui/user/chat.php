@@ -14,8 +14,15 @@ $ci =&get_instance();
 	<link rel="stylesheet" type="text/css" href="{base}assets/library/fontawesome/css/fontawesome.min.css">
 	<link rel="stylesheet" type="text/css" href="{base}assets/library/fontawesome/css/all.min.css">
 	<link rel="shortcut icon" href="{base}assets/images/favicon.png"/>
+	<script href="{base}assets/library/jquery/jquery-3.3.1.min.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script type="text/javascript">
+		var i = setInterval(function(){
+	    	location.reload(true);
+		},60000)
+	</script>
 </head>
-<body class="user-panel">
+<body class="user-panel" id="body">
 
 	<header>
 		<div class="header">
@@ -62,19 +69,40 @@ $ci =&get_instance();
 							<h5><span class="fas fa-1x fa-comments"></span>&nbsp;<span>گفتگو</span></h5>
 							<div class="real-content" style="min-height: 620px;">
 								
-								<div class="chat">
-									<div class="chat-box">
+								<p><strong><span class="fas fa-1x fa-user"></span>&nbsp;<span>{reciver_full_name}</span> <small>( <a class="text-dark" target="_blank" href="{base}user/<?php echo md5($reciver_message_id); ?>" title="مشاهده ی صفحه ی کاربر">صفحه کاربر</a> )</small></strong></p>
+								<div class="chat" id="chatbox">
+									<div class="chat-box" id="messages">
+										<div class="text-light bg-dark start-chat text-center">مکالمه شروع شد برای ارتباط لطفا پیامی را ارسال کنید.</div>
+										<div class="hr"></div>
 										<?php
 											if($chat!==false)
 											{
 												foreach ($chat as $my_chat) {
-													
+													if($my_chat['user_sender_id'] == $my_user_id) { ?>
+
+														<div class="float-right text-light bg-primary send-message-box">
+															<?php echo $my_chat['content']; ?>
+														</div>
+														<div class="clearfix"></div>
+
+													<?php } elseif($my_chat['user_sender_id'] == $reciver_message_id) { ?>
+
+														<div class="float-left text-light bg-success recive-message-box">
+															<?php echo $my_chat['content']; ?>
+														</div>
+														<div class="clearfix"></div>
+
+													<?php } else { 
+														continue;
+													}
 												}
 											}
 										?>
+										<div class="lastmessage"></div>
 									</div>
 									<div class="chat-controll">
 										{form_chat_open}
+										{reciver_message}
 										<table width="100%">
 											<tr>
 												<td width="94%">{textbox}</td>
@@ -83,6 +111,13 @@ $ci =&get_instance();
 										</table>
 										{form_close}
 										<div class="clearfix"></div>
+
+										<p>&nbsp;</p>
+										<div class="float-left">
+											<a href="{base}panel/message" title="بازگشت به پیام ها"><span class="btn btn-danger text-light">بازگشت</span></a>
+										</div>
+										<div class="clearfix"></div>
+
 									</div>
 								</div>
 
@@ -165,7 +200,12 @@ $ci =&get_instance();
 		</footer>
 	</div>
 
-	<script href="{base}assets/library/jquery/jquery-3.3.1.min.js"></script>
+	<script type="text/javascript">
+		window.onload = function() {
+			var div = document.getElementById('messages');
+	   		div.scrollTop = div.scrollHeight - div.clientHeight;
+	   	}
+	</script>
 	<script href="{base}assets/library/bootstrap/js/bootstrap.min.js"></script>
 	<script href="{base}assets/library/bootstrap/js/bootstrap.bundle.min.js"></script>
 </body>

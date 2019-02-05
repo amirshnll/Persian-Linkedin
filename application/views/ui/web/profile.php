@@ -95,6 +95,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 								<?php } else { ?>
 									<a href="{base}action/unblock/{user_key}" title="آنبلاک کردن" class="btn btn-danger text-light">آنبلاک کردن</a>
 								<?php } ?>
+								<?php if($is_friend==true) { ?>
+								<br /><br />
+								<a href="{base}panel/message/{user_key}" title="ارسال پیام" class="btn btn-success text-light">ارسال پیام</a>
+								<?php } ?>
 							<?php } ?>
 
 							<?php if(!empty($profile_success)) { ?>

@@ -2733,7 +2733,8 @@ class User extends CI_Controller
 
 		$profile_open_key = $this->base_url() . 'user/' . md5($this->session->userdata('user_id'));
 
-		$message = false;
+		$this->load->model('message_model');
+		$message = $this->message_model->active_chat_user($this->session->userdata('user_id'));
 
 		if($this->session->has_userdata('noconnection_message')) {
 			$noconnection_message = $this->session->userdata('noconnection_message');
@@ -2762,7 +2763,8 @@ class User extends CI_Controller
 			'register_date'			=>	$register_date,
 			'profile_open_key'		=>	$profile_open_key,
 			'message'				=>	$message,
-			'noconnection_message'	=>	$noconnection_message
+			'noconnection_message'	=>	$noconnection_message,
+			'my_id'					=>	$this->session->userdata('user_id')
 		);
 
 		$this->parser('user/message', $data);
@@ -3350,7 +3352,161 @@ class User extends CI_Controller
 		$this->parser('user/rules', $data);
 	}
 
-	public function chat()
+	public function chat($user_key)
+	{
+		$this->self_set_url($this->current_url());
+		$this->is_login();
+
+		$this->load->helper('url');
+		if(empty($user_key) || is_null($user_key))
+        {
+            redirect($this->base_url() . "panel/message");
+            exit(0);
+        }
+
+        $this->load->helper('security');
+        $user_key = trim(xss_clean($user_key));
+        $this->load->model('user_model');
+        $user = $this->user_model->find_profile($user_key);
+        if($user===false)
+        {
+            redirect($this->base_url() . "panel/message");
+            exit(0);
+        }
+
+        if($this->session->userdata('user_id') == $user['id'])
+        {
+            redirect($this->base_url() . "panel/message");
+            exit(0);
+        }
+
+        $this->load->model('block_model');
+        if($this->block_model->is_block($this->session->userdata('user_id'), $user['id']))
+        { 
+            redirect($this->base_url() . "panel/message");
+            exit(0);
+        }
+       	$this->load->model('connections_model');
+        if(!$this->connections_model->is_connection($this->session->userdata('user_id'), $user['id']) || !$this->connections_model->is_connection($this->session->userdata('user_id'), $user['id']))
+        {
+            redirect($this->base_url() . "panel/message");
+            exit(0);
+        }
+
+		$this->load->helper('form');
+		$form_search_open = form_open($this->base_url() . "user/form/search");
+		$search_input = form_input(
+			array(
+				'type'			=>	'text',
+				'name'			=>	'search',
+				'maxlength'		=>	255,
+				'placeholder'	=>	'تایپ + اینتر',
+				'class'			=>	'form-control text-right right-to-left'
+			)
+		);
+		$form_close = form_close();
+
+		$this->load->model('connections_model');
+		$user_connection_count = $this->connections_model->user_connection_count($this->session->userdata('user_id'));
+		if($user_connection_count===false)
+			$user_connection_count = 0;
+
+		$this->load->model('profile_view_model');
+		$user_view_profile = $this->profile_view_model->viewed_profile_count($this->session->userdata('user_id'));
+		if($user_view_profile===false)
+			$user_view_profile = 0;
+
+		$this->load->model('avatar_model');
+		$user_current_avatar = $this->avatar_model->user_current_avatar($this->session->userdata('user_id'));
+
+		$this->load->model('person_model');
+		$user_person = $this->person_model->read_user_person($this->session->userdata('user_id'));
+		$user_full_name = $user_person['firstname'] . " " . $user_person['lastname'];
+
+		$reciver_person = $this->person_model->read_user_person($user['id']);
+		$reciver_full_name = $reciver_person['firstname'] . " " . $reciver_person['lastname'];
+
+		$this->load->model('contact_model');
+		$user_contact = $this->contact_model->user_all_contact($this->session->userdata('user_id'));
+		$twitter  = "";
+		$linkedin = "";
+		$telegram = "";
+		$skype    = "";
+		foreach ($user_contact as $ucs) {
+			if($ucs['type']==1)
+				$linkedin = $ucs['content'];
+			if($ucs['type']==2)
+				$twitter = $ucs['content'];
+			if($ucs['type']==3)
+				$telegram = $ucs['content'];
+			if($ucs['type']==4)
+				$skype = $ucs['content'];
+		}
+
+		$this->load->model('user_model');
+		$this->load->library('jdf');
+		$register_date = $this->jdf->jdate('d / m / Y', $this->user_model->get_register_time_id($this->session->userdata('user_id')));
+
+		$profile_open_key = $this->base_url() . 'user/' . md5($this->session->userdata('user_id'));
+
+		$form_chat_open = form_open($this->base_url() . "user/form/send_message", 'id="ajaxform"');
+		$submit_input = form_input(
+			array(
+				'type'			=>	'submit',
+				'name'			=>	'submit',
+				'value'			=>	'☑',
+				'class'			=>	'btn bg-dark text-light refresh_key',
+				'id'			=>	'refresh_key'
+			)
+		);
+		$textbox = form_input(
+			array(
+				'type'			=>	'text',
+				'name'			=>	'textbox',
+				'id'			=>	'textbox',
+				'maxlength'		=>	255,
+				'placeholder'	=>	'تایپ + اینتر',
+				'class'			=>	'form-control text-right right-to-left'
+			)
+		);
+		$reciver_message = form_hidden('reciver_message', $user['id']);
+
+		$this->load->model('message_model');
+		$chat = $this->message_model->load_chat($this->session->userdata('user_id'), $user['id']);
+
+		$data = array(
+			'form_search_open'		=>	$form_search_open,
+			'search_input'			=>	$search_input,
+			'form_close'			=>	$form_close,
+			'user_connection_count'	=>	$user_connection_count,
+			'user_view_profile'		=>	$user_view_profile,
+			'user_current_avatar'	=>	$user_current_avatar,
+			'user_full_name'		=>	$user_full_name,
+			'twitter_limit'			=>	$this->character_limiter($twitter, 30),
+			'linkedin_limit'		=>	$this->character_limiter($linkedin, 30),
+			'telegram_limit'		=>	$this->character_limiter($telegram, 30),
+			'skype_limit'			=>	$this->character_limiter($skype, 30),
+			'twitter'				=>	$twitter,
+			'linkedin'				=>	$linkedin,
+			'telegram'				=>	$telegram,
+			'skype'					=>	$skype,
+			'register_date'			=>	$register_date,
+			'profile_open_key'		=>	$profile_open_key,
+			'form_chat_open'		=>	$form_chat_open,
+			'submit_input'			=>	$submit_input,
+			'textbox'				=>	$textbox,
+			'chat'					=>	$chat,
+			'reciver_message'		=>	$reciver_message,
+			'reciver_full_name'		=>	$reciver_full_name,
+			'reciver_message_id'	=>	$user['id'],
+			'my_user_id'			=>	$this->session->userdata('user_id')
+
+		);
+
+		$this->parser('user/chat', $data);
+	}
+
+	public function search($search_text)
 	{
 		$this->self_set_url($this->current_url());
 		$this->is_login();
@@ -3367,6 +3523,15 @@ class User extends CI_Controller
 			)
 		);
 		$form_close 	= form_close();
+
+		if(is_null($search_text) || empty($search_text) || strlen($search_text) < 1 || strlen($search_text) > 255 || $search_text=='emptyreq')
+		{
+			redirect($this->base_url() . "panel");
+			exit(0);
+		}
+
+		$this->load->helper('security');
+		$search_text = ltrim(rtrim(xss_clean($search_text)));
 
 		$this->load->model('connections_model');
 		$user_connection_count = $this->connections_model->user_connection_count($this->session->userdata('user_id'));
@@ -3408,27 +3573,41 @@ class User extends CI_Controller
 
 		$profile_open_key = $this->base_url() . 'user/' . md5($this->session->userdata('user_id'));
 
-		$form_chat_open = form_open($this->base_url() . "user/form/send_message");
-		$submit_input = form_input(
-			array(
-				'type'			=>	'submit',
-				'name'			=>	'submit',
-				'value'			=>	'☑',
-				'class'			=>	'btn bg-success text-light'
-			)
-		);
-		$textbox = form_input(
-			array(
-				'type'			=>	'text',
-				'name'			=>	'textbox',
-				'maxlength'		=>	255,
-				'placeholder'	=>	'تایپ + اینتر',
-				'class'			=>	'form-control text-right right-to-left'
-			)
-		);
+		$this->load->model('country_model');
+		$this->load->model('person_model');
+		$this->load->model('user_item_model');
+		$country_search	= false;
+		$person_search	= false;
+		$item_search	= false;
+		
+		/* Country Search */
+		$country_id = $this->country_model->get_country_id($search_text);
+		
+		if($country_id===false || !is_numeric($country_id) || is_null($country_id))
+			$country_search = false;
+		else
+			$country_search = $this->person_model->random_person_country($country_id, 20);
 
-		$this->load->model('message_model');
-		$chat = $this->message_model->load_chat();
+		/* Person Search */
+		$person_search = $this->person_model->random_person_names_like($search_text, 20);
+
+		/* User Item Search */
+		$user_item = $this->user_item_model->random_item_names_like($search_text, 20);
+		if($user_item!==false)
+		{
+			$item_search = array();
+			$item_search_counter = 1;
+			foreach ($user_item as $uit) {
+				$temp_person = $this->person_model->read_user_person($uit['user_id']);
+				if($temp_person!==false)
+				{
+					$item_search[$item_search_counter] = $temp_person;
+					$item_search_counter++;
+				}
+				else
+					continue;
+			}
+		}
 
 		$data = array(
 			'form_search_open'		=>	$form_search_open,
@@ -3448,14 +3627,14 @@ class User extends CI_Controller
 			'skype'					=>	$skype,
 			'register_date'			=>	$register_date,
 			'profile_open_key'		=>	$profile_open_key,
-			'form_chat_open'		=>	$form_chat_open,
-			'submit_input'			=>	$submit_input,
-			'textbox'				=>	$textbox,
-			'chat'					=>	$chat
-
+			'search_text'			=>	$search_text,
+			'country_search'		=>	$country_search,
+			'person_search'			=>	$person_search,
+			'item_search'			=>	$item_search,
+			'my_user_id'			=>	$this->session->userdata('user_id')
 		);
 
-		$this->parser('user/chat', $data);
+		$this->parser('user/search', $data);
 	}
 
 }
