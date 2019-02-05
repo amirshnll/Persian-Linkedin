@@ -295,4 +295,132 @@ class Web extends CI_Controller
 		$this->parser('user/register', $data);
 	}
 
+	public function profile($user_key)
+	{
+		$this->self_set_url($this->current_url());
+
+		if(empty($user_key) || is_null($user_key))
+		{
+			show_404();
+			exit(0);
+		}
+
+		/* Load User Page */
+		$this->load->helper('security');
+		$user_key = trim(xss_clean($user_key));
+		$this->load->model('user_model');
+		$user = $this->user_model->find_profile($user_key);
+		if($user===false)
+		{
+			show_404();
+			exit(0);
+		}
+
+		/* User Privacy */
+		$this->load->model('user_option_model');
+		$user_private_page = $this->user_option_model->get_option($user['id'], 'private_page');
+		$user_private_contact = $this->user_option_model->get_option($user['id'], 'private_contact');
+		$user_private_avatar = $this->user_option_model->get_option($user['id'], 'private_avatar');
+
+		/* Check System */
+		if($this->check_login())
+		{
+			$user_id = $this->session->userdata('user_id');
+
+			$this->load->model('block_model');
+			if($this->block_model->is_block($user['id'], $user_id))
+			{
+				show_404();
+				exit(0);
+			}
+		}
+		else
+		{
+			if($user_private_page == "true")
+			{
+				show_404();
+				exit(0);
+			}
+			$user_id = null;
+		}
+
+		/* View Page With Friend */
+		if(!is_null($user_id) && $user_private_page=="true" && $user['id'] != $user_id)
+		{
+			$this->load->model('connections_model');
+			if(!$this->connections_model->is_connection($user['id'], $user_id))
+			{
+				show_404();
+				exit(0);
+			}
+		}
+
+		/* Load Person User Data */
+		$this->load->model('person_model');
+		$person = $this->person_model->read_user_person($user['id']);
+		$this->load->model('country_model');
+		$person['country_id'] = $this->country_model->get_country_name($person['country_id']);
+
+		/* Load Avatar User Data */
+		$this->load->model('avatar_model');
+		$avatar = $this->avatar_model->user_current_avatar($user['id']);
+		if($user_private_avatar=="true" && $user['id'] != $user_id) {
+			$this->load->model('connections_model');
+			if(!$this->connections_model->is_connection($user['id'], $user_id))
+			{
+				$avatar = "default.png";
+				$user_private_contact = "true";
+			}
+		}
+
+		/* Load Items User Data */
+		$this->load->model('user_item_model');
+		$experience	= $this->user_item_model->read_user_special_type_item($user['id'], 1);
+		$education	= $this->user_item_model->read_user_special_type_item($user['id'], 2);
+		$skills		= $this->user_item_model->read_user_special_type_item($user['id'], 3);
+		$project	= $this->user_item_model->read_user_special_type_item($user['id'], 4);
+
+		/* Load Contact User Data */
+		$this->load->model('contact_model');
+		$user_contact = $this->contact_model->user_all_contact($user['id']);
+		$twitter_value  = "";
+		$linkedin_value = "";
+		$telegram_value = "";
+		$skype_value  	= "";
+		foreach ($user_contact as $ucs) {
+			if($ucs['type']==1)
+				$linkedin_value = $ucs['content'];
+			if($ucs['type']==2)
+				$twitter_value = $ucs['content'];
+			if($ucs['type']==3)
+				$telegram_value = $ucs['content'];
+			if($ucs['type']==4)
+				$skype_value = $ucs['content'];
+		}
+
+		/* ViewUp User Profile View */
+		$this->load->model('profile_view_model');
+		$this->profile_view_model->insert($user_id, $user['id'], $this->time());
+
+		$data = array(
+			'user_key'				=>	$user_key,
+			'email'					=>	$user['email'],
+			'register_time'			=>	$user['register_time'],
+			'person'				=>	$person,
+			'avatar'				=>	$avatar,
+			'experience'			=>	$experience,
+			'education'				=>	$education,
+			'skills'				=>	$skills,
+			'project'				=>	$project,
+			'twitter'				=>	$twitter_value,
+			'linkedin'				=>	$linkedin_value,
+			'telegram'				=>	$telegram_value,
+			'skype'					=>	$skype_value,
+			'user_private_contact'	=>	$user_private_contact
+
+		);
+
+		$this->parser('web/profile', $data);
+	}
+
 }

@@ -267,7 +267,7 @@
 	text-indent: 20px;
 	background-color: #f8f9f9;
 }
-.user-panel .content .content-box .user-profile-items
+.user-profile-items
 {
 	margin: 10px 0;
 	list-style: square;
@@ -287,4 +287,66 @@
 }
 .user-panel .avatar-file {
     display: none;
+}
+
+
+/* User Profile */
+.profile-topline {
+	font-family: 'samim';
+	background: #0771A9;
+	padding: 20px;
+	font-size: 12px;
+}
+.profile-header
+{
+	font-family: 'samim';
+	margin: 50px 0;
+	border-bottom: 2px solid #cfcfcf;
+	padding-bottom: 20px;
+}
+.profile-avatar {
+	padding: 5px;
+	border:2px solid #0771A9;
+	border-radius: 100%;
+	display: inline-block;
+	box-shadow:0px 0px 50px #0771A9;
+}
+.profile-avatar img
+{
+	border-radius: 100%;
+	width: 150px;
+	height: 150px;
+}
+.profile-header h1
+{
+	margin-bottom: 20px;
+}
+.social-profile-contact
+{
+	font-size: 12px;
+}
+.social-profile-contact p
+{
+	line-height: 0px;
+}
+.profile-section {
+	font-family: 'samim';
+}
+.profile-section .row
+{
+	margin-top: 50px;
+}
+.profile-section p {
+	line-height: 30px;
+}
+.profile-section h3 {
+	border-right: 5px solid #cfcfcf;
+	text-indent: 20px;
+	margin-bottom: 30px;
+}
+.profile-button-handler {
+	margin-top: 20px;
+}
+.profile-button-handler * {
+	font-size: 12px;
 }

@@ -100,7 +100,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						<div class="content-box">
 							<div class="real-content">
 								<h5>بیوگرافی [ <a class="text-success edit-item-icon" href="{base}panel/profile/edit/bio" title="ویرایش"><span class="fas fa-lg fa-pen"></span></a> ]</h5>
-								<p><?php echo $user_person['biography'] ?></p>
+								<p class="text-justify"><?php echo $user_person['biography'] ?></p>
 							</div>
 						</div>
 						<div class="content-box">

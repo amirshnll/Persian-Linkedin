@@ -506,18 +506,6 @@ class User extends CI_Controller
 		$this->parser('user/profile', $data);
 	}
 
-	public function notification()
-	{
-		$this->self_set_url($this->current_url());
-		$this->is_login();
-	}
-
-	public function message()
-	{
-		$this->self_set_url($this->current_url());
-		$this->is_login();
-	}
-
 	public function edit_person()
 	{
 		$this->self_set_url($this->current_url());
@@ -1685,6 +1673,60 @@ class User extends CI_Controller
 		);
 
 		$this->parser('user/singleproject', $data);
+	}
+
+	public function notification()
+	{
+		$this->self_set_url($this->current_url());
+		$this->is_login();
+
+		$this->load->helper('form');
+		$form_search_open = form_open($this->base_url() . "user/form/search");
+		$search_input = form_input(
+			array(
+				'type'			=>	'text',
+				'name'			=>	'search',
+				'maxlength'		=>	255,
+				'placeholder'	=>	'تایپ + اینتر',
+				'class'			=>	'form-control text-right right-to-left'
+			)
+		);
+		$form_close 	= form_close();
+
+		$data = array(
+			'form_search_open'		=>	$form_search_open,
+			'search_input'			=>	$search_input,
+			'form_close'			=>	$form_close
+		);
+
+		$this->parser('user/notification', $data);
+	}
+
+	public function message()
+	{
+		$this->self_set_url($this->current_url());
+		$this->is_login();
+
+		$this->load->helper('form');
+		$form_search_open = form_open($this->base_url() . "user/form/search");
+		$search_input = form_input(
+			array(
+				'type'			=>	'text',
+				'name'			=>	'search',
+				'maxlength'		=>	255,
+				'placeholder'	=>	'تایپ + اینتر',
+				'class'			=>	'form-control text-right right-to-left'
+			)
+		);
+		$form_close 	= form_close();
+
+		$data = array(
+			'form_search_open'		=>	$form_search_open,
+			'search_input'			=>	$search_input,
+			'form_close'			=>	$form_close
+		);
+
+		$this->parser('user/message', $data);
 	}
 
 }

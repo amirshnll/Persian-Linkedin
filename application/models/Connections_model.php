@@ -63,6 +63,25 @@ class Connections_model extends CI_Model {
         else
             return false;
     }
+
+    public function is_connection($user_id, $connect_id)
+    {
+        if(empty($user_id) || empty($connect_id))
+            return false;
+
+        $this->db->limit(1);
+        $this->db->where('status', 1);
+        $this->db->where('connected_id', $connect_id);
+        $this->db->where('connect_id', $user_id);
+        $query = $this->db->get('connections');
+
+        if($query->num_rows())
+        {
+            return true;
+        }
+        else
+            return false;
+    }
     
 }
 

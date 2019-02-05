@@ -31,6 +31,23 @@ class Profile_view_model extends CI_Model {
         else
             return false;
     }
+
+    public function insert($user_id, $user_viewed_id, $time)
+    {
+        if(empty($user_viewed_id))
+            return false;
+
+        $data = array(
+            'user_id'           =>  $user_id,
+            'user_viewed_id'    =>  $user_viewed_id,
+            'time'              =>  $time
+        );
+        
+        if($this->db->insert('profile_view', $data))
+            return true;
+        else
+            return false;
+    }
     
 }
 

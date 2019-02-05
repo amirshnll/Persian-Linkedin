@@ -215,6 +215,36 @@ class User_model extends CI_Model {
             return false;
     }
 
+    public function find_profile($string_find)
+    {
+        if(empty($string_find))
+            return false;
+
+        $this->db->where('status', 1);
+        $query = $this->db->get('user');
+
+        if($query->num_rows())
+        {
+            $query = $query->result_array();
+            $result = null;
+            
+            foreach ($query as $qq) {
+                if(md5($qq['id']) == $string_find)
+                {
+                    $result = $qq;
+                    break;
+                }
+            }
+
+            if(is_null($result))
+                return false;
+            else
+                return $result;
+        }
+        else
+            return false;
+    }
+
 }
 
 ?>

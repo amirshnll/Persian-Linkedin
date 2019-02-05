@@ -85,5 +85,8 @@ $route['panel/profile/edit/skills/edit/(:num)'] 	= 'user/user/single_skills/$1';
 $route['panel/profile/edit/skills/delete/(:num)']	= 'user/form/delete_skills/$1';
 
 $route['panel/profile/edit/project'] 				= 'user/user/edit_project';
-$route['panel/profile/edit/project/edit/(:num)'] = 'user/user/single_project/$1';
-$route['panel/profile/edit/project/delete/(:num)']= 'user/form/delete_project/$1';
+$route['panel/profile/edit/project/edit/(:num)'] 	= 'user/user/single_project/$1';
+$route['panel/profile/edit/project/delete/(:num)']	= 'user/form/delete_project/$1';
+
+
+$route['user/(:any)']								= 'web/profile/$1';

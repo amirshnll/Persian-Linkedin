@@ -121,7 +121,7 @@ class User_item_model extends CI_Model {
             return false;
 
         $data = array(
-            'status'     =>  2
+            'status'     =>  0
         );
 
         $this->db->where('id', $id);
