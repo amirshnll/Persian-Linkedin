@@ -442,3 +442,39 @@
 .like-anchor:hover {
 	color:#f00;
 }
+.like-anchor-active {
+	color:#f00 !important;
+}
+.like-anchor-active:hover {
+	color: #adb0b2;
+}
+.continue-button {
+	font-size: 12px;
+	margin-top: 10px;
+}
+.user-panel footer .footer
+{
+	font-size: 11px;
+	font-family: arial;
+	margin-top: 50px;
+}
+.user-panel footer .footer p
+{
+	border-top:1px solid #000;
+	padding-top:10px;
+}
+.loadmore {
+	margin: 30px 0;
+}
+.loadmore_post {
+	border-radius: 100%;
+	text-align: center;
+	border:1px solid #adb0b2;
+	display: inline-block;
+	width: 40px;
+	height: 40px;
+	padding-top: 8.1px;
+}
+.loadmore hr {
+	height: 15px;
+}

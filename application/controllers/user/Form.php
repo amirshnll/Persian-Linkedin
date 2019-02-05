@@ -523,7 +523,9 @@ class Form extends CI_Controller
                 'label' =>  'متن پست',
                 'rules' =>  'required|min_length[3]|max_length[10000]',
                 'errors'=>  array(
-                    'required'  =>  'فیلد %s اجباری می باشد.'
+                    'required'    =>  'فیلد %s اجباری می باشد.',
+                    'min_length'  =>  'محدودیت کاراکتر فیلد %s را رعایت نکردید.',
+                    'max_length'  =>  'محدودیت کاراکتر فیلد %s را رعایت نکردید.'
                 )
             )
         );
@@ -1870,6 +1872,11 @@ class Form extends CI_Controller
             exit(0);
         }
 
+        $previous = "javascript:history.go(-1)";
+        if(isset($_SERVER['HTTP_REFERER'])) {
+            $previous = $_SERVER['HTTP_REFERER'];
+        }
+
         /* Load User Page */
         $this->load->helper('security');
         $user_key = trim(xss_clean($user_key));
@@ -1897,8 +1904,17 @@ class Form extends CI_Controller
                 $this->connections_model->insert($this->session->userdata('user_id'), $user['id'], $this->time(), 2, 1);
                 $this->connections_model->insert($user['id'], $this->session->userdata('user_id'), $this->time(), 2, -1);
                 $this->session->set_userdata('profile_success', '<p>عملیات با موفقیت انجام شد.</p>');
-                redirect($this->base_url() . "user/" . $user_key);
-                exit(0);
+
+                if(stripos($previous, "panel") !== false)
+                {
+                    redirect($this->base_url() . "panel/#user_suggest_5");
+                    exit(0);
+                }
+                else
+                {
+                    redirect($this->base_url() . "user/" . $user_key);
+                    exit(0);
+                }
             }
             else
             {
@@ -1932,6 +1948,11 @@ class Form extends CI_Controller
             exit(0);
         }
 
+        $previous = "javascript:history.go(-1)";
+        if(isset($_SERVER['HTTP_REFERER'])) {
+            $previous = $_SERVER['HTTP_REFERER'];
+        }
+
         /* Load User Page */
         $this->load->helper('security');
         $user_key = trim(xss_clean($user_key));
@@ -1959,8 +1980,17 @@ class Form extends CI_Controller
                 $this->connections_model->delete_connection($this->session->userdata('user_id'), $user['id']);
                 $this->connections_model->delete_connection($user['id'], $this->session->userdata('user_id'));
                 $this->session->set_userdata('profile_success', '<p>عملیات با موفقیت انجام شد.</p>');
-                redirect($this->base_url() . "user/" . $user_key);
-                exit(0);
+
+                if(stripos($previous, "connections") !== false)
+                {
+                    redirect($this->base_url() . "panel/profile/connections");
+                    exit(0);
+                }
+                else
+                {
+                    redirect($this->base_url() . "user/" . $user_key);
+                    exit(0);
+                }
             }
             else
             {
@@ -1994,6 +2024,11 @@ class Form extends CI_Controller
             exit(0);
         }
 
+        $previous = "javascript:history.go(-1)";
+        if(isset($_SERVER['HTTP_REFERER'])) {
+            $previous = $_SERVER['HTTP_REFERER'];
+        }
+
         /* Load User Page */
         $this->load->helper('security');
         $user_key = trim(xss_clean($user_key));
@@ -2021,8 +2056,17 @@ class Form extends CI_Controller
                 $this->connections_model->confirm_connection($this->session->userdata('user_id'), $user['id']);
                 $this->connections_model->confirm_connection($user['id'], $this->session->userdata('user_id'));
                 $this->session->set_userdata('profile_success', '<p>عملیات با موفقیت انجام شد.</p>');
-                redirect($this->base_url() . "user/" . $user_key);
-                exit(0);
+
+                if(stripos($previous, "connections") !== false)
+                {
+                    redirect($this->base_url() . "panel/profile/connections");
+                    exit(0);
+                }
+                else
+                {
+                    redirect($this->base_url() . "user/" . $user_key);
+                    exit(0);
+                }
             }
             else
             {
@@ -2056,6 +2100,11 @@ class Form extends CI_Controller
             exit(0);
         }
 
+        $previous = "javascript:history.go(-1)";
+        if(isset($_SERVER['HTTP_REFERER'])) {
+            $previous = $_SERVER['HTTP_REFERER'];
+        }
+
         /* Load User Page */
         $this->load->helper('security');
         $user_key = trim(xss_clean($user_key));
@@ -2083,8 +2132,17 @@ class Form extends CI_Controller
                 $this->connections_model->delete_connection($this->session->userdata('user_id'), $user['id']);
                 $this->connections_model->delete_connection($user['id'], $this->session->userdata('user_id'));
                 $this->session->set_userdata('profile_success', '<p>عملیات با موفقیت انجام شد.</p>');
-                redirect($this->base_url() . "user/" . $user_key);
-                exit(0);
+
+                if(stripos($previous, "connections") !== false)
+                {
+                    redirect($this->base_url() . "panel/profile/connections");
+                    exit(0);
+                }
+                else
+                {
+                    redirect($this->base_url() . "user/" . $user_key);
+                    exit(0);
+                }
             }
             else
             {
@@ -2329,4 +2387,220 @@ class Form extends CI_Controller
             exit(0);
         }
     }
+
+    public function like_post($post_key)
+    {
+        $this->self_set_url($this->current_url());
+
+        $this->load->helper('url');
+        if(!$this->check_login())
+        {
+            redirect($this->base_url() . "login");
+            exit(0);
+        }
+
+        if(empty($post_key))
+        {
+            redirect($this->base_url() . "panel");
+            exit(0);
+        }
+
+        /* Load User Page */
+        $this->load->helper('security');
+        $post_key = trim(xss_clean($post_key));
+        $this->load->model('post_model');
+        $post = $this->post_model->find_post($post_key);
+        if($post===false)
+        {
+            redirect($this->base_url() . "panel");
+            exit(0);
+        }
+
+        $this->load->model('block_model');
+        if($this->block_model->is_block($this->session->userdata('user_id'), $post['user_id']) || $this->block_model->is_block($post['user_id'], $this->session->userdata('user_id'))) {
+            redirect($this->base_url() . "panel");
+            exit(0);
+        }
+
+        $this->load->model('connections_model');
+        if( ($this->session->userdata('user_id')!=$post['user_id']) && (!$this->connections_model->is_connection($this->session->userdata('user_id'), $post['user_id']) && !$this->connections_model->is_connection($post['user_id'], $this->session->userdata('user_id'))) )
+        {
+            redirect($this->base_url() . "panel");
+            exit(0);
+        }
+
+        $this->load->model('like_model');
+        if(!$this->like_model->is_like($post['id'], $this->session->userdata('user_id'))) {
+            $this->like_model->insert($this->session->userdata('user_id'), $post['id'], $this->time());
+            redirect($this->base_url() . "panel#" . $post_key);
+            exit(0);
+        }
+        
+        redirect($this->base_url() . "panel");
+        exit(0);
+    }
+
+    public function dislike_post($post_key)
+    {
+        $this->self_set_url($this->current_url());
+
+        $this->load->helper('url');
+        if(!$this->check_login())
+        {
+            redirect($this->base_url() . "login");
+            exit(0);
+        }
+
+        if(empty($post_key))
+        {
+            redirect($this->base_url() . "panel");
+            exit(0);
+        }
+
+        /* Load User Page */
+        $this->load->helper('security');
+        $post_key = trim(xss_clean($post_key));
+        $this->load->model('post_model');
+        $post = $this->post_model->find_post($post_key);
+        if($post===false)
+        {
+            redirect($this->base_url() . "panel");
+            exit(0);
+        }
+
+        $this->load->model('block_model');
+        if($this->block_model->is_block($this->session->userdata('user_id'), $post['user_id']) || $this->block_model->is_block($post['user_id'], $this->session->userdata('user_id'))) {
+            redirect($this->base_url() . "panel");
+            exit(0);
+        }
+
+        $this->load->model('connections_model');
+        if( ($this->session->userdata('user_id')!=$post['user_id']) && (!$this->connections_model->is_connection($this->session->userdata('user_id'), $post['user_id']) && !$this->connections_model->is_connection($post['user_id'], $this->session->userdata('user_id'))) )
+        {
+            redirect($this->base_url() . "panel");
+            exit(0);
+        }
+
+        $this->load->model('like_model');
+        if($this->like_model->is_like($post['id'], $this->session->userdata('user_id'))) {
+            $this->like_model->delete($this->session->userdata('user_id'), $post['id']);
+            redirect($this->base_url() . "panel#" . $post_key);
+            exit(0);
+        }
+        
+        redirect($this->base_url() . "panel");
+        exit(0);
+    }
+
+    public function edit_post($post_key)
+    {
+        $this->self_set_url($this->current_url());
+
+        $this->load->helper('url');
+        if(!$this->check_login())
+        {
+            redirect($this->base_url() . "login");
+            exit(0);
+        }
+
+        if(empty($post_key))
+        {
+            redirect($this->base_url() . "panel");
+            exit(0);
+        }
+
+        /* Load User Page */
+        $this->load->helper('security');
+        $post_key = trim(xss_clean($post_key));
+        $this->load->model('post_model');
+        $post = $this->post_model->find_post($post_key);
+        if($post===false)
+        {
+            redirect($this->base_url() . "panel");
+            exit(0);
+        }
+
+        if($this->session->userdata('user_id')!=$post['user_id'])
+        {
+            redirect($this->base_url() . "panel");
+            exit(0);
+        }
+
+        $this->load->helper('form');
+        $this->load->library('form_validation');
+        $this->load->database();
+
+        $rules = array(
+            array(
+                'field' =>  'post_content',
+                'label' =>  'متن پست',
+                'rules' =>  'required|min_length[3]|max_length[10000]',
+                'errors'=>  array(
+                    'required'    =>  'فیلد %s اجباری می باشد.',
+                    'min_length'  =>  'محدودیت کاراکتر فیلد %s را رعایت نکردید.',
+                    'max_length'  =>  'محدودیت کاراکتر فیلد %s را رعایت نکردید.'
+                )
+            )
+        );
+
+        $this->form_validation->set_rules($rules);
+        if ($this->form_validation->run() == FALSE)
+        {
+            $this->session->set_userdata('form_error', validation_errors());
+            redirect($this->base_url() . "panel/post/edit/" . $post_key);
+            exit(0);
+        }
+        else
+        {
+            $post_content   = $this->input->post('post_content', true);
+
+            $this->load->model('post_model');
+            $this->post_model->update($post['id'], $this->session->userdata('user_id'), $post_content, $this->time(), $this->user_agent() . " / IP: " . $this->user_ip());
+
+            $this->session->set_userdata('form_success', '<p>نوشته با موفقیت ویرایش شد.</p>');
+            redirect($this->base_url() . "panel/post/edit/" . $post_key);
+            exit(0);
+        }
+    }
+
+    public function delete_post($post_key)
+    {
+        $this->self_set_url($this->current_url());
+
+        $this->load->helper('url');
+        if(!$this->check_login())
+        {
+            redirect($this->base_url() . "login");
+            exit(0);
+        }
+
+        if(empty($post_key))
+        {
+            redirect($this->base_url() . "panel");
+            exit(0);
+        }
+
+        /* Load User Page */
+        $this->load->helper('security');
+        $post_key = trim(xss_clean($post_key));
+        $this->load->model('post_model');
+        $post = $this->post_model->find_post($post_key);
+        if($post===false)
+        {
+            redirect($this->base_url() . "panel");
+            exit(0);
+        }
+
+        if($this->session->userdata('user_id')==$post['user_id'])
+        {
+            $this->post_model->delete($post['id'], $this->session->userdata('user_id'));
+            $this->session->set_userdata('post_delete', '<p>نوشته ی موردنظر با موفقیت حذف شد.</p>');
+            redirect($this->base_url() . "panel");
+            exit(0);
+        }
+        
+        redirect($this->base_url() . "panel");
+        exit(0);
+    }
+
 }

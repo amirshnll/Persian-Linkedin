@@ -1,12 +1,13 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
+$ci =&get_instance();
 ?>
 <!DOCTYPE html>
 <html>
 <head>
 	<meta charset="utf-8">
   	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>لینکدین فارسی - ویرایش اطلاعات شخصی</title>
+	<title>لینکیدن فارسی - ارتباطات</title>
 	<link rel="stylesheet" type="text/css" href="{base}assets/layout/layout.css">
 	<link rel="stylesheet" type="text/css" href="{base}assets/library/bootstrap/css/bootstrap.min.css">
 	<link rel="stylesheet" type="text/css" href="{base}assets/library/bootstrap/css/bootstrap-grid.min.css">
@@ -58,38 +59,77 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				<div class="row right-to-left text-right">
 					<div class="col-md-9">
 						<div class="content-box">
-							<h5><span class="fas fa-1x fa-id-card"></span>&nbsp;<span>ویرایش اطلاعات شخصی</span></h5>
+							<h5><span class="fas fa-1x fa-handshake"></span>&nbsp;<span>ارتباطات</span></h5>
 							<div class="real-content">
-								{form_editperson_open}
-									<p><span class="fas fa-1x fa-edit"></span>&nbsp;<strong>اطلاعات شخصی</strong></p>
-									<p>نام : </p>
-									<p>{firstname_input}</p>
-									<p>نام خانوادگی : </p>
-									<p>{lastname_input}</p>
-									<p>کشور : </p>
-									<p>{dropdown_1}</p>
-									<p>کد پستی :</p>
-									<p>{zip_code_input}</p>
-									<p>تاریخ تولد : </p>
-									<p>{birthday_input}</p>
-									<p>&nbsp;</p>
-									<div class="float-left">
-										<a href="{base}panel/profile" title="بازگشت به پروفایل من"><span class="btn btn-danger text-light">بازگشت</span></a>
-										{submit_input}
-									</div>
-									<div class="clearfix"></div>
-									<p>&nbsp;</p>
-								{form_close}
-								<?php if(!empty($validation_errors)) { ?>
-									<div class="alert alert-danger right-to-left text-right">{validation_errors}</div>
+
+								<?php if(!empty($profile_success)) { ?>
+								<div class="alert alert-success">{profile_success}</div><br />
 								<?php } ?>
-								<?php if(!empty($form_success)) { ?>
-									<div class="alert alert-success right-to-left text-right">{form_success}</div>
-								<?php } ?>
-								<div class="hr"></div>
-								<p><span class="fas fa-1x fa-question-circle"></span>&nbsp;<span>راهنمایی :</span></p>
-								<p>لطفا قبل از ثبت تغییرات حتما آنها را با دقت بررسی کنید.</p>
-								<p>شما می توانید اطلاعاتی را که دوست ندارید همگان ببینند پر نکنید یا در بخش تنظیمات محدودیت های نمایشی روی صفحه ی خود اعمال کنید.</p>
+
+								<p><span class="fas fa-1x fa-signature"></span>&nbsp;<span><strong>منتظر تایید : </strong></p>
+								<?php 
+									if($respond_connections===false)
+									{
+										echo '<p class="alert alert-dark">چیزی یافت نشد.</p>';
+									}
+									else
+									{
+									$ci->load->model('avatar_model');
+									foreach ($respond_connections as $my_resconnections) {
+									$temp_full_name = $my_resconnections['firstname'] . " " . $my_resconnections['lastname'];
+									$temp_avatar = $ci->avatar_model->user_current_avatar($my_resconnections['connected_id']);
+									?>
+									<a href="{base}user/<?php echo md5($my_resconnections['connected_id']); ?>" title="مشاهده ی پروفایل <?php echo $temp_full_name; ?>" target="_blank">
+										<div class="suggest-item">
+											<div class="suggest-item-image float-right text-center">
+												<img class="img-fluid" src="{base}upload/avatar/<?php echo $temp_avatar; ?>" title="<?php echo $temp_full_name; ?>" src="<?php echo $temp_full_name; ?>" />
+											</div>
+											<div class="suggest-item-content float-right">
+												<p class="text-dark"><?php echo $temp_full_name; ?></p>
+											</div>
+											<div class="suggest-item-delete float-left">
+												<a href="{base}action/confirm_connect/<?php echo md5($my_resconnections['connected_id']); ?>" title="تایید درخواست" class="btn btn-success text-light">تایید درخواست</a>
+												<a href="{base}action/unconfirm_connect/<?php echo md5($my_resconnections['connected_id']); ?>" title="رد درخواست" class="btn btn-danger text-light">رد درخواست</a>
+											</div>
+											<div class="clearfix"></div>
+										</div>
+									</a>
+								<?php } } ?>
+
+								<br /><br />
+								<p><span class="fas fa-1x fa-link"></span>&nbsp;<span><strong> ارتباط های فعال: </strong></p>
+								<?php 
+									if($connections===false)
+									{
+										echo '<p class="alert alert-dark">چیزی یافت نشد.</p>';
+									}
+									else
+									{
+									$ci->load->model('avatar_model');
+									foreach ($connections as $my_connections) {
+									$temp_full_name = $my_connections['firstname'] . " " . $my_connections['lastname'];
+									$temp_avatar = $ci->avatar_model->user_current_avatar($my_connections['connected_id']);
+									?>
+									<a href="{base}user/<?php echo md5($my_connections['connected_id']); ?>" title="مشاهده ی پروفایل <?php echo $temp_full_name; ?>" target="_blank">
+										<div class="suggest-item">
+											<div class="suggest-item-image float-right text-center">
+												<img class="img-fluid" src="{base}upload/avatar/<?php echo $temp_avatar; ?>" title="<?php echo $temp_full_name; ?>" src="<?php echo $temp_full_name; ?>" />
+											</div>
+											<div class="suggest-item-content float-right">
+												<p class="text-dark"><?php echo $temp_full_name; ?></p>
+											</div>
+											<div class="suggest-item-delete float-left">
+												<a href="{base}action/delete_connect/<?php echo md5($my_connections['connected_id']); ?>" title="حذف ارتباط" class="btn btn-danger text-light">حذف ارتباط</a>
+											</div>
+											<div class="clearfix"></div>
+										</div>
+									</a>
+								<?php } } ?>
+								<p>&nbsp;</p>
+								<div class="float-left">
+									<a href="{base}panel/profile" title="بازگشت به پروفایل من"><span class="btn btn-danger text-light">بازگشت</span></a>
+								</div>
+								<div class="clearfix"></div>
 							</div>
 						</div>
 					</div>

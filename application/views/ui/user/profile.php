@@ -44,6 +44,7 @@ $ci =&get_instance();
 								<a href="{base}panel/profile" title="پروفایل من"><li><span class="fas fa-lg fa-user"></span></li></a>
 								<a href="{base}panel/notification" title="اعلانات"><li><span class="fas fa-lg fa-bell"></span></li></a>
 								<a href="{base}panel/message" title="پیام ها"><li><span class="fas fa-lg fa-envelope"></span></li></a>
+								<a href="{base}panel/profile/connections" title="ارتباطات"><li><span class="fas fa-lg fa-handshake"></span></li></a>
 							</ul>
 						</nav>
 					</div>
@@ -221,6 +222,36 @@ $ci =&get_instance();
 						<div class="content-box">
 							<div class="real-content">
 								<h5><span class="fas fa-1x fa-handshake"></span>&nbsp;<span>ارتباطات </span>[ <a class="text-primary edit-item-icon" href="{base}panel/profile/connections" title="مشاهده همه"><span class="fas fa-lg fa-eye"></span></a> ]</h5>
+								<div class="summary_connection">
+									<?php
+										if($summary_connection===false)
+										{
+											echo '<p class="alert alert-dark">چیزی یافت نشد.</p>';
+										}
+										else
+										{
+										$ci->load->model('avatar_model');
+										$sumcon_counter=0;
+										foreach ($summary_connection as $sumcon) {
+										$sumcon_counter++;
+										if($sumcon_counter>5)
+											break;
+										$temp_full_name = $sumcon['firstname'] . " " . $sumcon['lastname'];
+										$temp_avatar = $ci->avatar_model->user_current_avatar($sumcon['connected_id']);
+										?>
+										<a href="{base}user/<?php echo md5($sumcon['connected_id']); ?>" title="مشاهده ی پروفایل <?php echo $temp_full_name; ?>" target="_blank">
+											<div class="suggest-item">
+												<div class="suggest-item-image float-right text-center">
+													<img class="img-fluid" src="{base}upload/avatar/<?php echo $temp_avatar; ?>" title="<?php echo $temp_full_name; ?>" src="<?php echo $temp_full_name; ?>" />
+												</div>
+												<div class="suggest-item-content float-right">
+													<p class="text-dark"><?php echo $temp_full_name; ?></p>
+												</div>
+												<div class="clearfix"></div>
+											</div>
+										</a>
+									<?php } } ?>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -305,7 +336,7 @@ $ci =&get_instance();
 		<footer>
 			<div class="footer">
 				<div class="row">
-					
+					<p>&copy; <?php echo date('Y'); ?> Persian Linkedin. All Right Reserved...</p>
 				</div>
 			</div>
 		</footer>

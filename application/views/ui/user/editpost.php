@@ -1,12 +1,13 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
+$ci =&get_instance();
 ?>
 <!DOCTYPE html>
 <html>
 <head>
 	<meta charset="utf-8">
   	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>لینکدین فارسی - ویرایش اطلاعات شخصی</title>
+	<title>لینکدین فارسی - ویرایش نوشته</title>
 	<link rel="stylesheet" type="text/css" href="{base}assets/layout/layout.css">
 	<link rel="stylesheet" type="text/css" href="{base}assets/library/bootstrap/css/bootstrap.min.css">
 	<link rel="stylesheet" type="text/css" href="{base}assets/library/bootstrap/css/bootstrap-grid.min.css">
@@ -56,42 +57,95 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<section>
 			<div class="content">
 				<div class="row right-to-left text-right">
-					<div class="col-md-9">
+					<div class="col-md-3">
 						<div class="content-box">
-							<h5><span class="fas fa-1x fa-id-card"></span>&nbsp;<span>ویرایش اطلاعات شخصی</span></h5>
+							<h5><span class="fas fa-1x fa-users"></span>&nbsp; <span>شاید این افراد را بشناسید</span></h5>
 							<div class="real-content">
-								{form_editperson_open}
-									<p><span class="fas fa-1x fa-edit"></span>&nbsp;<strong>اطلاعات شخصی</strong></p>
-									<p>نام : </p>
-									<p>{firstname_input}</p>
-									<p>نام خانوادگی : </p>
-									<p>{lastname_input}</p>
-									<p>کشور : </p>
-									<p>{dropdown_1}</p>
-									<p>کد پستی :</p>
-									<p>{zip_code_input}</p>
-									<p>تاریخ تولد : </p>
-									<p>{birthday_input}</p>
-									<p>&nbsp;</p>
-									<div class="float-left">
-										<a href="{base}panel/profile" title="بازگشت به پروفایل من"><span class="btn btn-danger text-light">بازگشت</span></a>
-										{submit_input}
-									</div>
-									<div class="clearfix"></div>
-									<p>&nbsp;</p>
-								{form_close}
-								<?php if(!empty($validation_errors)) { ?>
-									<div class="alert alert-danger right-to-left text-right">{validation_errors}</div>
+								<?php if($user_suggest_3!==false) { ?>
+									<?php 
+										$suggest_counter = 0;
+										$ci->load->model('connections_model');
+										$ci->load->model('avatar_model');
+										foreach ($user_suggest_3 as $us3){
+											if($us3['id'] == $my_user_id)
+												continue;
+											if(!$ci->connections_model->is_connection($my_user_id, $us3['id']))
+											{ 
+												$temp_full_name = $ci->person_model->read_user_person($us3['id']);
+												$temp_full_name = $temp_full_name['firstname'] . " " . $temp_full_name['lastname'];
+												$temp_avatar = $ci->avatar_model->user_current_avatar($us3['id']);
+												?>
+
+												<a href="{base}user/<?php echo md5($us3['id']); ?>" title="مشاهده ی پروفایل <?php echo $temp_full_name; ?>" target="_blank">
+													<div class="suggest-item">
+														<div class="suggest-item-image float-right text-center">
+															<img class="img-fluid" src="{base}upload/avatar/<?php echo $temp_avatar; ?>" title="<?php echo $temp_full_name; ?>" src="<?php echo $temp_full_name; ?>" />
+														</div>
+														<div class="suggest-item-content float-right">
+															<p class="text-dark"><?php echo $temp_full_name; ?></p>
+														</div>
+														<div class="clearfix"></div>
+													</div>
+												</a>
+
+												<?php $suggest_counter++;
+											}
+										}
+
+										if($suggest_counter==0)
+										{
+											echo '<p class="alert alert-dark">در حال حاظر پیشنهادی موجود نیست.</p>';
+										}
+									?>
+								<?php } else { ?>
+									<p class="alert alert-dark">پیشنهادی موجود نیست.</p>
 								<?php } ?>
-								<?php if(!empty($form_success)) { ?>
-									<div class="alert alert-success right-to-left text-right">{form_success}</div>
-								<?php } ?>
-								<div class="hr"></div>
-								<p><span class="fas fa-1x fa-question-circle"></span>&nbsp;<span>راهنمایی :</span></p>
-								<p>لطفا قبل از ثبت تغییرات حتما آنها را با دقت بررسی کنید.</p>
-								<p>شما می توانید اطلاعاتی را که دوست ندارید همگان ببینند پر نکنید یا در بخش تنظیمات محدودیت های نمایشی روی صفحه ی خود اعمال کنید.</p>
 							</div>
 						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="content-box">
+							<div class="real-content">
+								<div class="write-post-box">
+									<div class="write-post-box-title">
+										<h6><span class="fas fa-1x fa-pen-nib"></span>&nbsp;<span>ویرایش نوشته....</span></h6>
+									</div>
+									<div class="write-post-box-content">
+										<p></p>
+										{form_editpost_open}
+											<?php
+												$ci->load->model('file_model');
+												if(!is_null($post['file_id']))
+												{
+													$temp_file_address = $ci->file_model->find_file($post['file_id']);
+												?>
+												<img class="img-fluid timeline_posts-image" src="{base}upload/file/<?php echo $temp_file_address; ?>" title="تصویر نوشته" alt="تصویر نوشته" /><p></p>
+											<?php } ?>
+											{edit_post_content}
+											<p></p>
+											<div class="float-left">
+												<a href="{base}panel#<?php echo md5($post['id']); ?>" title="بازگشت" class="btn btn-danger">بازگشت</a> &nbsp;
+												{submit_input}
+											</div>
+											<div class="clearfix"></div>
+										{form_close}
+										<p></p>
+										<?php if(!empty($validation_errors)) { ?>
+											<div class="alert alert-danger right-to-left text-right">{validation_errors}</div>
+										<?php } ?>
+										<?php if(!empty($form_success)) { ?>
+											<div class="alert alert-success right-to-left text-right">{form_success}</div>
+										<?php } ?>
+										<div class="hr"></div>
+										<p><span class="fas fa-1x fa-question-circle"></span>&nbsp;<span>راهنمایی :</span></p>
+										<p>در صورت انصراف از تغییر لطفا روی کلید "بازگشت" بزنید.</p>
+										<p>لطفا قبل از ثبت تغییرات حتما آنها را با دقت بررسی کنید.</p>
+										<p>تصویر نوشته ها قابل تغییر نیستند و در صورت نیاز باید نوشته را حذف کنید.</p>
+									</div>
+								</div>
+							</div>
+						</div>
+
 					</div>
 					<div class="col-md-3">
 						<div class="content-box">

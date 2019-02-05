@@ -62,6 +62,7 @@ $route['forget'] 									= 'web/forget';
 $route['register'] 									= 'web/register';
 
 $route['panel'] 									= 'user/user/index';
+$route['panel/(:num)'] 								= 'user/user/index_more/$1';
 $route['panel/out']									= 'user/user/logout';
 $route['panel/setting']								= 'user/user/setting';
 $route['panel/profile']								= 'user/user/profile';
@@ -89,6 +90,8 @@ $route['panel/profile/edit/project'] 				= 'user/user/edit_project';
 $route['panel/profile/edit/project/edit/(:num)'] 	= 'user/user/single_project/$1';
 $route['panel/profile/edit/project/delete/(:num)']	= 'user/form/delete_project/$1';
 
+$route['panel/profile/connections'] 				= 'user/user/connections';
+
 $route['action/add_connect/(:any)']					= 'user/form/add_connect/$1';
 $route['action/delete_connect/(:any)']				= 'user/form/delete_connect/$1';
 $route['action/report/(:any)']						= 'user/form/report/$1';
@@ -100,6 +103,7 @@ $route['action/unconfirm_connect/(:any)']			= 'user/form/unconfirm_connect/$1';
 
 $route['user/(:any)']								= 'web/profile/$1';
 
-$route['panel/post/like/(:any)'] 					= 'user/user/like_post';
-$route['panel/post/edit/(:any)'] 					= 'user/user/edit_post';
-$route['panel/post/delete/(:any)'] 					= 'user/user/delete_post';
+$route['panel/post/like/(:any)'] 					= 'user/form/like_post/$1';
+$route['panel/post/dislike/(:any)'] 				= 'user/form/dislike_post/$1';
+$route['panel/post/edit/(:any)'] 					= 'user/user/edit_post/$1';
+$route['panel/post/delete/(:any)'] 					= 'user/form/delete_post/$1';

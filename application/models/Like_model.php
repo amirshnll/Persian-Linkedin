@@ -70,6 +70,25 @@ class Like_model extends CI_Model {
         else
             return false;
     }
+
+    public function is_like($post_id, $user_id)
+    {
+        if(empty($post_id) || empty($user_id))
+            return false;
+
+        $this->db->where('status', 1);
+        $this->db->where('user_id', $user_id);
+        $this->db->where('post_id', $post_id);
+        $this->db->select('id');
+        $query = $this->db->get('like');
+
+        if($query->num_rows())
+        {
+            return true;
+        }
+        else
+            return false;
+    }
     
 }
 

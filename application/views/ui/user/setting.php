@@ -43,6 +43,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 								<a href="{base}panel/profile" title="پروفایل من"><li><span class="fas fa-lg fa-user"></span></li></a>
 								<a href="{base}panel/notification" title="اعلانات"><li><span class="fas fa-lg fa-bell"></span></li></a>
 								<a href="{base}panel/message" title="پیام ها"><li><span class="fas fa-lg fa-envelope"></span></li></a>
+								<a href="{base}panel/profile/connections" title="ارتباطات"><li><span class="fas fa-lg fa-handshake"></span></li></a>
 							</ul>
 						</nav>
 					</div>
@@ -162,7 +163,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<footer>
 			<div class="footer">
 				<div class="row">
-					
+					<p>&copy; <?php echo date('Y'); ?> Persian Linkedin. All Right Reserved...</p>
 				</div>
 			</div>
 		</footer>

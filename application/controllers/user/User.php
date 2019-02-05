@@ -230,11 +230,28 @@ class User extends CI_Controller
 
 		$this->load->model('post_model');
 		$timeline_posts = $this->post_model->post_timeline($this->session->userdata('user_id'), 100);
+		$timeline_posts_count = 1;
 
 		$user_suggest_3 = $this->user_model->people_suggest(3, $this->session->userdata('user_id'));
 		$user_suggest_5 = $this->user_model->people_suggest(5, $this->session->userdata('user_id'));
 
 		$profile_open_key = $this->base_url() . 'user/' . md5($this->session->userdata('user_id'));
+
+		if($this->session->has_userdata('post_delete')) {
+			$post_delete = $this->session->userdata('post_delete');
+			$this->session->unset_userdata('post_delete');
+		}
+		else {
+			$post_delete="";
+		}
+
+		if($this->session->has_userdata('profile_success')) {
+			$profile_success = $this->session->userdata('profile_success');
+			$this->session->unset_userdata('profile_success');
+		}
+		else {
+			$profile_success="";
+		}
 
 		$data = array(
 			'form_search_open'		=>	$form_search_open,
@@ -263,7 +280,156 @@ class User extends CI_Controller
 			'user_suggest_3'		=>	$user_suggest_3,
 			'user_suggest_5'		=>	$user_suggest_5,
 			'my_user_id'			=>	$this->session->userdata('user_id'),
-			'profile_open_key'		=>	$profile_open_key
+			'profile_open_key'		=>	$profile_open_key,
+			'post_delete'			=>	$post_delete,
+			'profile_success'		=>	$profile_success,
+			'timeline_posts_count'	=>	$timeline_posts_count+1
+		);
+
+		$this->parser('user/panel', $data);
+	}
+
+	public function index_more($timeline_posts_count = 2)
+	{
+		$this->self_set_url($this->current_url());
+		$this->is_login();
+
+		$this->load->helper('form');
+		$form_search_open = form_open($this->base_url() . "user/form/search");
+		$search_input = form_input(
+			array(
+				'type'			=>	'text',
+				'name'			=>	'search',
+				'maxlength'		=>	255,
+				'placeholder'	=>	'تایپ + اینتر',
+				'class'			=>	'form-control text-right right-to-left'
+			)
+		);
+		$form_close 	= form_close();
+
+		$form_newpost_open = form_open_multipart($this->base_url() . "user/form/newpost");
+		$write_post_content = form_textarea(
+			array(
+				'id'			=>	'post_content',
+				'name'			=>	'post_content',
+				'maxlength'		=>	10000,
+				'rows'			=> 	4,
+				'placeholder'	=>	'چیزی بنویسید....',
+				'class'			=>	'form-control text-right right-to-left'
+			)
+		);
+		$file_post_content = '<input type="file" id="file-upload" name="post_file" accept="image/*" />';
+		$post_submit_input = form_input(
+			array(
+				'type'			=>	'submit',
+				'name'			=>	'submit',
+				'value'			=>	'اشتراک گذاری',
+				'class'			=>	'btn bg-success text-light float-left'
+			)
+		);
+
+		if($this->session->has_userdata('form_error')) {
+			$validation_errors = $this->session->userdata('form_error');
+			$this->session->unset_userdata('form_error');
+		}
+		else {
+			$validation_errors="";
+		}
+
+		if($this->session->has_userdata('form_success')) {
+			$form_success = $this->session->userdata('form_success');
+			$this->session->unset_userdata('form_success');
+		}
+		else {
+			$form_success="";
+		}
+
+		$this->load->model('connections_model');
+		$user_connection_count = $this->connections_model->user_connection_count($this->session->userdata('user_id'));
+		if($user_connection_count===false)
+			$user_connection_count = 0;
+
+		$this->load->model('profile_view_model');
+		$user_view_profile = $this->profile_view_model->viewed_profile_count($this->session->userdata('user_id'));
+		if($user_view_profile===false)
+			$user_view_profile = 0;
+
+		$this->load->model('avatar_model');
+		$user_current_avatar = $this->avatar_model->user_current_avatar($this->session->userdata('user_id'));
+
+		$this->load->model('person_model');
+		$user_person = $this->person_model->read_user_person($this->session->userdata('user_id'));
+		$user_full_name = $user_person['firstname'] . " " . $user_person['lastname'];
+
+		$this->load->model('contact_model');
+		$user_contact = $this->contact_model->user_all_contact($this->session->userdata('user_id'));
+		$twitter  = "";
+		$linkedin = "";
+		$telegram = "";
+		$skype    = "";
+		foreach ($user_contact as $ucs) {
+			if($ucs['type']==1)
+				$linkedin = $ucs['content'];
+			if($ucs['type']==2)
+				$twitter = $ucs['content'];
+			if($ucs['type']==3)
+				$telegram = $ucs['content'];
+			if($ucs['type']==4)
+				$skype = $ucs['content'];
+		}
+
+		$this->load->model('user_model');
+		$this->load->library('jdf');
+		$register_date = $this->jdf->jdate('d / m / Y', $this->user_model->get_register_time_id($this->session->userdata('user_id')));
+
+		if(!is_numeric($timeline_posts_count) || $timeline_posts_count < 2)
+			$timeline_posts_count = 2;
+		$this->load->model('post_model');
+		$timeline_posts = $this->post_model->post_timeline($this->session->userdata('user_id'), $timeline_posts_count * 100);
+
+		$user_suggest_3 = $this->user_model->people_suggest(3, $this->session->userdata('user_id'));
+		$user_suggest_5 = $this->user_model->people_suggest(5, $this->session->userdata('user_id'));
+
+		$profile_open_key = $this->base_url() . 'user/' . md5($this->session->userdata('user_id'));
+
+		if($this->session->has_userdata('post_delete')) {
+			$post_delete = $this->session->userdata('post_delete');
+			$this->session->unset_userdata('post_delete');
+		}
+		else {
+			$post_delete="";
+		}
+
+		$data = array(
+			'form_search_open'		=>	$form_search_open,
+			'search_input'			=>	$search_input,
+			'form_close'			=>	$form_close,
+			'form_newpost_open'		=>	$form_newpost_open,
+			'write_post_content'	=>	$write_post_content,
+			'file_post_content'		=>	$file_post_content,
+			'post_submit_input'		=>	$post_submit_input,
+			'validation_errors'		=>	$validation_errors,
+			'form_success'			=>	$form_success,
+			'timeline_posts'		=>	$timeline_posts,
+			'user_connection_count'	=>	$user_connection_count,
+			'user_view_profile'		=>	$user_view_profile,
+			'user_current_avatar'	=>	$user_current_avatar,
+			'user_full_name'		=>	$user_full_name,
+			'twitter_limit'			=>	$this->character_limiter($twitter, 30),
+			'linkedin_limit'		=>	$this->character_limiter($linkedin, 30),
+			'telegram_limit'		=>	$this->character_limiter($telegram, 30),
+			'skype_limit'			=>	$this->character_limiter($skype, 30),
+			'twitter'				=>	$twitter,
+			'linkedin'				=>	$linkedin,
+			'telegram'				=>	$telegram,
+			'skype'					=>	$skype,
+			'register_date'			=>	$register_date,
+			'user_suggest_3'		=>	$user_suggest_3,
+			'user_suggest_5'		=>	$user_suggest_5,
+			'my_user_id'			=>	$this->session->userdata('user_id'),
+			'profile_open_key'		=>	$profile_open_key,
+			'post_delete'			=>	$post_delete,
+			'timeline_posts_count'	=>	$timeline_posts_count+1
 		);
 
 		$this->parser('user/panel', $data);
@@ -611,6 +777,9 @@ class User extends CI_Controller
 
 		$user_suggest_3 = $this->user_model->people_suggest(3, $this->session->userdata('user_id'));
 
+		$this->load->model('connections_model');
+		$summary_connection = $this->connections_model->user_connection($this->session->userdata('user_id'), 5);
+
 		$data = array(
 			'form_search_open'		=>	$form_search_open,
 			'search_input'			=>	$search_input,
@@ -640,7 +809,8 @@ class User extends CI_Controller
 			'user_suggest_3'		=>	$user_suggest_3,
 			'my_user_id'			=>	$this->session->userdata('user_id'),
 			'user_full_name'		=>	$user_person['firstname'] . " " . $user_person['lastname'],
-			'register_date'			=>	$register_date
+			'register_date'			=>	$register_date,
+			'summary_connection'	=>	$summary_connection
 		);
 
 		$this->parser('user/profile', $data);
@@ -2652,17 +2822,252 @@ class User extends CI_Controller
 		$this->parser('user/changepassword', $data);
 	}
 
-	public function like_post($post_key)
-	{
-
-	}
 	public function edit_post($post_key)
 	{
+		$this->self_set_url($this->current_url());
+		$this->is_login();
 
+		if(empty($post_key))
+        {
+            redirect($this->base_url() . "panel");
+            exit(0);
+        }
+
+        $this->load->helper('security');
+        $post_key = trim(xss_clean($post_key));
+        $this->load->model('post_model');
+        $post = $this->post_model->find_post($post_key);
+        if($post===false)
+        {
+            redirect($this->base_url() . "panel");
+            exit(0);
+        }
+
+        if($this->session->userdata('user_id')!=$post['user_id'])
+        {
+            redirect($this->base_url() . "panel");
+            exit(0);
+        }
+
+		$this->load->helper('form');
+		$form_search_open = form_open($this->base_url() . "user/form/search");
+		$search_input = form_input(
+			array(
+				'type'			=>	'text',
+				'name'			=>	'search',
+				'maxlength'		=>	255,
+				'placeholder'	=>	'تایپ + اینتر',
+				'class'			=>	'form-control text-right right-to-left'
+			)
+		);
+		$form_close 	= form_close();
+
+		$form_editpost_open = form_open_multipart($this->base_url() . "user/form/edit_post/" . $post_key);
+		$edit_post_content = form_textarea(
+			array(
+				'id'			=>	'post_content',
+				'name'			=>	'post_content',
+				'maxlength'		=>	10000,
+				'rows'			=> 	strlen($post['content']) / 130,
+				'value'			=>	$post['content'],
+				'placeholder'	=>	'متن نوشته ی خود را بنویسید...',
+				'class'			=>	'form-control text-right right-to-left'
+			)
+		);
+		$submit_input = form_input(
+			array(
+				'type'			=>	'submit',
+				'name'			=>	'submit',
+				'value'			=>	'ویرایش نوشته',
+				'class'			=>	'btn bg-success text-light float-left'
+			)
+		);
+
+		if($this->session->has_userdata('form_error')) {
+			$validation_errors = $this->session->userdata('form_error');
+			$this->session->unset_userdata('form_error');
+		}
+		else {
+			$validation_errors="";
+		}
+
+		if($this->session->has_userdata('form_success')) {
+			$form_success = $this->session->userdata('form_success');
+			$this->session->unset_userdata('form_success');
+		}
+		else {
+			$form_success="";
+		}
+
+		$this->load->model('connections_model');
+		$user_connection_count = $this->connections_model->user_connection_count($this->session->userdata('user_id'));
+		if($user_connection_count===false)
+			$user_connection_count = 0;
+
+		$this->load->model('profile_view_model');
+		$user_view_profile = $this->profile_view_model->viewed_profile_count($this->session->userdata('user_id'));
+		if($user_view_profile===false)
+			$user_view_profile = 0;
+
+		$this->load->model('avatar_model');
+		$user_current_avatar = $this->avatar_model->user_current_avatar($this->session->userdata('user_id'));
+
+		$this->load->model('person_model');
+		$user_person = $this->person_model->read_user_person($this->session->userdata('user_id'));
+		$user_full_name = $user_person['firstname'] . " " . $user_person['lastname'];
+
+		$this->load->model('contact_model');
+		$user_contact = $this->contact_model->user_all_contact($this->session->userdata('user_id'));
+		$twitter  = "";
+		$linkedin = "";
+		$telegram = "";
+		$skype    = "";
+		foreach ($user_contact as $ucs) {
+			if($ucs['type']==1)
+				$linkedin = $ucs['content'];
+			if($ucs['type']==2)
+				$twitter = $ucs['content'];
+			if($ucs['type']==3)
+				$telegram = $ucs['content'];
+			if($ucs['type']==4)
+				$skype = $ucs['content'];
+		}
+
+		$this->load->model('user_model');
+		$this->load->library('jdf');
+		$register_date = $this->jdf->jdate('d / m / Y', $this->user_model->get_register_time_id($this->session->userdata('user_id')));
+
+		$user_suggest_3 = $this->user_model->people_suggest(3, $this->session->userdata('user_id'));
+		$user_suggest_5 = $this->user_model->people_suggest(5, $this->session->userdata('user_id'));
+
+		$profile_open_key = $this->base_url() . 'user/' . md5($this->session->userdata('user_id'));
+
+		$data = array(
+			'form_search_open'		=>	$form_search_open,
+			'search_input'			=>	$search_input,
+			'form_close'			=>	$form_close,
+			'form_editpost_open'	=>	$form_editpost_open,
+			'edit_post_content'		=>	$edit_post_content,
+			'submit_input'			=>	$submit_input,
+			'validation_errors'		=>	$validation_errors,
+			'form_success'			=>	$form_success,
+			'user_connection_count'	=>	$user_connection_count,
+			'user_view_profile'		=>	$user_view_profile,
+			'user_current_avatar'	=>	$user_current_avatar,
+			'user_full_name'		=>	$user_full_name,
+			'twitter_limit'			=>	$this->character_limiter($twitter, 30),
+			'linkedin_limit'		=>	$this->character_limiter($linkedin, 30),
+			'telegram_limit'		=>	$this->character_limiter($telegram, 30),
+			'skype_limit'			=>	$this->character_limiter($skype, 30),
+			'twitter'				=>	$twitter,
+			'linkedin'				=>	$linkedin,
+			'telegram'				=>	$telegram,
+			'skype'					=>	$skype,
+			'register_date'			=>	$register_date,
+			'user_suggest_3'		=>	$user_suggest_3,
+			'user_suggest_5'		=>	$user_suggest_5,
+			'my_user_id'			=>	$this->session->userdata('user_id'),
+			'profile_open_key'		=>	$profile_open_key,
+			'post'					=>	$post
+		);
+
+		$this->parser('user/editpost', $data);
 	}
-	public function delete_post($post_key)
-	{
 
+	public function connections()
+	{
+		$this->self_set_url($this->current_url());
+		$this->is_login();
+
+		$this->load->helper('form');
+		$form_search_open = form_open($this->base_url() . "user/form/search");
+		$search_input = form_input(
+			array(
+				'type'			=>	'text',
+				'name'			=>	'search',
+				'maxlength'		=>	255,
+				'placeholder'	=>	'تایپ + اینتر',
+				'class'			=>	'form-control text-right right-to-left'
+			)
+		);
+		$form_close 	= form_close();
+
+		$this->load->model('connections_model');
+		$user_connection_count = $this->connections_model->user_connection_count($this->session->userdata('user_id'));
+		if($user_connection_count===false)
+			$user_connection_count = 0;
+
+		$this->load->model('profile_view_model');
+		$user_view_profile = $this->profile_view_model->viewed_profile_count($this->session->userdata('user_id'));
+		if($user_view_profile===false)
+			$user_view_profile = 0;
+
+		$this->load->model('avatar_model');
+		$user_current_avatar = $this->avatar_model->user_current_avatar($this->session->userdata('user_id'));
+
+		$this->load->model('person_model');
+		$user_person = $this->person_model->read_user_person($this->session->userdata('user_id'));
+		$user_full_name = $user_person['firstname'] . " " . $user_person['lastname'];
+
+		$this->load->model('contact_model');
+		$user_contact = $this->contact_model->user_all_contact($this->session->userdata('user_id'));
+		$twitter  = "";
+		$linkedin = "";
+		$telegram = "";
+		$skype    = "";
+		foreach ($user_contact as $ucs) {
+			if($ucs['type']==1)
+				$linkedin = $ucs['content'];
+			if($ucs['type']==2)
+				$twitter = $ucs['content'];
+			if($ucs['type']==3)
+				$telegram = $ucs['content'];
+			if($ucs['type']==4)
+				$skype = $ucs['content'];
+		}
+
+		$this->load->model('user_model');
+		$this->load->library('jdf');
+		$register_date = $this->jdf->jdate('d / m / Y', $this->user_model->get_register_time_id($this->session->userdata('user_id')));
+
+		$profile_open_key = $this->base_url() . 'user/' . md5($this->session->userdata('user_id'));
+
+		$this->load->model('connections_model');
+		$connections = $this->connections_model->user_connection($this->session->userdata('user_id'));
+		$respond_connections = $this->connections_model->user_respondconnection($this->session->userdata('user_id'));
+
+		if($this->session->has_userdata('profile_success')) {
+			$profile_success = $this->session->userdata('profile_success');
+			$this->session->unset_userdata('profile_success');
+		}
+		else {
+			$profile_success="";
+		}
+
+		$data = array(
+			'form_search_open'		=>	$form_search_open,
+			'search_input'			=>	$search_input,
+			'form_close'			=>	$form_close,
+			'user_connection_count'	=>	$user_connection_count,
+			'user_view_profile'		=>	$user_view_profile,
+			'user_current_avatar'	=>	$user_current_avatar,
+			'user_full_name'		=>	$user_full_name,
+			'twitter_limit'			=>	$this->character_limiter($twitter, 30),
+			'linkedin_limit'		=>	$this->character_limiter($linkedin, 30),
+			'telegram_limit'		=>	$this->character_limiter($telegram, 30),
+			'skype_limit'			=>	$this->character_limiter($skype, 30),
+			'twitter'				=>	$twitter,
+			'linkedin'				=>	$linkedin,
+			'telegram'				=>	$telegram,
+			'skype'					=>	$skype,
+			'register_date'			=>	$register_date,
+			'profile_open_key'		=>	$profile_open_key,
+			'connections'			=>	$connections,
+			'respond_connections'	=>	$respond_connections,
+			'profile_success'		=>	$profile_success
+		);
+
+		$this->parser('user/connections', $data);
 	}
 
 }
