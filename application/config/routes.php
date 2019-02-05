@@ -112,3 +112,9 @@ $route['panel/post/delete/(:any)'] 					= 'user/form/delete_post/$1';
 
 $route['panel/new_message']							= 'user/user/new_message';
 $route['panel/message/(:any)']						= 'user/user/chat/$1';
+
+$route['panel/search/(:any)']						= 'user/user/search/$1';
+
+$route['find'] 										= 'web/find';
+$route['finds/(:any)'] 								= 'web/finds/$1';
+$route['find/alphabet/(:num)'] 						= 'web/find_alphabet/$1';

@@ -562,3 +562,23 @@
 .bg-unread {
 	border:1px solid #f00;
 }
+.out_search {
+	min-height: 500px;
+	margin: 20px 0;
+}
+.alphabet .nav {
+	padding: 0;
+	line-height: 20px !important;
+}
+.alphabet .navbar {
+	margin: 0 !important;
+	padding: 0 !important;
+}
+.alphabet ul {
+	margin: 0 !important;
+	padding: 0 !important;
+}
+.alphabet li {
+	list-style-type: none !important;
+
+}

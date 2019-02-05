@@ -65,21 +65,21 @@ $ci =&get_instance();
 								<p><strong><span class="fas fa-1x fa-list"></span>&nbsp;جستجو برای  " {search_text} " : </strong></p>
 
 								<?php
-									if($country_search!==false)
+									if($array_result!==false)
 									{
 										$suggest_counter = 0;
 										$ci->load->model('connections_model');
 										$ci->load->model('avatar_model');
 
-										foreach ($country_search as $css){
-											if($css['user_id'] == $my_user_id)
+										foreach ($array_result as $ars){
+											if($ars['user_id'] == $my_user_id)
 												continue;
 
-											$temp_full_name = $ci->person_model->read_user_person($css['user_id']);
+											$temp_full_name = $ci->person_model->read_user_person($ars['user_id']);
 											$temp_full_name = $temp_full_name['firstname'] . " " . $temp_full_name['lastname'];
-											$temp_avatar = $ci->avatar_model->user_current_avatar($css['user_id']);
+											$temp_avatar = $ci->avatar_model->user_current_avatar($ars['user_id']);
 											?>
-											<a href="{base}user/<?php echo md5($css['user_id']); ?>" title="مشاهده ی پروفایل <?php echo $temp_full_name; ?>" target="_blank">
+											<a href="{base}user/<?php echo md5($ars['user_id']); ?>" title="مشاهده ی پروفایل <?php echo $temp_full_name; ?>" target="_blank">
 												<div class="suggest-item">
 													<div class="suggest-item-image float-right text-center">
 														<img class="img-fluid" src="{base}upload/avatar/<?php echo $temp_avatar; ?>" title="<?php echo $temp_full_name; ?>" src="<?php echo $temp_full_name; ?>" />
@@ -95,85 +95,13 @@ $ci =&get_instance();
 
 										if($suggest_counter==0)
 										{
-											$country_search = false;
-										}
-									}
-								?>
-
-								<?php
-									if($person_search!==false)
-									{
-										$suggest_counter = 0;
-										$ci->load->model('connections_model');
-										$ci->load->model('avatar_model');
-
-										foreach ($person_search as $pss){
-											if($pss['user_id'] == $my_user_id)
-												continue;
-
-											$temp_full_name = $ci->person_model->read_user_person($pss['user_id']);
-											$temp_full_name = $temp_full_name['firstname'] . " " . $temp_full_name['lastname'];
-											$temp_avatar = $ci->avatar_model->user_current_avatar($pss['user_id']);
-											?>
-											<a href="{base}user/<?php echo md5($pss['user_id']); ?>" title="مشاهده ی پروفایل <?php echo $temp_full_name; ?>" target="_blank">
-												<div class="suggest-item">
-													<div class="suggest-item-image float-right text-center">
-														<img class="img-fluid" src="{base}upload/avatar/<?php echo $temp_avatar; ?>" title="<?php echo $temp_full_name; ?>" src="<?php echo $temp_full_name; ?>" />
-													</div>
-													<div class="suggest-item-content float-right">
-														<p class="text-dark"><?php echo $temp_full_name; ?></p>
-													</div>
-													<div class="clearfix"></div>
-												</div>
-											</a>
-											<?php $suggest_counter++;
-										}
-
-										if($suggest_counter==0)
-										{
-											$person_search = false;
-										}
-									}
-								?>
-
-								<?php
-									if($item_search!==false)
-									{
-										$suggest_counter = 0;
-										$ci->load->model('connections_model');
-										$ci->load->model('avatar_model');
-
-										foreach ($item_search as $iss){
-											if($iss['user_id'] == $my_user_id)
-												continue;
-
-											$temp_full_name = $ci->person_model->read_user_person($iss['user_id']);
-											$temp_full_name = $temp_full_name['firstname'] . " " . $temp_full_name['lastname'];
-											$temp_avatar = $ci->avatar_model->user_current_avatar($iss['user_id']);
-											?>
-											<a href="{base}user/<?php echo md5($iss['user_id']); ?>" title="مشاهده ی پروفایل <?php echo $temp_full_name; ?>" target="_blank">
-												<div class="suggest-item">
-													<div class="suggest-item-image float-right text-center">
-														<img class="img-fluid" src="{base}upload/avatar/<?php echo $temp_avatar; ?>" title="<?php echo $temp_full_name; ?>" src="<?php echo $temp_full_name; ?>" />
-													</div>
-													<div class="suggest-item-content float-right">
-														<p class="text-dark"><?php echo $temp_full_name; ?></p>
-													</div>
-													<div class="clearfix"></div>
-												</div>
-											</a>
-											<?php $suggest_counter++;
-										}
-
-										if($suggest_counter==0)
-										{
-											$item_search = false;
+											$array_result = false;
 										}
 									}
 								?>
 
 								<?php 
-									if($country_search===false && $person_search===false && $item_search===false)
+									if($array_result===false)
 									{
 										echo '<p class="alert alert-dark">چیزی یافت نشد.</p>';
 									}

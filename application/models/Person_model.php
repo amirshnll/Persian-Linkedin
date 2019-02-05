@@ -123,6 +123,99 @@ class Person_model extends CI_Model {
         else
             return false;
     }
+
+    public function random_person_country($country_id, $limit)
+    {
+        if(empty($country_id))
+            return false;
+
+        if($limit!=0)
+            $this->db->limit($limit);
+        $this->db->order_by('id', 'RANDOM');
+        $this->db->where('country_id', $country_id);
+        $query = $this->db->get('person');
+
+        if($query->num_rows())
+        {
+            $query = $query->result_array();
+            return $query;
+        }
+        else
+            return false;
+    }
+
+    public function random_person_names_like($like_string, $limit)
+    {
+        if(empty($like_string))
+            return false;
+
+        $temp_like_string = explode(" ", $like_string);
+        $temp_like_string = $temp_like_string[0];
+
+        if($limit!=0)
+            $this->db->limit($limit);
+        $this->db->order_by('id', 'RANDOM');
+        $this->db->like('firstname', $temp_like_string);
+        $this->db->or_like('lastname', $temp_like_string);
+        $this->db->select('*');
+        $this->db->from('person');
+        $query = $this->db->get('');
+
+        if($query->num_rows())
+        {
+            $query = $query->result_array();
+            return $query;
+        }
+        else
+        {
+            if($temp_like_string!==$like_string)
+            {
+                $temp_like_string = explode(" ", $like_string);
+                $temp_like_string = $temp_like_string[1];
+
+                if($limit!=0)
+                $this->db->limit($limit);
+                $this->db->order_by('id', 'RANDOM');
+                $this->db->like('firstname', $temp_like_string);
+                $this->db->or_like('lastname', $temp_like_string);
+                $this->db->select('*');
+                $this->db->from('person');
+                $query = $this->db->get('');
+
+                if($query->num_rows())
+                {
+                    $query = $query->result_array();
+                    return $query;
+                }
+                else
+                    return false;
+            }
+            else
+                return false;
+        }
+    }
+
+    public function random_person_alphabet_like($like_string, $limit)
+    {
+        if(empty($like_string))
+            return false;
+
+        if($limit!=0)
+            $this->db->limit($limit);
+        $this->db->order_by('id', 'RANDOM');
+        $this->db->or_like('lastname', $like_string, 'after');
+        $this->db->select('*');
+        $this->db->from('person');
+        $query = $this->db->get('');
+
+        if($query->num_rows())
+        {
+            $query = $query->result_array();
+            return $query;
+        }
+        else
+            return false;
+    }
     
 }
 

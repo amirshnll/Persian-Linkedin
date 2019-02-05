@@ -134,6 +134,30 @@ class User_item_model extends CI_Model {
         else
             return false;
     }
+
+    public function random_item_names_like($like_string, $limit)
+    {
+        if(empty($like_string))
+            return false;
+
+        if($limit!=0)
+            $this->db->limit($limit);
+        $this->db->order_by('id', 'RANDOM');
+        $this->db->like('title', $like_string);
+        $this->db->or_like('content', $like_string);
+        $this->db->group_by('user_id');
+        $this->db->select('user_id');
+        $this->db->from('user_item');
+        $query = $this->db->get('');
+
+        if($query->num_rows())
+        {
+            $query = $query->result_array();
+            return $query;
+        }
+        else
+            return false;
+    }
     
 }
 

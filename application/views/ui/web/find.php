@@ -44,7 +44,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 								{search_input}
 								<div class="text-center">
 									<div class="flot-left d-inline width-50">{submit_input}</div>
-									<div class="float-right d-inline width-50"><a href="{base}login" title="همین حالا رایگان عضو سایت شوید" class="nav-link text-light"><span>عضویت</span>&nbsp;<span class="fas fa-1x fa-ban"></span></a></div>
+									<div class="float-right d-inline width-50"><a href="{base}register" title="همین حالا رایگان عضو سایت شوید" class="nav-link text-light"><span>عضویت</span>&nbsp;<span class="fas fa-1x fa-user-plus"></span></a></div>
 									<div class="clearfix"></div>
 								</div>
 							{form_close}

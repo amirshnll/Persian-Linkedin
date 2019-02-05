@@ -13,6 +13,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<link rel="stylesheet" type="text/css" href="{base}assets/library/fontawesome/css/fontawesome.min.css">
 	<link rel="stylesheet" type="text/css" href="{base}assets/library/fontawesome/css/all.min.css">
 	<link rel="shortcut icon" href="{base}assets/images/favicon.png"/>
+	<script href="http://localhost:8080/assets/library/jquery/jquery-3.3.1.min.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script href="http://localhost:8080/assets/library/bootstrap/js/bootstrap.min.js"></script>
+	<script href="http://localhost:8080/assets/library/bootstrap/js/bootstrap.bundle.min.js"></script>
 </head>
 <body class="user-out-form" id="register-page">
 	<div class="container">
@@ -83,8 +87,5 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		</footer>
 	</div>
 
-	<script href="{base}assets/library/jquery/jquery-3.3.1.min.js"></script>
-	<script href="{base}assets/library/bootstrap/js/bootstrap.min.js"></script>
-	<script href="{base}assets/library/bootstrap/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

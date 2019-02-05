@@ -553,10 +553,340 @@ class Web extends CI_Controller
 		}
 
 		$data = array(
-			
+			'alphabet'		=>	array("ا", "ب", "پ", "ت", "ث", "ج", "چ", "ح", "خ", "د", "ذ", "ر", "ز", "ژ", "س", "ش", "ص", "ض", "ط", "ظ", "ع", "غ", "ف", "ق", "ک", "گ", "ل", "م", "ن", "و", "هـ", "ی")
 		);
 
 		$this->parser('web/rules', $data);
+	}
+
+	public function find()
+	{
+		$this->self_set_url($this->current_url());
+		if($this->check_login())
+		{
+			$this->load->helper('url');
+			redirect($this->base_url() . "panel");
+			exit(0);
+		}
+
+		$this->load->helper('form');
+		$form_open = form_open($this->base_url() . "user/form/out_search");
+		$search_input = form_input(
+			array(
+				'type'			=>	'text',
+				'name'			=>	'search',
+				'maxlength'		=>	255,
+				'placeholder'	=>	'⛶ جستجو',
+				'class'			=>	'form-control text-right right-to-left'
+			)
+		);
+		$submit_input = form_input(
+			array(
+				'type'			=>	'submit',
+				'name'			=>	'submit',
+				'value'			=>	'جستجو  ⚐',
+				'class'			=>	'btn bg-light'
+			)
+		);
+		$form_close 	= form_close();
+
+		$data = array(
+			'form_open' 	=>	$form_open,
+			'search_input'	=>	$search_input,
+			'submit_input'	=>	$submit_input,
+			'form_close'	=>	$form_close,
+			'alphabet'		=>	array("ا", "ب", "پ", "ت", "ث", "ج", "چ", "ح", "خ", "د", "ذ", "ر", "ز", "ژ", "س", "ش", "ص", "ض", "ط", "ظ", "ع", "غ", "ف", "ق", "ک", "گ", "ل", "م", "ن", "و", "هـ", "ی")
+		);
+
+		$this->parser('web/find', $data);
+	}
+
+	public function finds($search_text)
+	{
+		$this->self_set_url($this->current_url());
+		if($this->check_login())
+		{
+			$this->load->helper('url');
+			redirect($this->base_url() . "panel");
+			exit(0);
+		}
+
+		if(is_null($search_text) || empty($search_text) || strlen($search_text) < 1 || strlen($search_text) > 255 || $search_text=='emptyreq')
+		{
+			redirect($this->base_url() . "find");
+			exit(0);
+		}
+
+		$this->load->helper('security');
+		$search_text = ltrim(rtrim(xss_clean($search_text)));
+
+		$this->load->model('country_model');
+		$this->load->model('person_model');
+		$this->load->model('user_item_model');
+		$country_search	= false;
+		$person_search	= false;
+		$item_search	= false;
+		
+		/* Country Search */
+		$country_id = $this->country_model->get_country_id($search_text);
+		
+		if($country_id===false || !is_numeric($country_id) || is_null($country_id))
+			$country_search = false;
+		else
+			$country_search = $this->person_model->random_person_country($country_id, 30);
+
+		/* Person Search */
+		$person_search = $this->person_model->random_person_names_like($search_text, 30);
+
+		/* User Item Search */
+		$user_item = $this->user_item_model->random_item_names_like($search_text, 30);
+		if($user_item!==false)
+		{
+			$item_search = array();
+			$item_search_counter = 1;
+			foreach ($user_item as $uit) {
+				$temp_person = $this->person_model->read_user_person($uit['user_id']);
+				if($temp_person!==false)
+				{
+					$item_search[$item_search_counter] = $temp_person;
+					$item_search_counter++;
+				}
+				else
+					continue;
+			}
+		}
+
+		$this->load->helper('form');
+		$form_open = form_open($this->base_url() . "user/form/out_search");
+		$search_input = form_input(
+			array(
+				'type'			=>	'text',
+				'name'			=>	'search',
+				'maxlength'		=>	255,
+				'placeholder'	=>	'⛶ جستجو',
+				'class'			=>	'form-control text-right right-to-left'
+			)
+		);
+		$submit_input = form_input(
+			array(
+				'type'			=>	'submit',
+				'name'			=>	'submit',
+				'value'			=>	'جستجو  ',
+				'class'			=>	'btn bg-success text-light float-left'
+			)
+		);
+		$form_close 	= form_close();
+
+
+		if($country_search!==false && $person_search!==false && $item_search!==false)
+		{
+			$array_result = array_unique(array_merge($country_search,$person_search), SORT_REGULAR);
+			$array_result = array_unique(array_merge($array_result,$item_search), SORT_REGULAR);
+		}
+		elseif(  ($country_search!==false) && ($person_search===false && $item_search===false) )
+		{
+			$array_result = $country_search;
+		}
+		elseif(  ($person_search!==false) && ($country_search===false && $item_search===false) )
+		{
+			$array_result = $person_search;
+		}
+		elseif(  ($item_search!==false) && ($person_search===false && $country_search===false) )
+		{
+			$array_result = $item_search;
+		}
+		elseif(  ($country_search===false) && ($person_search!==false && $item_search!==false) )
+		{
+			$array_result = array_unique(array_merge($person_search,$item_search), SORT_REGULAR);
+		}
+		elseif(  ($person_search===false) && ($country_search!==false && $item_search!==false) )
+		{
+			$array_result = array_unique(array_merge($country_search,$item_search), SORT_REGULAR);
+		}
+		elseif(  ($item_search===false) && ($person_search!==false && $country_search!==false) )
+		{
+			$array_result = array_unique(array_merge($person_search,$country_search), SORT_REGULAR);
+		}
+		else
+		{
+			$array_result = false;
+		}
+
+		$data = array(
+			'array_result'		=>	$array_result,
+			'form_open'			=>	$form_open,
+			'search_input'		=>	$search_input,
+			'form_close'		=>	$form_close,
+			'submit_input'		=>	$submit_input,
+			'search_text'		=>	$search_text,
+			'alphabet'		=>	array("ا", "ب", "پ", "ت", "ث", "ج", "چ", "ح", "خ", "د", "ذ", "ر", "ز", "ژ", "س", "ش", "ص", "ض", "ط", "ظ", "ع", "غ", "ف", "ق", "ک", "گ", "ل", "م", "ن", "و", "هـ", "ی")
+		);
+
+		$this->parser('web/finds', $data);
+	}
+
+	public function find_alphabet($alphabet_id)
+	{
+		$this->self_set_url($this->current_url());
+		if($this->check_login())
+		{
+			$this->load->helper('url');
+			redirect($this->base_url() . "panel");
+			exit(0);
+		}
+
+		if(is_null($alphabet_id) || empty($alphabet_id) || strlen($alphabet_id) < 1 || strlen($alphabet_id) > 255 || !is_numeric($alphabet_id))
+		{
+			redirect($this->base_url() . "find");
+			exit(0);
+		}
+
+		$this->load->helper('security');
+		$alphabet_id = ltrim(rtrim(xss_clean($alphabet_id)));
+
+		switch ($alphabet_id) {
+			case 1:
+				$search_text = 'ا';
+				break;
+			case 2:
+				$search_text = 'ب';
+				break;
+			case 3:
+				$search_text = 'پ';
+				break;
+			case 4:
+				$search_text = 'ت';
+				break;
+			case 5:
+				$search_text = 'ث';
+				break;
+			case 6:
+				$search_text = 'ج';
+				break;
+			case 7:
+				$search_text = 'چ';
+				break;
+			case 8:
+				$search_text = 'ح';
+				break;
+			case 9:
+				$search_text = 'خ';
+				break;
+			case 10:
+				$search_text = 'د';
+				break;
+			case 11:
+				$search_text = 'ذ';
+				break;
+			case 12:
+				$search_text = 'ر';
+				break;
+			case 13:
+				$search_text = 'ز';
+				break;
+			case 14:
+				$search_text = 'ژ';
+				break;
+			case 15:
+				$search_text = 'س';
+				break;
+			case 16:
+				$search_text = 'ش';
+				break;
+			case 17:
+				$search_text = 'ص';
+				break;
+			case 18:
+				$search_text = 'ض';
+				break;
+			case 19:
+				$search_text = 'ط';
+				break;
+			case 20:
+				$search_text = 'ظ';
+				break;
+			case 21:
+				$search_text = 'ع';
+				break;
+			case 22:
+				$search_text = 'غ';
+				break;
+			case 23:
+				$search_text = 'ف';
+				break;
+			case 24:
+				$search_text = 'ق';
+				break;
+			case 25:
+				$search_text = 'ک';
+				break;
+			case 26:
+				$search_text = 'گ';
+				break;
+			case 27:
+				$search_text = 'ل';
+				break;
+			case 28:
+				$search_text = 'م';
+				break;
+			case 29:
+				$search_text = 'ن';
+				break;
+			case 30:
+				$search_text = 'و';
+				break;
+			case 31:
+				$search_text = 'ه';
+				break;
+			case 32:
+				$search_text = 'ی';
+				break;
+			default:
+				redirect($this->base_url() . "find");
+				exit(0);
+				break;
+		}
+
+		$this->load->model('person_model');
+		$person_search	= false;
+
+		/* Person Search */
+		$person_search = $this->person_model->random_person_alphabet_like($search_text, 30);
+
+		$this->load->helper('form');
+		$form_open = form_open($this->base_url() . "user/form/out_search");
+		$search_input = form_input(
+			array(
+				'type'			=>	'text',
+				'name'			=>	'search',
+				'maxlength'		=>	255,
+				'placeholder'	=>	'⛶ جستجو',
+				'class'			=>	'form-control text-right right-to-left'
+			)
+		);
+		$submit_input = form_input(
+			array(
+				'type'			=>	'submit',
+				'name'			=>	'submit',
+				'value'			=>	'جستجو  ',
+				'class'			=>	'btn bg-success text-light float-left'
+			)
+		);
+		$form_close 	= form_close();
+
+		$array_result = $person_search;
+
+		$data = array(
+			'array_result'		=>	$array_result,
+			'form_open'			=>	$form_open,
+			'search_input'		=>	$search_input,
+			'form_close'		=>	$form_close,
+			'submit_input'		=>	$submit_input,
+			'search_text'		=>	$search_text,
+			'alphabet'		=>	array("ا", "ب", "پ", "ت", "ث", "ج", "چ", "ح", "خ", "د", "ذ", "ر", "ز", "ژ", "س", "ش", "ص", "ض", "ط", "ظ", "ع", "غ", "ف", "ق", "ک", "گ", "ل", "م", "ن", "و", "هـ", "ی")
+		);
+
+		$this->parser('web/alphabet', $data);
 	}
 
 }

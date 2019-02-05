@@ -7,9 +7,17 @@ deny from all
 RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ index.php/$1 [L]
+RewriteRule ^([\s\S]*)$ index.php/$1 [L]
 
 php_value upload_max_filesize 100M
 php_value post_max_size 100M
 php_value max_execution_time 300
 php_value max_input_time 300
+
+<FilesMatch "\.(html|htm|js|css|php)>
+FileETag None
+Header unset ETag
+Header set Cache-Control "max-age=0, no-cache, no-store, must-revalidate"
+Header set Pragma "no-cache"
+Header set Expires "Wed, 11 Jan 1984 05:00:00 GMT"
+</FilesMatch>
