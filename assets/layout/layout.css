@@ -221,3 +221,29 @@
     -webkit-box-shadow: none;
     box-shadow: none !important;
 }
+.user-panel .write-post-box-content input[type="file"] {
+    display: none;
+}
+.user-panel .write-post-box-content .custom-file-upload {
+	margin-left: 10px;
+    cursor: pointer;
+}
+
+.user-panel .content .content-box .edit-item-icon span {
+	font-size: 11px;
+}
+
+.database-table
+{
+	border:1px solid #000;
+	width: 100%;
+	font-size: 12px;
+}
+.database-table th {
+	padding: 10px;
+	background-color: #000;
+	color: #fff;
+}
+.database-table td {
+	padding: 5px;
+}

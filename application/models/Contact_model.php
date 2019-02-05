@@ -14,6 +14,11 @@ class Contact_model extends CI_Model {
     	parent::__construct();
     	$this->load->database();
     }
+
+    public function user_all_contact()
+    {
+    	
+    }
     
 }
 

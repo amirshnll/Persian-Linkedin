@@ -57,13 +57,31 @@ $route['translate_uri_dashes'] = FALSE;
 
 
 /* My Router */
-$route['login'] 			= 'web/index';
-$route['forget'] 			= 'web/forget';
-$route['register'] 			= 'web/register';
+$route['login'] 									= 'web/index';
+$route['forget'] 									= 'web/forget';
+$route['register'] 									= 'web/register';
 
-$route['panel'] 			= 'user/user/index';
-$route['panel/out']			= 'user/user/logout';
-$route['panel/setting']		= 'user/user/setting';
-$route['panel/profile']		= 'user/user/profile';
-$route['panel/notification']= 'user/user/notification';
-$route['panel/message']		= 'user/user/message';
+$route['panel'] 									= 'user/user/index';
+$route['panel/out']									= 'user/user/logout';
+$route['panel/setting']								= 'user/user/setting';
+$route['panel/profile']								= 'user/user/profile';
+$route['panel/notification']						= 'user/user/notification';
+$route['panel/message']								= 'user/user/message';
+
+$route['panel/profile/edit/bio'] 					= 'user/user/edit_bio';
+
+$route['panel/profile/edit/experience'] 			= 'user/user/edit_experience';
+$route['panel/profile/edit/experience/edit/(:num)'] = 'user/user/single_experience/$1';
+$route['panel/profile/edit/experience/delete/(:num)']= 'user/form/delete_experience/$1';
+
+$route['panel/profile/edit/education'] 				= 'user/user/edit_education';
+$route['panel/profile/edit/education/edit/(:num)'] = 'user/user/single_education/$1';
+$route['panel/profile/edit/education/delete/(:num)']= 'user/form/delete_education/$1';
+
+$route['panel/profile/edit/skills'] 				= 'user/user/edit_skills';
+$route['panel/profile/edit/skills/edit/(:num)'] 	= 'user/user/single_skills/$1';
+$route['panel/profile/edit/skills/delete/(:num)']	= 'user/form/delete_skills/$1';
+
+$route['panel/profile/edit/project'] 				= 'user/user/edit_project';
+$route['panel/profile/edit/project/edit/(:num)'] = 'user/user/single_project/$1';
+$route['panel/profile/edit/project/delete/(:num)']= 'user/form/delete_project/$1';

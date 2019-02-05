@@ -55,6 +55,42 @@ class Person_model extends CI_Model {
         else
             return false;
     }
+
+    public function read_user_biography($user_id)
+    {
+        if(empty($user_id))
+            return false;
+
+        $this->db->limit(1);
+        $this->db->select('biography');
+        $this->db->where('user_id', $user_id);
+        $query = $this->db->get('person');
+
+        if($query->num_rows())
+        {
+            $query = $query->result_array();
+            $query = $query[0];
+            return $query;
+        }
+        else
+            return false;
+    }
+
+    public function update_user_biography($user_id, $biography)
+    {
+        if(empty($user_id))
+            return false;
+
+        $data = array(
+            'biography'  =>  $biography
+        );
+
+        $this->db->where('user_id', $user_id);
+        if($this->db->update('person', $data))
+            return true;
+        else
+            return false;
+    }
     
 }
 

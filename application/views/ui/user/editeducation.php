@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <head>
 	<meta charset="utf-8">
   	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>لینکدین فارسی - تنظیمات</title>
+	<title>لینکدین فارسی - ویرایش مدارک تحصیلی</title>
 	<link rel="stylesheet" type="text/css" href="{base}assets/layout/layout.css">
 	<link rel="stylesheet" type="text/css" href="{base}assets/library/bootstrap/css/bootstrap.min.css">
 	<link rel="stylesheet" type="text/css" href="{base}assets/library/bootstrap/css/bootstrap-grid.min.css">
@@ -57,24 +57,19 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				<div class="row right-to-left text-right">
 					<div class="col-md-9">
 						<div class="content-box">
-							<h5>تنظیمات</h5>
+							<h5>ویرایش مدارک تحصیلی</h5>
 							<div class="real-content">
-								{form_setting_open}
-									<p><strong>نمایش پروفایل</strong></p>
-									{dropdown_1}
-									<p>&nbsp;</p>
-									<p><strong>نمایش اطلاعات تماس</strong></p>
-									{dropdown_2}
-									<p>&nbsp;</p>
-									<p><strong>نمایش تصویر کاربری</strong></p>
-									{dropdown_3}
-									<p>&nbsp;</p>
-									<p><strong>تغییر رمزعبور</strong></p>
-									<p>{password_input}</p>
-									<p>{new_password_input}</p>
-									<p>{new_repassword_input}</p>
-									<p>&nbsp;</p>
-									{submit_input}
+								{form_addeducation_open}
+									<p><strong>مدارک تحصیلی</strong></p>
+									<p>افزودن مدارک تحصیلی جدید</p>
+									<p>{title_input}</p>
+									<p>{content_input}</p>
+									<p>{start_date_input}</p>
+									<p>{end_date_input}</p>
+									<div class="float-left">
+										<a href="{base}panel/profile" title="بازگشت به پروفایل من"><span class="btn btn-danger text-light">بازگشت</span></a>
+										{submit_input}
+									</div>
 									<div class="clearfix"></div>
 									<p>&nbsp;</p>
 								{form_close}
@@ -84,11 +79,51 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 								<?php if(!empty($form_success)) { ?>
 									<div class="alert alert-success right-to-left text-right">{form_success}</div>
 								<?php } ?>
+
+								<p>&nbsp;</p><p>&nbsp;</p>
+								<p>فهرست مدارک تحصیلی</p>
+
+								<table border="1" class="database-table">
+									<thead>
+										<th width="5%">#</th>
+										<th width="25%">عنوان</th>
+										<th width="40%">توضیحات</th>
+										<th width="12%">شروع</th>
+										<th width="12%">پایان</th>
+									<th width="6%"></th>
+									</thead>
+									<tbody>
+										<?php
+											if($user_education !== false)
+											{
+												$counter = 1;
+												foreach ($user_education as $ux) {
+													echo '<tr>';
+													echo '<td>' . $counter . '</td>';
+													echo '<td>' . $ux['title'] . '</td>';
+													echo '<td>' . $ux['content'] . '</td>';
+													echo '<td>' . $ux['start_date'] . '</td>';
+													echo '<td>' . $ux['end_date'] . '</td>';
+													echo '<td class="text-center"><a href="{base}panel/profile/edit/education/edit/' . $ux['id'] . '" title="ویرایش" class="text-warning"><span class="fas fa-1x fa-edit"></span></a> <a href="{base}panel/profile/edit/education/delete/' . $ux['id'] . '" title="حذف" class="text-danger"><span class="fas fa-1x fa-trash"></span></a></td>';
+													echo '</tr>';
+													$counter+=1;
+												}
+											}
+											else
+											{
+												echo "<tr><td colspan='6'>رکوردی موجود نیست.</td></tr>";
+											}
+										?>
+									</tbody>
+								</table>
+								<p>&nbsp;</p>
+								<?php if(!empty($database_action)) { ?>
+									<div class="alert alert-success right-to-left text-right">{database_action}</div>
+								<?php } ?>
 								<div class="hr"></div>
 								<p>راهنمایی :</p>
 								<p>لطفا قبل از ثبت تغییرات حتما آنها را با دقت بررسی کنید.</p>
-								<p>در صورتی که علاقه به تغییر رمزعبور خود ندارید نیازی نیست فیلدهای آنرا پر کنید.</p>
-								<p>بخش تنظیمات از اهمیت ویژه ای برخوردار میباشد پس با توجه به نیاز خود آنرا ویرایش کنید.</p>
+								<p>یکی از بخش های مهم رزومه ی کاری خوب ثبت مدارک تحصیلی با کیفیت می باشد.</p>
 							</div>
 						</div>
 					</div>

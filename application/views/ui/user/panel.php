@@ -73,7 +73,20 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 									<div class="write-post-box-content">
 										{form_newpost_open}
 											{write_post_content}
+											<p></p>
+											<div class="float-left">
+												<label for="file-upload" class="custom-file-upload btn btn-primary"> انتخاب فایل</label>
+												{post_submit_input}
+											</div>
+											<div class="clearfix"></div>
+											{file_post_content}
 										{form_close}
+										<?php if(!empty($validation_errors)) { ?>
+											<div class="alert alert-danger right-to-left text-right">{validation_errors}</div>
+										<?php } ?>
+										<?php if(!empty($form_success)) { ?>
+											<div class="alert alert-success right-to-left text-right">{form_success}</div>
+										<?php } ?>
 									</div>
 								</div>
 							</div>
@@ -90,11 +103,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 							<div class="connection-state-timeline text-center">
 								<div class="real-content">
 									<div class="float-right text-center width-50">
-										<p><strong>0</strong></p>
+										<p><strong>{user_view_profile}</strong></p>
 										<p class="text-gray">بازدیدها</p>
 									</div>
 									<div class="float-left text-center width-50">
-										<p><strong>0</strong></p>
+										<p><strong>{user_connection_count}</strong></p>
 										<p class="text-gray">ارتباطات</p>
 									</div>
 									<div class="clearfix"></div>

@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <head>
 	<meta charset="utf-8">
   	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>لینکدین فارسی - پروفایل من</title>
+	<title>لینکدین فارسی - ویرایش پروژه ها </title>
 	<link rel="stylesheet" type="text/css" href="{base}assets/layout/layout.css">
 	<link rel="stylesheet" type="text/css" href="{base}assets/library/bootstrap/css/bootstrap.min.css">
 	<link rel="stylesheet" type="text/css" href="{base}assets/library/bootstrap/css/bootstrap-grid.min.css">
@@ -55,58 +55,35 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<section>
 			<div class="content">
 				<div class="row right-to-left text-right">
-					<div class="col-md-3">
+					<div class="col-md-9">
 						<div class="content-box">
-							<h5>خلاصه آمار</h5>
+							<h5>ویرایش پروژه ها </h5>
 							<div class="real-content">
-								<div class="float-right text-center">
-									<p><strong>0</strong></p>
-									<p class="text-gray">بازدیدکنندگان</p>
-								</div>
-								<div class="float-left text-center">
-									<p><strong>0</strong></p>
-									<p class="text-gray">بازدید پست ها</p>
-								</div>
-								<div class="clearfix"></div>
-							</div>
-						</div>
-						<div class="content-box">
-							<h5>شاید این افراد را بشناسید</h5>
-							<div class="real-content">
-
-							</div>
-						</div>
-					</div>
-					<div class="col-md-6">
-						<div class="content-box">
-							<div class="real-content">
-								<h5>بیوگرافی [ <a class="text-success edit-item-icon" href="{base}panel/profile/edit/bio" title="ویرایش"><span class="fas fa-lg fa-pen"></span></a> ]</h5>
-								<p><?php echo $user_person['biography'] ?></p>
-							</div>
-						</div>
-						<div class="content-box">
-							<div class="real-content">
-								<h5>موقعیت های شغلی [ <a class="text-success edit-item-icon" href="{base}panel/profile/edit/experience" title="ویرایش"><span class="fas fa-lg fa-pen"></span></a> ]</h5>
-							</div>
-						</div>
-						<div class="content-box">
-							<div class="real-content">
-								<h5>مدارک تحصیلی [ <a class="text-success edit-item-icon" href="{base}panel/profile/edit/education" title="ویرایش"><span class="fas fa-lg fa-pen"></span></a> ]</h5>
-							</div>
-						</div>
-						<div class="content-box">
-							<div class="real-content">
-								<h5>مهارت ها [ <a class="text-success edit-item-icon" href="{base}panel/profile/edit/skills" title="ویرایش"><span class="fas fa-lg fa-pen"></span></a> ]</h5>
-							</div>
-						</div>
-						<div class="content-box">
-							<div class="real-content">
-								<h5>پروژه ها [ <a class="text-success edit-item-icon" href="{base}panel/profile/edit/project" title="ویرایش"><span class="fas fa-lg fa-pen"></span></a> ]</h5>
-							</div>
-						</div>
-						<div class="content-box">
-							<div class="real-content">
-								<h5>ارتباطات [ <a class="text-primary edit-item-icon" href="{base}panel/profile/connections" title="مشاهده همه"><span class="fas fa-lg fa-eye"></span></a> ]</h5>
+								{form_editproject_open}
+									<p><strong>پروژه ها </strong></p>
+									<p>ویرایش موقعیت شغلی</p>
+									<p>{id_input}</p>
+									<p>{title_input}</p>
+									<p>{content_input}</p>
+									<p>{start_date_input}</p>
+									<p>{end_date_input}</p>
+									<div class="float-left">
+										<a href="{base}panel/profile/edit/project" title="بازگشت به پروفایل من"><span class="btn btn-danger text-light">بازگشت</span></a>
+										{submit_input}
+									</div>
+									<div class="clearfix"></div>
+									<p>&nbsp;</p>
+								{form_close}
+								<?php if(!empty($validation_errors)) { ?>
+									<div class="alert alert-danger right-to-left text-right">{validation_errors}</div>
+								<?php } ?>
+								<?php if(!empty($form_success)) { ?>
+									<div class="alert alert-success right-to-left text-right">{form_success}</div>
+								<?php } ?>
+								<div class="hr"></div>
+								<p>راهنمایی :</p>
+								<p>لطفا قبل از ثبت تغییرات حتما آنها را با دقت بررسی کنید.</p>
+								<p>یکی از بخش های مهم رزومه ی کاری خوب ثبت پروژه ها با کیفیت می باشد.</p>
 							</div>
 						</div>
 					</div>

@@ -15,6 +15,23 @@ class Post_view_model extends CI_Model {
     	$this->load->database();
     }
 
+    public function insert($user_id, $post_viewed_id, $time)
+    {
+    	if(empty($user_id) || empty($post_viewed_id) || empty($time))
+    		return false;
+
+    	$data = array(
+    		'user_id'		=>	$user_id,
+			'post_viewed_id'=>	$post_viewed_id,
+			'time'			=>	$time
+    	);
+    	
+    	if($this->db->insert('post_view', $data))
+    		return true;
+    	else
+    		return false;
+    }
+
 }
 
 ?>

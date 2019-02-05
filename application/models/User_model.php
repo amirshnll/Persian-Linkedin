@@ -198,6 +198,23 @@ class User_model extends CI_Model {
             return false;
     }
 
+    public function authorize_password($id, $password)
+    {
+        if(empty($id) || empty($password))
+            return false;
+
+        $this->db->limit(1);
+        $this->db->where('id', $id);
+        $this->db->where('password', $this->encrypt_password($password));
+        $this->db->select('id');
+        $query = $this->db->get('user');
+
+        if($query->num_rows())
+            return true;
+        else
+            return false;
+    }
+
 }
 
 ?>
