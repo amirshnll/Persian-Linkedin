@@ -352,15 +352,155 @@ class User extends CI_Controller
 		$this->load->model('connections_model');
 		$user_connection = $this->connections_model->user_connection($this->session->userdata('user_id'), 0);
 
+		$this->load->model('avatar_model');
+		$user_current_avatar = $this->avatar_model->user_current_avatar($this->session->userdata('user_id'));
+
+		$this->load->model('person_model');
+		$this->load->model('country_model');
+		$user_person 				= $this->person_model->read_user_person($this->session->userdata('user_id'));
+		$user_person['country_id'] 	= $this->country_model->get_country_name($user_person['country_id']);
+
+		$this->load->model('contact_model');
+		$user_contact = $this->contact_model->user_all_contact($this->session->userdata('user_id'));
+		$twitter_value  = "";
+		$linkedin_value = "";
+		$telegram_value = "";
+		$skype_value  	= "";
+		foreach ($user_contact as $ucs) {
+			if($ucs['type']==1)
+				$linkedin_value = $ucs['content'];
+			if($ucs['type']==2)
+				$twitter_value = $ucs['content'];
+			if($ucs['type']==3)
+				$telegram_value = $ucs['content'];
+			if($ucs['type']==4)
+				$skype_value = $ucs['content'];
+		}
+
+		$linkedin = form_input(
+			array(
+				'type'			=>	'text',
+				'name'			=>	'linkedin',
+				'maxlength'		=>	500,
+				'placeholder'	=>	'linkedin',
+				'class'			=>	'social-profile-input',
+				'value'			=>	$linkedin_value
+			)
+		);
+		$twitter = form_input(
+			array(
+				'type'			=>	'text',
+				'name'			=>	'twitter',
+				'maxlength'		=>	500,
+				'placeholder'	=>	'twitter',
+				'class'			=>	'social-profile-input',
+				'value'			=>	$twitter_value
+			)
+		);
+		$telegram = form_input(
+			array(
+				'type'			=>	'text',
+				'name'			=>	'telegram',
+				'maxlength'		=>	500,
+				'placeholder'	=>	'telegram',
+				'class'			=>	'social-profile-input',
+				'value'			=>	$telegram_value
+			)
+		);
+		$skype = form_input(
+			array(
+				'type'			=>	'text',
+				'name'			=>	'skype',
+				'maxlength'		=>	500,
+				'placeholder'	=>	'skype',
+				'class'			=>	'social-profile-input',
+				'value'			=>	$skype_value
+			)
+		);
+
+		$social_form_open   = form_open($this->base_url() . "user/form/editsocial");
+		$social_submit 		= form_input(
+			array(
+				'type'			=>	'submit',
+				'name'			=>	'submit',
+				'value'			=>	'✎',
+				'class'			=>	'btn bg-success text-light float-right'
+			)
+		);
+
+		if($this->session->has_userdata('social_success')) {
+			$social_success = $this->session->userdata('social_success');
+			$this->session->unset_userdata('social_success');
+		}
+		else {
+			$social_success="";
+		}
+
+		if($this->session->has_userdata('social_error')) {
+			$social_error = $this->session->userdata('social_error');
+			$this->session->unset_userdata('social_error');
+		}
+		else {
+			$social_error="";
+		}
+		
+		$this->load->model('connections_model');
+		$user_connection_count = $this->connections_model->user_connection_count($this->session->userdata('user_id'));
+		if($user_connection_count===false)
+			$user_connection_count = 0;
+
+		$this->load->model('profile_view_model');
+		$user_view_profile = $this->profile_view_model->viewed_profile_count($this->session->userdata('user_id'));
+		if($user_view_profile===false)
+			$user_view_profile = 0;
+
+		$this->load->model('contact_model');
+		$user_contact = $this->contact_model->user_all_contact($this->session->userdata('user_id'));
+
+
+		$form_avatar_open = form_open_multipart($this->base_url() . "user/form/newavatar");
+		$file_avatar_content = '<input type="file" id="file-upload" name="avatar_file" class="avatar-file" accept="image/png, image/jpeg, image/jpg" />';
+		$avatar_submit 		= form_input(
+			array(
+				'type'			=>	'submit',
+				'name'			=>	'submit',
+				'value'			=>	'✔',
+				'class'			=>	'btn bg-success text-light d-inline'
+			)
+		);
+		if($this->session->has_userdata('avatar_success')) {
+			$avatar_success = $this->session->userdata('avatar_success');
+			$this->session->unset_userdata('avatar_success');
+		}
+		else {
+			$avatar_success="";
+		}
+
 		$data = array(
-			'form_search_open'	=>	$form_search_open,
-			'search_input'		=>	$search_input,
-			'form_close'		=>	$form_close,
-			'user_person'		=>	$user_person,
-			'experience'		=>	$experience,
-			'education'			=>	$education,
-			'skills'			=>	$skills,
-			'project'			=>	$project,
+			'form_search_open'		=>	$form_search_open,
+			'search_input'			=>	$search_input,
+			'form_close'			=>	$form_close,
+			'user_person'			=>	$user_person,
+			'experience'			=>	$experience,
+			'education'				=>	$education,
+			'skills'				=>	$skills,
+			'project'				=>	$project,
+			'user_current_avatar'	=>	$user_current_avatar,
+			'user_person'			=>	$user_person,
+			'social_form_open'		=>	$social_form_open,
+			'social_submit'			=>	$social_submit,
+			'linkedin'				=>	$linkedin,
+			'twitter'				=>	$twitter,
+			'telegram'				=>	$telegram,
+			'skype'					=>	$skype,
+			'social_success'		=>	$social_success,
+			'social_error'			=>	$social_error,
+			'user_connection_count'	=>  $user_connection_count,
+			'user_view_profile'		=>	$user_view_profile,
+			'form_avatar_open'		=>	$form_avatar_open,
+			'file_avatar_content'	=>	$file_avatar_content,
+			'avatar_submit'			=>	$avatar_submit,
+			'avatar_success'		=>	$avatar_success
 		);
 
 		$this->parser('user/profile', $data);
@@ -376,6 +516,121 @@ class User extends CI_Controller
 	{
 		$this->self_set_url($this->current_url());
 		$this->is_login();
+	}
+
+	public function edit_person()
+	{
+		$this->self_set_url($this->current_url());
+		$this->is_login();
+
+		$this->load->helper('form');
+		$form_search_open = form_open($this->base_url() . "user/form/search");
+		$search_input = form_input(
+			array(
+				'type'			=>	'text',
+				'name'			=>	'search',
+				'maxlength'		=>	255,
+				'placeholder'	=>	'تایپ + اینتر',
+				'class'			=>	'form-control text-right right-to-left'
+			)
+		);
+		$form_close 	= form_close();
+
+		if($this->session->has_userdata('form_error')) {
+			$validation_errors = $this->session->userdata('form_error');
+			$this->session->unset_userdata('form_error');
+		}
+		else {
+			$validation_errors="";
+		}
+
+		if($this->session->has_userdata('form_success')) {
+			$form_success = $this->session->userdata('form_success');
+			$this->session->unset_userdata('form_success');
+		}
+		else {
+			$form_success="";
+		}
+
+		$this->load->model('person_model');
+		$user_person = $this->person_model->read_user_person($this->session->userdata('user_id'));
+
+		$form_editperson_open = form_open($this->base_url() . "user/form/editperson");
+
+		$firstname_input = form_input(
+			array(
+				'type'			=>	'text',
+				'name'			=>	'firstname',
+				'maxlength'		=>	100,
+				'placeholder'	=>	'نام',
+				'class'			=>	'form-control text-right right-to-left',
+				'value'			=>	$user_person['firstname']
+			)
+		);
+		$lastname_input = form_input(
+			array(
+				'type'			=>	'text',
+				'name'			=>	'lastname',
+				'maxlength'		=>	100,
+				'placeholder'	=>	'نام خانوادگی',
+				'class'			=>	'form-control text-right right-to-left',
+				'value'			=>	$user_person['lastname']
+			)
+		);
+
+		$this->load->model('country_model');
+		$country = $this->country_model->select_all();
+		foreach ($country as $mc) {
+			$dropdown_1_options[$mc['id']] = $mc['name'];
+		}
+		$dropdown_1 = form_dropdown('country_id', $dropdown_1_options, $user_person['country_id'], 'class="form-control"');
+
+		$zip_code_input = form_input(
+			array(
+				'type'			=>	'text',
+				'name'			=>	'zip_code',
+				'maxlength'		=>	20,
+				'placeholder'	=>	'کدپستی',
+				'class'			=>	'form-control text-right right-to-left',
+				'value'			=>	$user_person['zip_code']
+			)
+		);
+		$birthday_input = form_input(
+			array(
+				'type'			=>	'text',
+				'name'			=>	'birthday',
+				'maxlength'		=>	10,
+				'placeholder'	=>	'تاریخ تولد',
+				'class'			=>	'form-control text-right right-to-left',
+				'value'			=>	$user_person['birthday']
+			)
+		);
+
+		$submit_input = form_input(
+			array(
+				'type'			=>	'submit',
+				'name'			=>	'submit',
+				'value'			=>	'ثبت  تغییرات',
+				'class'			=>	'btn bg-success text-light'
+			)
+		);
+
+		$data = array(
+			'form_search_open'		=>	$form_search_open,
+			'search_input'			=>	$search_input,
+			'form_close'			=>	$form_close,
+			'form_editperson_open'	=>	$form_editperson_open,
+			'submit_input'			=>	$submit_input,
+			'validation_errors'		=>	$validation_errors,
+			'form_success'			=>	$form_success,
+			'firstname_input'		=>	$firstname_input,
+			'lastname_input'		=>	$lastname_input,
+			'dropdown_1'			=>	$dropdown_1,
+			'zip_code_input'		=>	$zip_code_input,
+			'birthday_input'		=>	$birthday_input
+		);
+
+		$this->parser('user/editperson', $data);
 	}
 
 	public function edit_bio()

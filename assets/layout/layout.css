@@ -247,3 +247,44 @@
 .database-table td {
 	padding: 5px;
 }
+
+.person-profile-table {
+	width: 100%;
+	font-size: 12px;
+}
+.person-profile-table td {
+	padding: 10px;
+}
+.person-profile-table td:nth-child(odd) {
+	background-color: #0771A9;
+	color: #fff;
+	width: 20%;
+}
+.person-profile-table td:nth-child(odd):after {
+	content: " : "
+}
+.person-profile-table td:nth-child(even) {
+	text-indent: 20px;
+	background-color: #f8f9f9;
+}
+.user-panel .content .content-box .user-profile-items
+{
+	margin: 10px 0;
+	list-style: square;
+	padding-right: 15px;
+}
+.user-panel .content .content-box .user-profile-items li {
+	margin-bottom: 10px;
+	padding: 0;
+}
+
+.user-panel .social-link-timeline .social-profile-input {
+	border:none;
+	border-bottom: 1px solid #adb0b2;
+	outline: none;
+	color: #555;
+	width: 83%;
+}
+.user-panel .avatar-file {
+    display: none;
+}

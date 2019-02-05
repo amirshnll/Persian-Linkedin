@@ -37,6 +37,26 @@ class Person_model extends CI_Model {
     		return false;
     }
 
+    public function update($user_id, $firstname, $lastname, $country_id, $zip_code, $birthday)
+    {
+        if(empty($user_id))
+            return false;
+
+        $data = array(
+            'firstname' =>  $firstname,
+            'lastname'  =>  $lastname,
+            'country_id'=>  $country_id,
+            'zip_code'  =>  $zip_code,
+            'birthday'  =>  $birthday
+        );
+
+        $this->db->where('user_id', $user_id);
+        if($this->db->update('person', $data))
+            return true;
+        else
+            return false;
+    }
+
     public function read_user_person($user_id)
     {
         if(empty($user_id))

@@ -332,6 +332,12 @@ class Form extends CI_Controller
             $this->user_option_model->insert($user_id, 'private_avatar', 'false');
             $this->user_option_model->insert($user_id, 'need_change_password', 'false');
 
+            $this->load->model('contact_model');
+            $this->contact_model->insert($user_id, 1, "", $this->time());
+            $this->contact_model->insert($user_id, 2, "", $this->time());
+            $this->contact_model->insert($user_id, 3, "", $this->time());
+            $this->contact_model->insert($user_id, 4, "", $this->time());
+
             $this->session->set_userdata('form_success', '<p>ثبت نام با موفقیت انجام شد.</p>');
             redirect($this->base_url() . "login");
             exit(0);
@@ -526,6 +532,109 @@ class Form extends CI_Controller
 
             $this->session->set_userdata('form_success', '<p>نوشته ی شما با موفقیت ثبت  شد.</p>');
             redirect($this->base_url() . "panel");
+            exit(0);
+        }
+    }
+
+    public function editperson()
+    {
+        $this->self_set_url($this->current_url());
+
+        $this->load->helper('url');
+        if(!$this->check_login())
+        {
+            redirect($this->base_url() . "login");
+            exit(0);
+        }
+
+        $this->load->helper('form');
+        $this->load->library('form_validation');
+        $this->load->database();
+
+        $rules = array(
+            array(
+                'field' =>  'firstname',
+                'label' =>  'نام',
+                'rules' =>  'required|min_length[2]|max_length[100]',
+                'errors'=>  array(
+                    'required'  =>  'فیلد %s اجباری می باشد.',
+                    'min_length'=>  'طول رشته ی فیلد %s کوتاه می باشد.',
+                    'max_length'=>  'فیلد %s طول رشته ی بلندی دارد.'
+                )
+            ),
+            array(
+                'field' =>  'lastname',
+                'label' =>  'نام خانوادگی',
+                'rules' =>  'required|min_length[2]|max_length[100]',
+                'errors'=>  array(
+                    'required'  =>  'فیلد %s اجباری می باشد.',
+                    'min_length'=>  'طول رشته ی فیلد %s کوتاه می باشد.',
+                    'max_length'=>  'فیلد %s طول رشته ی بلندی دارد.'
+                )
+            ),
+            array(
+                'field' =>  'country_id',
+                'label' =>  'کشور',
+                'rules' =>  'required|numeric',
+                'errors'=>  array(
+                    'required'  =>  'فیلد %s اجباری می باشد.',
+                    'numeric'   =>  'فیلد %s معتبر نیست'
+                )
+            ),
+            array(
+                'field' =>  'zip_code',
+                'label' =>  'کدپستی',
+                'rules' =>  'numeric|min_length[2]|max_length[20]',
+                'errors'=>  array(
+                    'numeric'   =>  'فیلد %s معتبر نیست',
+                    'min_length'=>  'طول رشته ی فیلد %s کوتاه می باشد.',
+                    'max_length'=>  'فیلد %s طول رشته ی بلندی دارد.'
+                )
+            ),
+            array(
+                'field' =>  'birthday',
+                'label' =>  'تاریخ تولد',
+                'rules' =>  'max_length[10]',
+                'errors'=>  array(
+                    'max_length'=>  'فیلد %s طول رشته ی بلندی دارد.'
+                )
+            )
+        );
+
+        $this->form_validation->set_rules($rules);
+        if ($this->form_validation->run() == FALSE)
+        {
+            $this->session->set_userdata('form_error', validation_errors());
+            redirect($this->base_url() . "panel/profile/edit/person");
+            exit(0);
+        }
+        else
+        {
+            $firstname      = $this->input->post('firstname', true);
+            $lastname       = $this->input->post('lastname', true);
+            $country_id     = $this->input->post('country_id', true);
+            $zip_code       = $this->input->post('zip_code', true);
+            $birthday       = $this->input->post('birthday', true);
+
+            if(!empty($birthday))
+            {
+                if (!preg_match("/^[1-4]\d{3}\/((0[1-6]\/((3[0-1])|([1-2][0-9])|(0[1-9])))|((1[0-2]|(0[7-9]))\/(30|31|([1-2][0-9])|(0[1-9]))))$/",$birthday)) {
+                    $this->session->set_userdata('form_error', "<p>تاریخ ورودی معتبر نیست.</p>");
+                    redirect($this->base_url() . "panel/profile/edit/person");
+                    exit(0);
+                }
+            }
+
+            $this->load->model('country_model');
+            $country_name = $this->country_model->get_country_name($country_id);
+            if($country_name === false)
+                $country_id = null;
+
+            $this->load->model('person_model');
+            $this->person_model->update($this->session->userdata('user_id'), $firstname, $lastname, $country_id, $zip_code, $birthday);
+
+            $this->session->set_userdata('form_success', '<p>تغییرات با موفقیت انجام شد.</p>');
+            redirect($this->base_url() . "panel/profile/edit/person");
             exit(0);
         }
     }
@@ -1511,6 +1620,122 @@ class Form extends CI_Controller
 
         $this->session->set_userdata('database_action', '<p>عملیات با موفقیت انچام شد.</p>');
         redirect($this->base_url() . "panel/profile/edit/project");
+        exit(0);
+    }
+
+    public function editsocial()
+    {
+        $this->self_set_url($this->current_url());
+
+        $this->load->helper('url');
+        if(!$this->check_login())
+        {
+            redirect($this->base_url() . "login");
+            exit(0);
+        }
+
+        $this->load->helper('form');
+        $this->load->library('form_validation');
+        $this->load->database();
+
+        $rules = array(
+            array(
+                'field' =>  'linkedin',
+                'label' =>  'لینک لینکدین',
+                'rules' =>  'valid_url|max_length[500]',
+                'errors'=>  array(
+                    'valid_url'  =>  'فید %s معتبر نیست.',
+                    'max_length'=>  'حداکثر طول %s 255 کاراکتر می باشد.'
+                )
+            ),
+            array(
+                'field' =>  'twitter',
+                'label' =>  'لینک توییتر',
+                'rules' =>  'valid_url|max_length[500]',
+                'errors'=>  array(
+                    'valid_url'  =>  'فید %s معتبر نیست.',
+                    'max_length'=>  'حداکثر طول %s 255 کاراکتر می باشد.'
+                )
+            ),
+            array(
+                'field' =>  'telegram',
+                'label' =>  'لینک تلگرام',
+                'rules' =>  'valid_url|max_length[500]',
+                'errors'=>  array(
+                    'valid_url'  =>  'فید %s معتبر نیست.',
+                    'max_length'=>  'حداکثر طول %s 255 کاراکتر می باشد.'
+                )
+            ),
+            array(
+                'field' =>  'skype',
+                'label' =>  'لینک اسکایپ',
+                'rules' =>  'valid_url|max_length[500]',
+                'errors'=>  array(
+                    'valid_url'  =>  'فید %s معتبر نیست.',
+                    'max_length'=>  'حداکثر طول %s 255 کاراکتر می باشد.'
+                )
+            )
+        );
+
+        $this->form_validation->set_rules($rules);
+        if ($this->form_validation->run() == FALSE)
+        {
+            $this->session->set_userdata('social_error', validation_errors());
+            redirect($this->base_url() . "panel/profile");
+            exit(0);
+        }
+        else
+        {
+            $linkedin   = $this->input->post('linkedin', true);
+            $twitter    = $this->input->post('twitter', true);
+            $telegram   = $this->input->post('telegram', true);
+            $skype      = $this->input->post('skype', true);
+
+            $this->load->model('contact_model');
+            $this->contact_model->update($this->session->userdata('user_id'), 1, $linkedin);
+            $this->contact_model->update($this->session->userdata('user_id'), 2, $twitter);
+            $this->contact_model->update($this->session->userdata('user_id'), 3, $telegram);
+            $this->contact_model->update($this->session->userdata('user_id'), 4, $skype);
+
+            $this->session->set_userdata('social_success', '<p>عملیات موفق بود.</p>');
+            redirect($this->base_url() . "panel/profile");
+            exit(0);
+        }
+    }
+
+    public function newavatar()
+    {
+        $this->self_set_url($this->current_url());
+
+        $this->load->helper('url');
+        if(!$this->check_login())
+        {
+            redirect($this->base_url() . "login");
+            exit(0);
+        }
+
+        $this->load->helper('form');
+        $this->load->library('form_validation');
+        $this->load->database();
+        
+        $post_content   = $this->input->post('post_content', true);
+
+        $config['upload_path']          = './upload/avatar/';
+        $config['allowed_types']        = 'jpg|jpeg|png';
+        $config['max_size']             = 0;
+        $config['encrypt_name']         = TRUE;
+
+        $this->load->library('upload', $config);
+        if ($this->upload->do_upload('avatar_file'))
+        {
+            $data = array('upload_data' => $this->upload->data());
+            $this->load->model('avatar_model');
+            $this->avatar_model->disable_current_avatar($this->session->userdata('user_id'));
+            $this->avatar_model->insert($this->session->userdata('user_id'), $this->upload->data('file_name'), $this->time(), 1, $this->user_agent() . " / IP: " . $this->user_ip());
+            $this->session->set_userdata('avatar_success', '<p>عملیات موفق بود.</p>');
+        }
+
+        redirect($this->base_url() . "panel/profile");
         exit(0);
     }
 

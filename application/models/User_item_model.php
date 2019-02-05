@@ -130,7 +130,6 @@ class User_item_model extends CI_Model {
             return true;
         else
             return false;
-
     }
     
 }

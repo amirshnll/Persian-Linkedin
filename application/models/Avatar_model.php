@@ -54,6 +54,22 @@ class Avatar_model extends CI_Model {
         else
             return false;
     }
+
+    public function disable_current_avatar($user_id)
+    {
+        if(empty($user_id))
+            return false;
+
+        $data = array(
+            'status'  =>  0
+        );
+
+        $this->db->where('user_id', $user_id);
+        if($this->db->update('avatar', $data))
+            return true;
+        else
+            return false;
+    }
     
 }
 

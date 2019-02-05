@@ -68,6 +68,8 @@ $route['panel/profile']								= 'user/user/profile';
 $route['panel/notification']						= 'user/user/notification';
 $route['panel/message']								= 'user/user/message';
 
+$route['panel/profile/edit/person'] 				= 'user/user/edit_person';
+
 $route['panel/profile/edit/bio'] 					= 'user/user/edit_bio';
 
 $route['panel/profile/edit/experience'] 			= 'user/user/edit_experience';
