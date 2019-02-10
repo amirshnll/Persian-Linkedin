@@ -1,0 +1,16 @@
+.sqlscript {
+  overflow-x: visible;
+  word-wrap: nowrap;
+  white-space: normal;
+}
+
+.content {
+  padding: 20px 20px 0px 20px;
+}
+
+.page-wrap {
+  min-height: 100%;
+  height: auto !important;
+  margin: 0px;
+  padding: 0px;
+}
